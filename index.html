@@ -13,137 +13,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        .header-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-        .header-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
 
-.share-btn{
-  background: rgba(255,255,255,0.2);
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  font-size:20px;
-}
-
-.share-btn:active{
-  background: rgba(255,255,255,0.3);
-  transform: scale(0.95);
-}
-
-.share-modal.active{
-  align-items:center;
-}
-
-.share-modal .modal-content{
-  max-width: 520px;
-  margin: 0 auto;
-  border-radius: 20px;
-}
-
-.qr-container{
-  text-align:center;
-  padding:20px;
-  background:white;
-  border-radius:16px;
-  margin: 10px 0 20px;
-}
-
-.qr-code{
-  width:280px;
-  height:280px;
-  margin:0 auto;
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.url-display{
-  margin-top:15px;
-  padding:12px;
-  background:#f5f5f7;
-  border-radius:8px;
-  font-family: monospace;
-  font-size:13px;
-  color:#667eea;
-  word-break: break-all;
-}
-
-.tutorial{
-  text-align:left;
-  padding:20px;
-  background:#f5f5f7;
-  border-radius:12px;
-}
-
-.tutorial-title{
-  font-size:18px;
-  font-weight:600;
-  margin-bottom:15px;
-}
-
-.platform-title{
-  font-weight:600;
-  color:#667eea;
-  margin-bottom:8px;
-}
-
-.tutorial-steps{
-  list-style:none;
-  padding-left:0;
-}
-
-.tutorial-steps li{
-  padding:8px 0 8px 24px;
-  position:relative;
-  color:#6e6e73;
-  line-height:1.5;
-}
-
-.tutorial-steps li:before{
-  content:"→";
-  position:absolute;
-  left:0;
-  color:#667eea;
-  font-weight:bold;
-}
-
-
-.share-btn{
-  background: rgba(255,255,255,0.2);
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  transition: all 0.2s;
-}
-
-.share-btn:active{
-  background: rgba(255,255,255,0.3);
-  transform: scale(0.95);
-}
-
-
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f7;
@@ -161,10 +31,36 @@
             z-index: 100;
         }
 
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
         .header h1 {
             font-size: 24px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin: 0;
+        }
+
+        .share-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .share-btn:active {
+            background: rgba(255,255,255,0.3);
+            transform: scale(0.95);
         }
 
         .search-box {
@@ -305,15 +201,6 @@
             color: #3b82f6;
         }
 
-        .notes {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f5f5f7;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #6e6e73;
-        }
-
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -352,6 +239,16 @@
         .modal.active {
             display: flex;
             align-items: flex-end;
+        }
+
+        .share-modal.active {
+            align-items: center;
+        }
+
+        .share-modal .modal-content {
+            max-width: 520px;
+            margin: 0 auto;
+            border-radius: 20px;
         }
 
         @keyframes fadeIn {
@@ -461,22 +358,90 @@
             color: #1d1d1f;
         }
 
-        .modal-notes {
-            margin-top: 20px;
-            padding: 15px;
+        .qr-container {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            margin: 10px 0 20px;
+        }
+
+        .qr-code {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .url-display {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f5f5f7;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #667eea;
+            word-break: break-all;
+        }
+
+        .tutorial {
+            text-align: left;
+            padding: 20px;
             background: #f5f5f7;
             border-radius: 12px;
         }
 
-        .modal-notes-title {
+        .tutorial-title {
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             color: #1d1d1f;
         }
 
-        .modal-notes-text {
+        .tutorial-section {
+            margin-bottom: 20px;
+        }
+
+        .tutorial-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .platform-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tutorial-steps {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tutorial-steps li {
+            padding: 8px 0 8px 24px;
+            position: relative;
             color: #6e6e73;
             line-height: 1.5;
+        }
+
+        .tutorial-steps li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
         }
 
         .toast {
@@ -522,12 +487,11 @@
 </head>
 <body>
     <div class="header">
-    <div class="header-top">
-        <h1>✈️ CDG Parking Mapper</h1>
-        <button class="share-btn" onclick="openShareModal()" aria-label="Partager">📤</button>
-    </div>
-
-    <div class="search-box">
+        <div class="header-top">
+            <h1>✈️ CDG Parking Mapper</h1>
+            <button class="share-btn" onclick="openShareModal()" aria-label="Partager">📤</button>
+        </div>
+        <div class="search-box">
             <span class="search-icon">🔍</span>
             <input 
                 type="text" 
@@ -555,58 +519,58 @@
             <div id="modalBody"></div>
         </div>
     </div>
-<div class="modal share-modal" id="shareModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title">📤 Partager l'application</div>
-      <button class="close-btn" onclick="closeShareModal()">✕</button>
+
+    <div class="modal share-modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📤 Partager l'application</div>
+                <button class="close-btn" onclick="closeShareModal()">✕</button>
+            </div>
+
+            <div class="qr-container">
+                <div class="qr-code">
+                    <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper">
+                </div>
+                <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
+            </div>
+
+            <div class="tutorial">
+                <div class="tutorial-title">📲 Installer comme une app</div>
+
+                <div class="tutorial-section">
+                    <div class="platform-title">🍎 iPhone / iPad (Safari)</div>
+                    <ul class="tutorial-steps">
+                        <li>Ouvrez ce site dans <strong>Safari</strong></li>
+                        <li>Appuyez sur <strong>Partage</strong> 📤</li>
+                        <li>Sélectionnez <strong>"Sur l'écran d'accueil"</strong></li>
+                        <li>Nommez (ex: "CDG Parking")</li>
+                        <li><strong>Ajouter</strong></li>
+                    </ul>
+                </div>
+
+                <div class="tutorial-section">
+                    <div class="platform-title">🤖 Android (Chrome)</div>
+                    <ul class="tutorial-steps">
+                        <li>Ouvrez ce site dans <strong>Chrome</strong></li>
+                        <li>Menu <strong>⋮</strong></li>
+                        <li><strong>"Ajouter à l'écran d'accueil"</strong></li>
+                        <li>Nommez (ex: "CDG Parking")</li>
+                        <li><strong>Ajouter</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top: 20px;">
+                <span>Copier le lien de partage</span>
+                <span>🔗</span>
+            </button>
+        </div>
     </div>
-
-    <div class="qr-container">
-      <div class="qr-code">
-        <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper" style="width:100%;height:100%;object-fit:contain;">
-      </div>
-      <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
-    </div>
-
-    <div class="tutorial">
-      <div class="tutorial-title">📲 Installer comme une app</div>
-
-      <div class="tutorial-section">
-        <div class="platform-title">🍎 iPhone / iPad (Safari)</div>
-        <ul class="tutorial-steps">
-          <li>Ouvrez ce site dans <strong>Safari</strong></li>
-          <li>Appuyez sur <strong>Partage</strong> 📤</li>
-          <li>Sélectionnez <strong>"Sur l'écran d'accueil"</strong></li>
-          <li>Nommez (ex: "CDG Parking")</li>
-          <li><strong>Ajouter</strong></li>
-        </ul>
-      </div>
-
-      <div class="tutorial-section">
-        <div class="platform-title">🤖 Android (Chrome)</div>
-        <ul class="tutorial-steps">
-          <li>Ouvrez ce site dans <strong>Chrome</strong></li>
-          <li>Menu <strong>⋮</strong></li>
-          <li><strong>"Ajouter à l'écran d'accueil"</strong></li>
-          <li>Nommez (ex: "CDG Parking")</li>
-          <li><strong>Ajouter</strong></li>
-        </ul>
-      </div>
-    </div>
-
-    <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top: 20px;">
-      <span>Copier le lien de partage</span>
-      <span>🔗</span>
-    </button>
-  </div>
-</div>
 
     <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
 
     <script>
         const mappings = [
-            // 2E K
             {"parkingCode":"E10","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E12","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E14","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
@@ -623,8 +587,6 @@
             {"parkingCode":"E40","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E42","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E44","gates":["K36"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-            
-            // 2E S3
             {"parkingCode":"K71","gates":["L36","L34"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"K65","gates":["L30","L32"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"K59","gates":["L26","L28"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
@@ -648,8 +610,6 @@
             {"parkingCode":"F15","gates":["L45"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
             {"parkingCode":"F07","gates":["L47"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"F09","gates":["L49"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            
-            // 2E S4
             {"parkingCode":"K26","gates":["M31"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"K32","gates":["M29"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"K38","gates":["M27"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
@@ -666,8 +626,6 @@
             {"parkingCode":"L59","gates":["M46"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"L65","gates":["M48"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"L71","gates":["M50"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            
-            // 2F
             {"parkingCode":"F02","gates":["F26"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"F04","gates":["F27"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"F08","gates":["F28"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
@@ -715,8 +673,6 @@
             {"parkingCode":"F44","gates":["F44"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
             {"parkingCode":"F41","gates":["F41"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
             {"parkingCode":"F43","gates":["F43"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-            
-            // 2G
             {"parkingCode":"J10","gates":["G21"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"J11","gates":["G23"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
             {"parkingCode":"J12","gates":["G25"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
@@ -856,7 +812,8 @@
             });
         }
 
-        function showToast() {
+        function showToast(message) {
+            toast.textContent = message || "✓ Copié dans le presse-papiers";
             toast.classList.add('active');
             setTimeout(() => {
                 toast.classList.remove('active');
@@ -865,44 +822,31 @@
 
         const shareModal = document.getElementById('shareModal');
 
-function openShareModal(){
-  shareModal.classList.add('active');
-}
+        function openShareModal() {
+            shareModal.classList.add('active');
+        }
 
-function closeShareModal(){
-  shareModal.classList.remove('active');
-}
+        function closeShareModal() {
+            shareModal.classList.remove('active');
+        }
 
-shareModal.addEventListener('click', (e) => {
-  if (e.target === shareModal) closeShareModal();
-});
+        shareModal.addEventListener('click', (e) => {
+            if (e.target === shareModal) closeShareModal();
+        });
 
-function copyCurrentUrl(){
-  const url = window.location.href;
-  if (url.includes('file://')) {
-    showToast("⚠️ Ouvre l'app via GitHub Pages pour copier le lien");
-    return;
-  }
-  navigator.clipboard.writeText(url).then(() => showToast("✓ Lien copié"));
-}
+        function copyCurrentUrl() {
+            const url = window.location.href;
+            if (url.includes('file://')) {
+                showToast("⚠️ Hébergez d'abord l'app pour copier le lien");
+                return;
+            }
+            navigator.clipboard.writeText(url).then(() => {
+                showToast("✓ Lien copié");
+            });
+        }
 
-// Améliore ton showToast pour afficher un message (optionnel)
-function showToast(message){
-  toast.textContent = message || "✓ Copié dans le presse-papiers";
-  toast.classList.add('active');
-  setTimeout(() => toast.classList.remove('active'), 2000);
-}
-
-        
-
-        
         // Initialisation
         displayResults(mappings);
     </script>
-    
 </body>
-
 </html>
-
-
-
