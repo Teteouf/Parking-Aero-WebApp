@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GBF7EZST2X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-GBF7EZST2X');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CDG Parking">
-    <title>Antisèche de Parking</title>
+    <meta name="apple-mobile-web-app-title" content="Parking">
+    <meta name="theme-color" content="#667eea">
+    <title>Parking</title>
+    
+    <!-- Icône pour iOS (iPhone/iPad) -->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
+    <!-- Icônes pour Android / Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+    
+    <!-- Favicon pour navigateur -->
+    <link rel="icon" href="favicon.ico">
+    <link rel="shortcut icon" href="favicon.ico">
+    
     <style>
         * {
             margin: 0;
@@ -538,7 +542,7 @@
 
             <div class="qr-container">
                 <div class="qr-code">
-                    <img src="./qr-code-cdg.png" alt="QR Code CDG Parking Mapper">
+                    <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper">
                 </div>
                 <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
             </div>
@@ -613,9 +617,6 @@
             {"parkingCode":"E21","gates":["L31"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E17","gates":["L29"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E13","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-
-{"parkingCode":"E15","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-
             {"parkingCode":"E09","gates":["L25"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E05","gates":["L23"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E01","gates":["L21"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
@@ -709,7 +710,6 @@
             {"parkingCode":"J39","gates":["G36"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"J40","gates":["G34"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"J41","gates":["G32"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false}
-
         ];
 
         const searchInput = document.getElementById('searchInput');
@@ -725,7 +725,7 @@
         searchInput.addEventListener('input', (e) => {
             const value = e.target.value;
             clearBtn.classList.toggle('visible', value.length > 0);
-
+            
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => search(value), 150);
         });
@@ -739,7 +739,7 @@
 
         function search(query) {
             const normalized = query.toUpperCase().trim();
-
+            
             if (!normalized) {
                 displayResults(mappings);
                 return;
@@ -755,7 +755,7 @@
 
         function displayResults(results) {
             resultsCount.textContent = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
-
+            
             if (results.length === 0) {
                 resultsDiv.innerHTML = `
                     <div class="empty-state">
