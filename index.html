@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
-<!-- Bibliothèque ZXing pour scanner les codes-barres -->
-<script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
 <head>
+    <!-- Bibliothèque ZXing pour scanner les codes-barres -->
+    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1307,25 +1308,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-function closeScanner() {
-    const scannerModal = document.getElementById('scannerModal');
-    scannerModal.classList.remove('active');
-}
-
-// Fermer en cliquant en dehors
-document.addEventListener('DOMContentLoaded', function() {
-    const scannerModal = document.getElementById('scannerModal');
-    if (scannerModal) {
-        scannerModal.addEventListener('click', (e) => {
-            if (e.target.id === 'scannerModal') {
-                closeScanner();
-            }
-        });
-    }
-});
-        
-
         
         // Initialisation
         displayResults(mappings);
@@ -1334,6 +1316,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
+
 
 
 
