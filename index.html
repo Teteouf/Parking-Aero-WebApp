@@ -1123,7 +1123,12 @@ async function openScanner() {
     
     try {
         // Initialiser ZXing
-        codeReader = new ZXing.BrowserMultiFormatReader();
+        if (typeof ZXing === 'undefined' || !ZXing.BrowserMultiFormatReader) {
+    statusElement.textContent = '❌ Bibliothèque de scan non chargée';
+    console.error('ZXing not loaded');
+    return;
+}
+codeReader = new ZXing.BrowserMultiFormatReader();
         
         // Demander l'accès à la caméra
         const videoInputDevices = await codeReader.listVideoInputDevices();
@@ -1316,6 +1321,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
+
 
 
 
