@@ -11,9 +11,6 @@
   gtag('config', 'G-GBF7EZST2X');
 </script>
 <head>
-    <!-- Bibliothèque Html5-QRCode pour scanner les codes-barres -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -156,7 +153,7 @@
 }
 
 
-
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f7;
@@ -513,11 +510,11 @@
         }
 
         @keyframes toastIn {
-            from {
+            from { 
                 opacity: 0;
                 transform: translateX(-50%) translateY(20px);
             }
-            to {
+            to { 
                 opacity: 1;
                 transform: translateX(-50%) translateY(0);
             }
@@ -613,7 +610,7 @@
     padding: 20px;
 }
 
-#scanner-reader {
+#scanner-video {
     width: 100%;
     max-width: 500px;
     border-radius: 12px;
@@ -738,9 +735,9 @@
 
     <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input
-                type="text"
-                class="search-input"
+            <input 
+                type="text" 
+                class="search-input" 
                 id="searchInput"
                 placeholder="Code parking ou porte (ex: E22, K43)"
                 autocomplete="off"
@@ -824,7 +821,7 @@
         <button class="scanner-close" onclick="closeScanner()">✕</button>
     </div>
     <div class="scanner-container" id="scannerContainer">
-        <div id="scanner-reader" style="width: 100%; max-width: 500px;"></div>
+        <video id="scanner-video" playsinline></video>
         <div class="scanner-instructions">
             Placez le code-barres de la carte d'embarquement dans le cadre
         </div>
@@ -850,7 +847,7 @@
             {"parkingCode":"E40","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E42","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"E44","gates":["K36"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-
+            
             // 2E S3
             {"parkingCode":"K71","gates":["L36","L34"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"K65","gates":["L30","L32"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
@@ -875,7 +872,7 @@
             {"parkingCode":"F15","gates":["L45"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
             {"parkingCode":"F07","gates":["L47"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"F09","gates":["L49"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-
+            
             // 2E S4
             {"parkingCode":"K26","gates":["M31"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"K32","gates":["M29"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
@@ -893,7 +890,7 @@
             {"parkingCode":"L59","gates":["M46"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"L65","gates":["M48"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"L71","gates":["M50"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-
+            
             // 2F
             {"parkingCode":"F02","gates":["F26"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"F04","gates":["F27"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
@@ -942,7 +939,7 @@
             {"parkingCode":"F44","gates":["F44"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
             {"parkingCode":"F41","gates":["F41"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
             {"parkingCode":"F43","gates":["F43"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-
+            
             // 2G
             {"parkingCode":"J10","gates":["G21"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
             {"parkingCode":"J11","gates":["G23"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
@@ -983,7 +980,7 @@
         searchInput.addEventListener('input', (e) => {
             const value = e.target.value;
             clearBtn.classList.toggle('visible', value.length > 0);
-
+            
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => search(value), 150);
         });
@@ -997,7 +994,7 @@
 
         function search(query) {
             const normalized = query.toUpperCase().trim();
-
+            
             if (!normalized) {
                 displayResults(mappings);
                 return;
@@ -1013,7 +1010,7 @@
 
         function displayResults(results) {
             resultsCount.textContent = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
-
+            
             if (results.length === 0) {
                 resultsDiv.innerHTML = `
                     <div class="empty-state">
@@ -1119,266 +1116,19 @@ function showToast(message){
   toast.classList.add('active');
   setTimeout(() => toast.classList.remove('active'), 2000);
 }
-// ========== SCANNER DE CARTE D'EMBARQUEMENT ==========
-let html5QrcodeScanner = null;
-let isScanning = false;
-let hasResult = false;
-
-const CITY_BY_IATA = {
-    CDG: 'Paris (CDG)',
-    ORY: 'Paris (ORY)',
-    LBG: 'Paris-Le Bourget',
-    NCE: 'Nice',
-    MRS: 'Marseille',
-    TLS: 'Toulouse',
-    LYS: 'Lyon',
-    BOD: 'Bordeaux',
-    LHR: 'Londres Heathrow',
-    AMS: 'Amsterdam',
-    MAD: 'Madrid',
-    BCN: 'Barcelone',
-    JFK: 'New York JFK',
-    DXB: 'Dubaï'
-};
-
-const PARIS_AIRPORTS = new Set(['CDG', 'ORY', 'LBG']);
-
-function escapeHtml(value) {
-    return String(value ?? '').replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-    }[char]));
-}
-
-function normalizeAirport(iata) {
-    const code = (iata || '').trim().toUpperCase();
-    if (!code) return 'Inconnu';
-    return CITY_BY_IATA[code] ? `${CITY_BY_IATA[code]} - ${code}` : code;
-}
-
+// ========== SCANNER (Étape 1 - Interface uniquement) ==========
 function openScanner() {
-    if (isScanning) return;
-
     const scannerModal = document.getElementById('scannerModal');
-    const statusElement = document.getElementById('scannerStatus');
-
     scannerModal.classList.add('active');
-    statusElement.textContent = 'Initialisation de la caméra...';
-    hasResult = false;
-
-    if (!html5QrcodeScanner) {
-        html5QrcodeScanner = new Html5Qrcode('scanner-reader');
-    }
-
-    const config = {
-        fps: 12,
-        disableFlip: true,
-        qrbox: { width: 360, height: 240 },
-        aspectRatio: 1.777778,
-        formatsToSupport: [
-            Html5QrcodeSupportedFormats.AZTEC,
-            Html5QrcodeSupportedFormats.PDF_417,
-            Html5QrcodeSupportedFormats.QR_CODE,
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8
-        ]
-    };
-
-    isScanning = true;
-
-    html5QrcodeScanner.start(
-        { facingMode: 'environment' },
-        config,
-        decodedText => {
-            if (hasResult) return;
-            hasResult = true;
-            statusElement.textContent = '✅ Code scanné';
-            handleScanResult(decodedText);
-        },
-        () => {}
-    ).then(() => {
-        statusElement.textContent = '📷 Positionnez le code-barres dans le cadre';
-    }).catch(err => {
-        console.error('Erreur caméra:', err);
-        statusElement.textContent = '❌ Impossible d'accéder à la caméra';
-        isScanning = false;
-    });
-}
-
-function stopScanner() {
-    if (!html5QrcodeScanner || !isScanning) {
-        isScanning = false;
-        return Promise.resolve();
-    }
-
-    return html5QrcodeScanner.stop()
-        .then(() => html5QrcodeScanner.clear())
-        .catch(err => console.error('Erreur arrêt scanner:', err))
-        .finally(() => {
-            isScanning = false;
-            hasResult = false;
-        });
+    document.getElementById('scannerStatus').textContent = 'Initialisation de la caméra...';
+    
+    // TODO: On ajoutera le vrai scanner à l'étape 2
+    console.log('Scanner ouvert - fonctionnalité à venir');
 }
 
 function closeScanner() {
-    document.getElementById('scannerModal').classList.remove('active');
-    stopScanner();
-}
-
-function handleScanResult(barcode) {
-    try {
-        const boardingPass = parseBoardingPass(barcode);
-
-        if (!boardingPass) {
-            const status = document.getElementById('scannerStatus');
-            status.textContent = '⚠️ Code lu mais format BCBP non reconnu';
-            setTimeout(() => {
-                hasResult = false;
-                if (isScanning) {
-                    status.textContent = '📷 Positionnez le code-barres dans le cadre';
-                }
-            }, 2000);
-            return;
-        }
-
-        displayBoardingPassInfo(boardingPass);
-    } catch (error) {
-        console.error('Erreur parsing:', error);
-        document.getElementById('scannerStatus').textContent = '❌ Erreur de lecture';
-        setTimeout(() => {
-            hasResult = false;
-        }, 2000);
-    }
-}
-
-function parseBoardingPass(data) {
-    const payload = (data || '').trim();
-    if (!payload.startsWith('M') || payload.length < 52) return null;
-
-    const rawName = payload.substring(2, 22).trim();
-    const [lastname = '', firstname = ''] = rawName.split('/');
-    const passengerName = `${lastname} ${firstname}`.replace(/\s+/g, ' ').trim() || rawName;
-
-    const pnr = payload.substring(23, 30).trim();
-    const origin = payload.substring(30, 33).toUpperCase();
-    const destination = payload.substring(33, 36).toUpperCase();
-    const airline = payload.substring(36, 39).trim().toUpperCase();
-    const flightNumberRaw = payload.substring(39, 44).trim();
-    const julianDate = payload.substring(44, 47);
-    const seatNumber = payload.substring(48, 52).trim() || 'Non spécifié';
-
-    const gate = extractGate(payload);
-    const routeType = PARIS_AIRPORTS.has(origin) && PARIS_AIRPORTS.has(destination)
-        ? 'Vol interne Paris'
-        : 'Vol standard';
-
-    return {
-        passengerName,
-        pnr: pnr || 'Non disponible',
-        origin,
-        destination,
-        originLabel: normalizeAirport(origin),
-        destinationLabel: normalizeAirport(destination),
-        airline,
-        flightNumber: `${airline}${flightNumberRaw}`.trim(),
-        date: parseJulianDate(julianDate),
-        seatNumber,
-        gate,
-        routeType
-    };
-}
-
-function extractGate(data) {
-    const candidates = data.match(/\b[A-Z]\d{1,3}\b/g) || [];
-    const nonSeats = candidates.filter(token => !/\d{1,2}[A-Z]$/.test(token));
-    return nonSeats.at(-1) || 'Non spécifiée';
-}
-
-function parseJulianDate(julian) {
-    const day = Number.parseInt(julian, 10);
-    if (!Number.isInteger(day) || day < 1 || day > 366) return 'Date inconnue';
-
-    const date = new Date(new Date().getFullYear(), 0, day);
-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
-function displayBoardingPassInfo(bp) {
-    stopScanner().finally(() => {
-        const container = document.getElementById('scannerContainer');
-        const safeName = escapeHtml(bp.passengerName);
-
-        container.innerHTML = `
-            <div class="boarding-pass-result">
-                <div class="passenger-header">
-                    <div class="passenger-name">${safeName}</div>
-                    <div class="flight-number">${escapeHtml(bp.flightNumber || 'Vol non identifié')}</div>
-                </div>
-
-                <div class="flight-details">
-                    <div class="detail-row">
-                        <div>
-                            <div class="detail-label">Trajet</div>
-                            <div class="route-display">
-                                <span class="route-airport">${escapeHtml(bp.origin)}</span>
-                                <span class="route-arrow">✈️</span>
-                                <span class="route-airport">${escapeHtml(bp.destination)}</span>
-                            </div>
-                            <div class="detail-label" style="margin-top: 8px; text-transform: none;">${escapeHtml(bp.originLabel)} → ${escapeHtml(bp.destinationLabel)}</div>
-                        </div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Type de trajet</div>
-                        <div class="detail-value">${escapeHtml(bp.routeType)}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Date de vol</div>
-                        <div class="detail-value">${escapeHtml(bp.date)}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Porte de départ</div>
-                        <div class="detail-value">${escapeHtml(bp.gate)}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Siège</div>
-                        <div class="detail-value">${escapeHtml(bp.seatNumber)}</div>
-                    </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">PNR</div>
-                        <div class="detail-value">${escapeHtml(bp.pnr)}</div>
-                    </div>
-                </div>
-
-                <button class="scan-another-btn" onclick="resetScanner()">Scanner une autre carte</button>
-            </div>
-        `;
-    });
-}
-
-function resetScanner() {
-    const container = document.getElementById('scannerContainer');
-
-    container.innerHTML = `
-        <div id="scanner-reader" style="width: 100%; max-width: 500px;"></div>
-        <div class="scanner-instructions">
-            Placez le code-barres de la carte d'embarquement dans le cadre
-        </div>
-        <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
-    `;
-
-    html5QrcodeScanner = null;
-    isScanning = false;
-    hasResult = false;
-    openScanner();
+    const scannerModal = document.getElementById('scannerModal');
+    scannerModal.classList.remove('active');
 }
 
 // Fermer en cliquant en dehors
@@ -1392,14 +1142,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+        
 
+        
         // Initialisation
         displayResults(mappings);
     </script>
-
+    
 </body>
 
 </html>
+
 
 
 
