@@ -623,19 +623,30 @@
     let scannerActive = false;
     let codeReader = null;
 
+    function loadZxing() {
+      return new Promise((resolve, reject) => {
+        if (window.ZXingBrowser) { resolve(); return; }
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/@zxing/browser@0.1.4/umd/index.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
     async function openScanner() {
       const scannerModal = document.getElementById('scannerModal');
       scannerModal.classList.add('active');
 
-      // Réinitialise le contenu du container
       document.getElementById('scannerContainer').innerHTML = `
         <video id="scanner-video" playsinline></video>
         <div class="scanner-instructions">Pointez vers le code-barres PDF417 de la carte d'embarquement</div>
-        <div class="scanner-status" id="scannerStatus">Chargement de la librairie...</div>
+        <div class="scanner-status" id="scannerStatus">Chargement...</div>
       `;
 
       try {
-        const { BrowserPDF417Reader } = await import('https://unpkg.com/@zxing/browser@0.1.4/esm/index.js');
+        await loadZxing();
+        const { BrowserPDF417Reader } = window.ZXingBrowser;
         codeReader = new BrowserPDF417Reader();
         scannerActive = true;
 
