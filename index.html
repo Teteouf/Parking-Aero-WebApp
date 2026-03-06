@@ -663,8 +663,8 @@
           if (result && scannerActive) {
             scannerActive = false;
             const raw = result.getText();
-            const flightNumber = extractFlightNumber(raw);
-            handleScanResult(flightNumber, raw);
+            const scanInfo = extractFlightInfo(raw);
+            handleScanResult(scanInfo, raw);
           }
         });
 
@@ -680,36 +680,215 @@
       document.getElementById('scannerModal').classList.remove('active');
     }
 
-    function extractFlightNumber(raw) {
-      try {
-        // Tentative 1 : format BCBP standard (positions 23-30)
-        const bcbpFlight = raw.substring(23, 30).trim().replace(/\s+/g, '');
-        if (/^[A-Z0-9]{2,3}\d{1,4}$/.test(bcbpFlight)) return bcbpFlight;
-
-        // Tentative 2 : regex générique sur tout le texte
-        const match = raw.match(/\b([A-Z]{2,3})\s?(\d{3,4})\b/);
-        if (match) return match[1] + match[2];
-
-      } catch(e) {}
-      return null;
+    function cleanBarcodeRaw(raw) {
+      return (raw || '').toUpperCase().replace(/[^\x20-\x7E]/g, '');
     }
 
-    function handleScanResult(flightNumber, raw) {
+    function parseHexLength(value) {
+      if (!/^[0-9A-F]{2}$/.test(value)) return null;
+      return parseInt(value, 16);
+    }
+
+    function normalizeFlightNumberDigits(value) {
+      const digits = (value || '').replace(/\s+/g, '').trim();
+      if (!digits) return '';
+      const withoutLeadingZero = digits.replace(/^0+/, '');
+      return withoutLeadingZero || digits;
+    }
+
+    function buildFlightCode(carrier, flightNumber) {
+      const carrierCode = (carrier || '').replace(/\s+/g, '').trim();
+      const numberCode = normalizeFlightNumberDigits(flightNumber);
+      if (!carrierCode || !numberCode) return null;
+      return `${carrierCode}${numberCode}`;
+    }
+
+    function parseBcbpSegments(raw) {
+      const text = cleanBarcodeRaw(raw);
+      if (!/^[MS][1-4]/.test(text) || text.length < 60) return null;
+
+      let cursor = 0;
+      const formatCode = text.slice(cursor, cursor + 1);
+      cursor += 1;
+
+      const legCountRaw = text.slice(cursor, cursor + 1);
+      cursor += 1;
+      const legCount = parseInt(legCountRaw, 10);
+      if (!Number.isInteger(legCount) || legCount < 1 || legCount > 4) return null;
+
+      const passengerName = text.slice(cursor, cursor + 20).trim();
+      cursor += 20;
+      cursor += 1; // Electronic ticket indicator
+
+      const segments = [];
+      for (let i = 0; i < legCount; i++) {
+        if (cursor + 37 > text.length) break;
+
+        const pnr = text.slice(cursor, cursor + 7).trim();
+        cursor += 7;
+        const from = text.slice(cursor, cursor + 3).trim();
+        cursor += 3;
+        const to = text.slice(cursor, cursor + 3).trim();
+        cursor += 3;
+        const carrier = text.slice(cursor, cursor + 3).trim();
+        cursor += 3;
+        const flightNumberRaw = text.slice(cursor, cursor + 5);
+        cursor += 5;
+        const dateOfFlightRaw = text.slice(cursor, cursor + 3);
+        cursor += 3;
+        cursor += 1; // Compartment
+        cursor += 4; // Seat
+        cursor += 5; // Check-in sequence
+        cursor += 1; // Passenger status
+
+        const conditionalSizeRaw = text.slice(cursor, cursor + 2);
+        cursor += 2;
+        const conditionalSize = parseHexLength(conditionalSizeRaw);
+        if (conditionalSize === null || cursor + conditionalSize > text.length) break;
+        cursor += conditionalSize;
+
+        const flightCode = buildFlightCode(carrier, flightNumberRaw);
+        const julianDate = /^\d{3}$/.test(dateOfFlightRaw) ? parseInt(dateOfFlightRaw, 10) : null;
+        if (flightCode && /^[A-Z0-9]{2,3}\d{1,5}$/.test(flightCode)) {
+          segments.push({ flightCode, from, to, carrier, pnr, julianDate });
+        }
+      }
+
+      if (!segments.length) return null;
+
+      const deduped = [];
+      const seen = new Set();
+      for (const segment of segments) {
+        const key = `${segment.flightCode}-${segment.from}-${segment.to}-${segment.julianDate || ''}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        deduped.push(segment);
+      }
+
+      return { formatCode, passengerName, segments: deduped };
+    }
+
+    function estimateDateFromJulian(julianDate) {
+      if (!Number.isInteger(julianDate) || julianDate < 1 || julianDate > 366) return null;
+
+      const now = Date.now();
+      const currentYear = new Date().getUTCFullYear();
+      const years = [currentYear, currentYear - 1, currentYear + 1];
+      let best = null;
+      let bestDiff = Number.MAX_SAFE_INTEGER;
+
+      for (const year of years) {
+        const date = new Date(Date.UTC(year, 0, 1));
+        date.setUTCDate(julianDate);
+        const diff = Math.abs(date.getTime() - now);
+        if (diff < bestDiff) {
+          best = date;
+          bestDiff = diff;
+        }
+      }
+      return best;
+    }
+
+    function selectBestSegment(segments) {
+      if (!segments.length) return { selected: null, hasCdgDeparture: false };
+
+      const cdgDepartures = segments.filter(segment => segment.from === 'CDG');
+      const candidates = cdgDepartures.length ? cdgDepartures : segments;
+      const now = Date.now();
+
+      let selected = candidates[0];
+      let bestScore = Number.MAX_SAFE_INTEGER;
+      for (const segment of candidates) {
+        const date = estimateDateFromJulian(segment.julianDate);
+        if (!date) continue;
+        const score = Math.abs(date.getTime() - now);
+        if (score < bestScore) {
+          selected = segment;
+          bestScore = score;
+        }
+      }
+
+      return { selected, hasCdgDeparture: cdgDepartures.length > 0 };
+    }
+
+    function fallbackRegexFlights(raw) {
+      const text = cleanBarcodeRaw(raw);
+      const matches = [...text.matchAll(/\b([A-Z0-9]{2,3})\s?([0-9]{2,5})\b/g)];
+      const flights = [];
+      const seen = new Set();
+
+      for (const match of matches) {
+        const carrier = match[1];
+        const number = normalizeFlightNumberDigits(match[2]);
+        const flightCode = `${carrier}${number}`;
+        if (!/^[A-Z0-9]{2,3}\d{2,5}$/.test(flightCode) || seen.has(flightCode)) continue;
+        seen.add(flightCode);
+        flights.push({ flightCode, from: '', to: '', carrier, pnr: '', julianDate: null });
+        if (flights.length >= 3) break;
+      }
+      return flights;
+    }
+
+    function extractFlightInfo(raw) {
+      const parsed = parseBcbpSegments(raw);
+      if (parsed && parsed.segments.length) {
+        const selection = selectBestSegment(parsed.segments);
+        return {
+          primaryFlight: selection.selected ? selection.selected.flightCode : null,
+          primarySegment: selection.selected,
+          segments: parsed.segments,
+          hasCdgDeparture: selection.hasCdgDeparture,
+          passengerName: parsed.passengerName,
+          source: 'bcbp'
+        };
+      }
+
+      const fallbackSegments = fallbackRegexFlights(raw);
+      return {
+        primaryFlight: fallbackSegments[0] ? fallbackSegments[0].flightCode : null,
+        primarySegment: fallbackSegments[0] || null,
+        segments: fallbackSegments,
+        hasCdgDeparture: false,
+        passengerName: '',
+        source: fallbackSegments.length ? 'regex' : 'none'
+      };
+    }
+
+    function handleScanResult(scanInfo, raw) {
       if (navigator.vibrate) navigator.vibrate(200);
 
       const container = document.getElementById('scannerContainer');
+      const primaryFlight = scanInfo ? scanInfo.primaryFlight : null;
 
-      if (flightNumber) {
+      if (primaryFlight) {
+        const primarySegment = scanInfo.primarySegment;
+        const route = primarySegment && primarySegment.from && primarySegment.to
+          ? `${primarySegment.from} → ${primarySegment.to}`
+          : '';
+        const routeLine = route ? `<div style="color:#86868b;margin-top:8px;font-size:14px;">${route}</div>` : '';
+        const departureHint = scanInfo.hasCdgDeparture
+          ? `<div style="color:#00a35a;margin-top:8px;font-size:13px;font-weight:600;">Départ CDG détecté</div>`
+          : `<div style="color:#d97706;margin-top:8px;font-size:13px;font-weight:600;">Aucun départ CDG détecté sur ce code</div>`;
+
+        const otherSegments = (scanInfo.segments || []).filter(seg => seg.flightCode !== primaryFlight);
+        const otherButtons = otherSegments.slice(0, 3).map(seg => `
+            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:10px;" onclick="openFlightInfo('${seg.flightCode}')">
+              🔎 ${seg.flightCode}${seg.from && seg.to ? ` (${seg.from} → ${seg.to})` : ''}
+            </button>`).join('');
+
         container.innerHTML = `
           <div class="boarding-pass-result">
             <div class="passenger-header">
               <div style="font-size:48px;">✅</div>
-              <div style="font-size:36px;font-weight:700;color:#1d1d1f;margin-top:10px;">✈️ ${flightNumber}</div>
+              <div style="font-size:36px;font-weight:700;color:#1d1d1f;margin-top:10px;">✈️ ${primaryFlight}</div>
               <div style="color:#86868b;margin-top:8px;font-size:14px;">Vol détecté</div>
+              ${routeLine}
+              ${departureHint}
             </div>
-            <button class="scan-another-btn" onclick="openFlightInfo('${flightNumber}')" style="font-size:18px;padding:20px;margin-top:20px;">
+            <button class="scan-another-btn" onclick="openFlightInfo('${primaryFlight}')" style="font-size:18px;padding:20px;margin-top:20px;">
               🔍 Voir la porte sur Paris Aéroport
             </button>
+            ${otherButtons}
             <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:12px;" onclick="resetScanner()">
               📷 Scanner une autre carte
             </button>
@@ -723,7 +902,7 @@
             <div class="passenger-header">
               <div style="font-size:48px;">❌</div>
               <div style="font-size:18px;font-weight:600;margin-top:10px;">Vol non détecté</div>
-              <div style="color:#86868b;margin-top:8px;font-size:14px;">Le code n'a pas pu être lu correctement</div>
+              <div style="color:#86868b;margin-top:8px;font-size:14px;">Le code ne contient pas de vol exploitable (cas possible sur certaines cartes d'arrivée)</div>
             </div>
             <button class="scan-another-btn" onclick="resetScanner()">🔄 Réessayer</button>
             <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:12px;" onclick="closeScanner()">✕ Fermer</button>
@@ -732,7 +911,7 @@
     }
 
     function openFlightInfo(flightNumber) {
-      const url = `https://www.parisaeroport.fr/fr/passagers/vols/cdg?search=${flightNumber}`;
+      const url = `https://www.parisaeroport.fr/fr/passagers/vols/cdg?search=${encodeURIComponent(flightNumber)}`;
       window.open(url, '_blank');
     }
 
