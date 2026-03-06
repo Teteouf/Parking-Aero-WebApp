@@ -1,1178 +1,745 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CDG Parking">
+  <title>Antisèche de Parking</title>
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
-<link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
-<link rel="manifest" href="manifest.json">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GBF7EZST2X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-GBF7EZST2X');
-</script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CDG Parking">
-    <title>Antisèche de Parking</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        .header-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-        .header-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-
-.share-btn{
-  background: rgba(255,255,255,0.2);
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  font-size:20px;
-}
-
-.share-btn:active{
-  background: rgba(255,255,255,0.3);
-  transform: scale(0.95);
-}
-
-.share-modal.active{
-  align-items:center;
-}
-
-.share-modal .modal-content{
-  max-width: 520px;
-  margin: 0 auto;
-  border-radius: 20px;
-}
-
-.qr-container{
-  text-align:center;
-  padding:20px;
-  background:white;
-  border-radius:16px;
-  margin: 10px 0 20px;
-}
-
-.qr-code{
-  width:280px;
-  height:280px;
-  margin:0 auto;
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.url-display{
-  margin-top:15px;
-  padding:12px;
-  background:#f5f5f7;
-  border-radius:8px;
-  font-family: monospace;
-  font-size:13px;
-  color:#667eea;
-  word-break: break-all;
-}
-
-.tutorial{
-  text-align:left;
-  padding:20px;
-  background:#f5f5f7;
-  border-radius:12px;
-}
-
-.tutorial-title{
-  font-size:18px;
-  font-weight:600;
-  margin-bottom:15px;
-}
-
-.platform-title{
-  font-weight:600;
-  color:#667eea;
-  margin-bottom:8px;
-}
-
-.tutorial-steps{
-  list-style:none;
-  padding-left:0;
-}
-
-.tutorial-steps li{
-  padding:8px 0 8px 24px;
-  position:relative;
-  color:#6e6e73;
-  line-height:1.5;
-}
-
-.tutorial-steps li:before{
-  content:"→";
-  position:absolute;
-  left:0;
-  color:#667eea;
-  font-weight:bold;
-}
-
-
-.share-btn{
-  background: rgba(255,255,255,0.2);
-  border: 2px solid rgba(255,255,255,0.3);
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  transition: all 0.2s;
-}
-
-.share-btn:active{
-  background: rgba(255,255,255,0.3);
-  transform: scale(0.95);
-}
-
-
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f7;
-            color: #1d1d1f;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .search-box {
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 45px 14px 45px;
-            border: none;
-            border-radius: 12px;
-            font-size: 17px;
-            background: rgba(255,255,255,0.95);
-            text-transform: uppercase;
-            outline: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #86868b;
-        }
-
-        .clear-btn {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #d1d1d6;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-        }
-
-        .clear-btn.visible {
-            display: flex;
-        }
-
-        .content {
-            padding: 20px;
-        }
-
-        .results-count {
-            color: #86868b;
-            font-size: 14px;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .mapping-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .mapping-card:active {
-            transform: scale(0.98);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-        }
-
-        .card-main {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .parking-code {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1d1d1f;
-        }
-
-        .arrow {
-            color: #86868b;
-            font-size: 24px;
-        }
-
-        .gates {
-            font-size: 28px;
-            font-weight: 700;
-            color: #007aff;
-        }
-
-        .badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .badge-terminal {
-            background: rgba(147, 51, 234, 0.15);
-            color: #9333ea;
-        }
-
-        .badge-section {
-            background: rgba(249, 115, 22, 0.15);
-            color: #f97316;
-        }
-
-        .badge-offsite {
-            background: rgba(239, 68, 68, 0.15);
-            color: #ef4444;
-        }
-
-        .badge-ramp {
-            background: rgba(34, 197, 94, 0.15);
-            color: #22c55e;
-        }
-
-        .badge-elevator {
-            background: rgba(59, 130, 246, 0.15);
-            color: #3b82f6;
-        }
-
-        .notes {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f5f5f7;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #6e6e73;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        .empty-state-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1d1d1f;
-        }
-
-        .empty-state-text {
-            color: #86868b;
-            font-size: 15px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            animation: fadeIn 0.2s;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: flex-end;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: white;
-            width: 100%;
-            border-radius: 20px 20px 0 0;
-            padding: 30px 20px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .modal-title {
-            font-size: 22px;
-            font-weight: 600;
-        }
-
-        .close-btn {
-            background: #f5f5f7;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 18px;
-            color: #1d1d1f;
-        }
-
-        .modal-main-info {
-            text-align: center;
-            padding: 30px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px;
-            margin-bottom: 20px;
-        }
-
-        .modal-parking {
-            font-size: 48px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 10px;
-        }
-
-        .modal-arrow {
-            font-size: 24px;
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 10px;
-        }
-
-        .modal-gates {
-            font-size: 48px;
-            font-weight: 700;
-            color: white;
-        }
-
-        .modal-badges {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: opacity 0.2s;
-        }
-
-        .action-btn:active {
-            opacity: 0.7;
-        }
-
-        .btn-primary {
-            background: #007aff;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #f5f5f7;
-            color: #1d1d1f;
-        }
-
-        .modal-notes {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f5f5f7;
-            border-radius: 12px;
-        }
-
-        .modal-notes-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1d1d1f;
-        }
-
-        .modal-notes-text {
-            color: #6e6e73;
-            line-height: 1.5;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 20px;
-            font-size: 15px;
-            font-weight: 500;
-            z-index: 2000;
-            display: none;
-            animation: toastIn 0.3s;
-        }
-
-        .toast.active {
-            display: block;
-        }
-
-        @keyframes toastIn {
-            from { 
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        @media (max-width: 375px) {
-            .parking-code, .gates {
-                font-size: 24px;
-            }
-            .modal-parking, .modal-gates {
-                font-size: 40px;
-            }
-        }
-        /* ========== SCANNER BUTTON ========== */
-.scanner-fab {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    cursor: pointer;
-    font-size: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    z-index: 999;
-}
-
-.scanner-fab:active {
-    transform: scale(0.95);
-}
-
-.scanner-fab:hover {
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-}
-
-/* Modal Scanner */
-.scanner-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 3000;
-    animation: fadeIn 0.3s;
-}
-
-.scanner-modal.active {
-    display: flex;
-    flex-direction: column;
-}
-
-.scanner-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.scanner-header h2 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-}
-
-.scanner-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.scanner-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-#scanner-video {
-    width: 100%;
-    max-width: 500px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-.scanner-instructions {
-    margin-top: 20px;
-    color: white;
-    text-align: center;
-    font-size: 16px;
-}
-
-.scanner-status {
-    margin-top: 10px;
-    padding: 12px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 14px;
-}
-
-/* Résultat du scan */
-.boarding-pass-result {
-    background: white;
-    border-radius: 16px;
-    padding: 30px 20px;
-    max-width: 500px;
-    width: 90%;
-    animation: slideUp 0.3s;
-}
-
-.passenger-header {
-    text-align: center;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #f5f5f7;
-    margin-bottom: 20px;
-}
-
-.passenger-name {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1d1d1f;
-    margin-bottom: 5px;
-}
-
-.flight-number {
-    font-size: 20px;
-    color: #667eea;
-    font-weight: 600;
-}
-
-.flight-details {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    background: #f5f5f7;
-    border-radius: 12px;
-}
-
-.detail-label {
-    font-size: 13px;
-    color: #86868b;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.detail-value {
-    font-size: 18px;
-    color: #1d1d1f;
-    font-weight: 600;
-}
-
-.route-display {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.route-airport {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1d1d1f;
-}
-
-.route-arrow {
-    color: #86868b;
-    font-size: 20px;
-}
-
-.scan-another-btn {
-    width: 100%;
-    padding: 16px;
-    margin-top: 20px;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 17px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.scan-another-btn:active {
-    opacity: 0.8;
-}
-    </style>
+  <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+  <link rel="manifest" href="manifest.json">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBF7EZST2X"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-GBF7EZST2X');
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .header h1 { font-size: 24px; font-weight: 600; }
+
+    .share-btn {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 20px; transition: all 0.2s;
+    }
+    .share-btn:active { background: rgba(255,255,255,0.3); transform: scale(0.95); }
+
+    /* ===== SEARCH ===== */
+    .search-box { position: relative; }
+    .search-input {
+      width: 100%;
+      padding: 14px 45px 14px 45px;
+      border: none; border-radius: 12px;
+      font-size: 17px;
+      background: rgba(255,255,255,0.95);
+      text-transform: uppercase;
+      outline: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .search-icon {
+      position: absolute; left: 15px; top: 50%;
+      transform: translateY(-50%); color: #86868b;
+    }
+    .clear-btn {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: #d1d1d6; border: none; border-radius: 50%;
+      width: 28px; height: 28px; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      color: white; font-size: 14px;
+    }
+    .clear-btn.visible { display: flex; }
+
+    /* ===== CONTENT ===== */
+    .content { padding: 20px; }
+    .results-count { color: #86868b; font-size: 14px; margin-bottom: 15px; font-weight: 500; }
+
+    .mapping-card {
+      background: white; border-radius: 16px; padding: 20px;
+      margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .mapping-card:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+    .card-main { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .parking-code { font-size: 28px; font-weight: 700; color: #1d1d1f; }
+    .arrow { color: #86868b; font-size: 24px; }
+    .gates { font-size: 28px; font-weight: 700; color: #007aff; }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; white-space: nowrap;
+    }
+    .badge-terminal  { background: rgba(147,51,234,0.15); color: #9333ea; }
+    .badge-section   { background: rgba(249,115,22,0.15); color: #f97316; }
+    .badge-offsite   { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .badge-ramp      { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .badge-elevator  { background: rgba(59,130,246,0.15); color: #3b82f6; }
+
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.3; }
+    .empty-state-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+    .empty-state-text { color: #86868b; font-size: 15px; }
+
+    /* ===== MODALS ===== */
+    .modal {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      animation: fadeIn 0.2s;
+    }
+    .modal.active { display: flex; align-items: flex-end; }
+    .share-modal.active { align-items: center; }
+
+    .modal-content {
+      background: white; width: 100%;
+      border-radius: 20px 20px 0 0;
+      padding: 30px 20px; max-height: 90vh;
+      overflow-y: auto; animation: slideUp 0.3s;
+    }
+    .share-modal .modal-content { border-radius: 20px; max-width: 520px; margin: 0 auto; }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .modal-title { font-size: 22px; font-weight: 600; }
+    .close-btn {
+      background: #f5f5f7; border: none; border-radius: 50%;
+      width: 32px; height: 32px; cursor: pointer;
+      font-size: 18px; color: #1d1d1f;
+    }
+
+    .modal-main-info {
+      text-align: center; padding: 30px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px; margin-bottom: 20px;
+    }
+    .modal-parking { font-size: 48px; font-weight: 700; color: white; margin-bottom: 10px; }
+    .modal-arrow { font-size: 24px; color: rgba(255,255,255,0.8); margin-bottom: 10px; }
+    .modal-gates { font-size: 48px; font-weight: 700; color: white; }
+    .modal-badges { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+
+    .action-btn {
+      width: 100%; padding: 16px; border: none; border-radius: 12px;
+      font-size: 17px; font-weight: 600; cursor: pointer;
+      margin-bottom: 12px; display: flex; align-items: center;
+      justify-content: space-between; transition: opacity 0.2s;
+    }
+    .action-btn:active { opacity: 0.7; }
+    .btn-primary { background: #007aff; color: white; }
+    .btn-secondary { background: #f5f5f7; color: #1d1d1f; }
+
+    /* ===== SHARE MODAL ===== */
+    .qr-container { text-align: center; padding: 20px; background: white; border-radius: 16px; margin: 10px 0 20px; }
+    .qr-code { width: 280px; height: 280px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .url-display { margin-top: 15px; padding: 12px; background: #f5f5f7; border-radius: 8px; font-family: monospace; font-size: 13px; color: #667eea; word-break: break-all; }
+    .tutorial { text-align: left; padding: 20px; background: #f5f5f7; border-radius: 12px; }
+    .tutorial-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
+    .platform-title { font-weight: 600; color: #667eea; margin-bottom: 8px; }
+    .tutorial-steps { list-style: none; padding-left: 0; }
+    .tutorial-steps li { padding: 8px 0 8px 24px; position: relative; color: #6e6e73; line-height: 1.5; }
+    .tutorial-steps li:before { content: "→"; position: absolute; left: 0; color: #667eea; font-weight: bold; }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.85); color: white;
+      padding: 12px 24px; border-radius: 20px;
+      font-size: 15px; font-weight: 500; z-index: 2000;
+      display: none; animation: toastIn 0.3s;
+    }
+    .toast.active { display: block; }
+
+    /* ===== SCANNER FAB ===== */
+    .scanner-fab {
+      position: fixed; bottom: 90px; right: 20px;
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; border: none; border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+      cursor: pointer; font-size: 28px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease; z-index: 999;
+    }
+    .scanner-fab:active { transform: scale(0.95); }
+
+    /* ===== SCANNER MODAL ===== */
+    .scanner-modal {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95); z-index: 3000;
+      animation: fadeIn 0.3s;
+    }
+    .scanner-modal.active { display: flex; flex-direction: column; }
+
+    .scanner-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; padding: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .scanner-header h2 { font-size: 20px; font-weight: 600; margin: 0; }
+    .scanner-close {
+      background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
+      width: 36px; height: 36px; color: white; font-size: 20px; cursor: pointer;
+    }
+
+    .scanner-container {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+
+    #scanner-video {
+      width: 100%; max-width: 500px;
+      border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .scanner-instructions { margin-top: 20px; color: white; text-align: center; font-size: 16px; }
+    .scanner-status {
+      margin-top: 10px; padding: 12px 20px;
+      background: rgba(255,255,255,0.1); border-radius: 8px;
+      color: #fff; font-size: 14px; text-align: center;
+    }
+
+    /* ===== BOARDING PASS RESULT ===== */
+    .boarding-pass-result {
+      background: white; border-radius: 16px;
+      padding: 30px 20px; max-width: 500px; width: 90%;
+      animation: slideUp 0.3s;
+    }
+    .passenger-header {
+      text-align: center; padding-bottom: 20px;
+      border-bottom: 2px solid #f5f5f7; margin-bottom: 20px;
+    }
+    .scan-another-btn {
+      width: 100%; padding: 16px; margin-top: 12px;
+      background: #667eea; color: white; border: none;
+      border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer;
+    }
+    .scan-another-btn:active { opacity: 0.8; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    @media (max-width: 375px) {
+      .parking-code, .gates { font-size: 24px; }
+      .modal-parking, .modal-gates { font-size: 40px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
     <div class="header-top">
-        <h1>✈️ CDG Parking Mapper</h1>
-        <button class="share-btn" onclick="openShareModal()" aria-label="Partager QR Code">
-  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="1" y="1" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
-    <rect x="3.5" y="3.5" width="3" height="3" fill="white"/>
-    <rect x="13" y="1" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
-    <rect x="15.5" y="3.5" width="3" height="3" fill="white"/>
-    <rect x="1" y="13" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
-    <rect x="3.5" y="15.5" width="3" height="3" fill="white"/>
-    <rect x="13" y="13" width="3" height="3" fill="white"/>
-    <rect x="18" y="13" width="3" height="3" fill="white"/>
-    <rect x="13" y="18" width="3" height="3" fill="white"/>
-    <rect x="18" y="18" width="3" height="3" fill="white"/>
-    <rect x="15.5" y="15.5" width="3" height="3" fill="white"/>
-  </svg>
-</button>
+      <h1>✈️ CDG Parking Mapper</h1>
+      <button class="share-btn" onclick="openShareModal()" aria-label="Partager QR Code">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
+          <rect x="3.5" y="3.5" width="3" height="3" fill="white"/>
+          <rect x="13" y="1" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
+          <rect x="15.5" y="3.5" width="3" height="3" fill="white"/>
+          <rect x="1" y="13" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
+          <rect x="3.5" y="15.5" width="3" height="3" fill="white"/>
+          <rect x="13" y="13" width="3" height="3" fill="white"/>
+          <rect x="18" y="13" width="3" height="3" fill="white"/>
+          <rect x="13" y="18" width="3" height="3" fill="white"/>
+          <rect x="18" y="18" width="3" height="3" fill="white"/>
+          <rect x="15.5" y="15.5" width="3" height="3" fill="white"/>
+        </svg>
+      </button>
     </div>
-
     <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input 
-                type="text" 
-                class="search-input" 
-                id="searchInput"
-                placeholder="Code parking ou porte (ex: E22, K43)"
-                autocomplete="off"
-                autocapitalize="characters"
-            >
-            <button class="clear-btn" id="clearBtn">✕</button>
-        </div>
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput"
+        placeholder="Code parking ou porte (ex: E22, K43)"
+        autocomplete="off" autocapitalize="characters">
+      <button class="clear-btn" id="clearBtn">✕</button>
     </div>
-
-    <div class="content">
-        <div class="results-count" id="resultsCount"></div>
-        <div id="results"></div>
-    </div>
-
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Détails</div>
-                <button class="close-btn" onclick="closeModal()">✕</button>
-            </div>
-            <div id="modalBody"></div>
-        </div>
-    </div>
-<div class="modal share-modal" id="shareModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title"> Partager l'application</div>
-      <button class="close-btn" onclick="closeShareModal()">✕</button>
-    </div>
-
-    <div class="qr-container">
-      <div class="qr-code">
-        <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper" style="width:100%;height:100%;object-fit:contain;">
-      </div>
-      <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
-    </div>
-
-    <div class="tutorial">
-      <div class="tutorial-title">📲 Installer comme une app</div>
-
-      <div class="tutorial-section">
-        <div class="platform-title">🍎 iPhone / iPad (Safari)</div>
-        <ul class="tutorial-steps">
-          <li>Ouvrez ce site dans <strong>Safari</strong></li>
-          <li>Appuyez sur <strong>Partage</strong> 📤</li>
-          <li>Sélectionnez <strong>"Sur l'écran d'accueil"</strong></li>
-          <li>Nommez (ex: "CDG Parking")</li>
-          <li><strong>Ajouter</strong></li>
-        </ul>
-      </div>
-
-      <div class="tutorial-section">
-        <div class="platform-title">🤖 Android (Chrome)</div>
-        <ul class="tutorial-steps">
-          <li>Ouvrez ce site dans <strong>Chrome</strong></li>
-          <li>Menu <strong>⋮</strong></li>
-          <li><strong>"Ajouter à l'écran d'accueil"</strong></li>
-          <li>Nommez (ex: "CDG Parking")</li>
-          <li><strong>Ajouter</strong></li>
-        </ul>
-      </div>
-    </div>
-
-    <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top: 20px;">
-      <span>Copier le lien de partage</span>
-      <span>🔗</span>
-    </button>
   </div>
-</div>
 
-    <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
-<!-- Bouton Scanner flottant -->
-<button class="scanner-fab" onclick="openScanner()" aria-label="Scanner carte d'embarquement">
-    📷
-</button>
+  <!-- ===== CONTENT ===== -->
+  <div class="content">
+    <div class="results-count" id="resultsCount"></div>
+    <div id="results"></div>
+  </div>
 
-<!-- Modal Scanner -->
-<div class="scanner-modal" id="scannerModal">
+  <!-- ===== MODAL DÉTAIL ===== -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Détails</div>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL PARTAGE ===== -->
+  <div class="modal share-modal" id="shareModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📤 Partager l'application</div>
+        <button class="close-btn" onclick="closeShareModal()">✕</button>
+      </div>
+      <div class="qr-container">
+        <div class="qr-code">
+          <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper" style="width:100%;height:100%;object-fit:contain;">
+        </div>
+        <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
+      </div>
+      <div class="tutorial">
+        <div class="tutorial-title">📲 Installer comme une app</div>
+        <div class="tutorial-section">
+          <div class="platform-title">🍎 iPhone / iPad (Safari)</div>
+          <ul class="tutorial-steps">
+            <li>Ouvrez ce site dans <strong>Safari</strong></li>
+            <li>Appuyez sur <strong>Partage</strong> 📤</li>
+            <li>Sélectionnez <strong>"Sur l'écran d'accueil"</strong></li>
+            <li>Nommez (ex: "CDG Parking")</li>
+            <li><strong>Ajouter</strong></li>
+          </ul>
+        </div>
+        <div class="tutorial-section">
+          <div class="platform-title">🤖 Android (Chrome)</div>
+          <ul class="tutorial-steps">
+            <li>Ouvrez ce site dans <strong>Chrome</strong></li>
+            <li>Menu <strong>⋮</strong></li>
+            <li><strong>"Ajouter à l'écran d'accueil"</strong></li>
+            <li>Nommez (ex: "CDG Parking")</li>
+            <li><strong>Ajouter</strong></li>
+          </ul>
+        </div>
+      </div>
+      <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top:20px;">
+        <span>Copier le lien de partage</span><span>🔗</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TOAST ===== -->
+  <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
+
+  <!-- ===== BOUTON SCANNER ===== -->
+  <button class="scanner-fab" onclick="openScanner()" aria-label="Scanner carte d'embarquement">📷</button>
+
+  <!-- ===== MODAL SCANNER ===== -->
+  <div class="scanner-modal" id="scannerModal">
     <div class="scanner-header">
-        <h2>📷 Scanner la carte d'embarquement</h2>
-        <button class="scanner-close" onclick="closeScanner()">✕</button>
+      <h2>📷 Scanner la carte d'embarquement</h2>
+      <button class="scanner-close" onclick="closeScanner()">✕</button>
     </div>
     <div class="scanner-container" id="scannerContainer">
-        <video id="scanner-video" playsinline></video>
-        <div class="scanner-instructions">
-            Placez le code-barres de la carte d'embarquement dans le cadre
-        </div>
-        <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
+      <video id="scanner-video" playsinline></video>
+      <div class="scanner-instructions">Pointez vers le code-barres PDF417 de la carte d'embarquement</div>
+      <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
     </div>
-</div>
-    <script>
-        const mappings = [
-            // 2E K
-            {"parkingCode":"E10","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E12","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E14","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E16","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E18","gates":["K49"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E20","gates":["K45","K47"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"E22","gates":["K43"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E24","gates":["K41"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E26","gates":["K37","K39"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"E30","gates":["K35"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E32","gates":["K33"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E34","gates":["K31"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E38","gates":["K30"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E40","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E42","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E44","gates":["K36"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-            
-            // 2E S3
-            {"parkingCode":"K71","gates":["L36","L34"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K65","gates":["L30","L32"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K59","gates":["L26","L28"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K53","gates":["L22","L24"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"K21","gates":["L42"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K17","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"K13","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"K09","gates":["L46"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K05","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K01","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F03","gates":["L51"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E29","gates":["L35"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E27","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E25","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E21","gates":["L31"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E17","gates":["L29"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E13","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"E09","gates":["L25"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E05","gates":["L23"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"E01","gates":["L21"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F15","gates":["L45"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"F07","gates":["L47"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F09","gates":["L49"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-            
-            // 2E S4
-            {"parkingCode":"K26","gates":["M31"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K32","gates":["M29"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K38","gates":["M27"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K44","gates":["M25"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K52","gates":["M41"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K58","gates":["M43"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K70","gates":["M47"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K76","gates":["M49"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"L27","gates":["M28"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"L33","gates":["M26"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"L39","gates":["M24"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"L53","gates":["M44"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"K64","gates":["M45"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"L59","gates":["M46"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"L65","gates":["M48"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"L71","gates":["M50"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-            
-            // 2F
-            {"parkingCode":"F02","gates":["F26"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F04","gates":["F27"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F08","gates":["F28"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F10","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F11","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F12","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F13","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":true},
-            {"parkingCode":"F14","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F16","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F17","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F18","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F19","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F20","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F22","gates":["F31"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F26","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F27","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F28","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F30","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F32","gates":["F34"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F34","gates":["F35"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F66","gates":["F47"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F68","gates":["F48"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F70","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F71","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F72","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F73","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F74","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F75","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F76","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F80","gates":["F50"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F82","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F83","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F84","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F86","gates":["F52"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F90","gates":["F53"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F92","gates":["F54"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F94","gates":["F55"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F96","gates":["F56"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"F25","gates":["F25"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F24","gates":["F24"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F21","gates":["F21"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F23","gates":["F23"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F46","gates":["F46"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F45","gates":["F45"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F44","gates":["F44"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F41","gates":["F41"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-            {"parkingCode":"F43","gates":["F43"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-            
-            // 2G
-            {"parkingCode":"J10","gates":["G21"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J11","gates":["G23"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-            {"parkingCode":"J12","gates":["G25"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-            {"parkingCode":"J13","gates":["G27"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J14","gates":["G29"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J15","gates":["G29","G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J16","gates":["G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J17","gates":["G28"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J18","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-            {"parkingCode":"J19","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J20","gates":["G24"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J21","gates":["G22"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-            {"parkingCode":"J30","gates":["G31"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J31","gates":["G33"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J32","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J33","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J34","gates":["G37"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J35","gates":["G39"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J36","gates":["G39","G40"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J37","gates":["G40"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-            {"parkingCode":"J38","gates":["G38"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J39","gates":["G36"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J40","gates":["G34"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-            {"parkingCode":"J41","gates":["G32"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false}
-        ];
+  </div>
 
-        const searchInput = document.getElementById('searchInput');
-        const clearBtn = document.getElementById('clearBtn');
-        const resultsDiv = document.getElementById('results');
-        const resultsCount = document.getElementById('resultsCount');
-        const modal = document.getElementById('modal');
-        const modalBody = document.getElementById('modalBody');
-        const toast = document.getElementById('toast');
+  <script>
+    // ===== DONNÉES =====
+    const mappings = [
+      // 2E K
+      {"parkingCode":"E10","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E12","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E14","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E16","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E18","gates":["K49"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E20","gates":["K45","K47"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"E22","gates":["K43"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E24","gates":["K41"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E26","gates":["K37","K39"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"E30","gates":["K35"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E32","gates":["K33"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E34","gates":["K31"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E38","gates":["K30"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E40","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E42","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E44","gates":["K36"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
+      // 2E S3
+      {"parkingCode":"K71","gates":["L36","L34"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K65","gates":["L30","L32"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K59","gates":["L26","L28"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K53","gates":["L22","L24"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"K21","gates":["L42"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K17","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"K13","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"K09","gates":["L46"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K05","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K01","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F03","gates":["L51"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E29","gates":["L35"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E27","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E25","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E21","gates":["L31"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E17","gates":["L29"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E13","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"E09","gates":["L25"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E05","gates":["L23"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"E01","gates":["L21"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F15","gates":["L45"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"F07","gates":["L47"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F09","gates":["L49"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+      // 2E S4
+      {"parkingCode":"K26","gates":["M31"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K32","gates":["M29"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K38","gates":["M27"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K44","gates":["M25"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K52","gates":["M41"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K58","gates":["M43"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K70","gates":["M47"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K76","gates":["M49"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"L27","gates":["M28"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"L33","gates":["M26"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"L39","gates":["M24"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"L53","gates":["M44"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"K64","gates":["M45"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"L59","gates":["M46"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"L65","gates":["M48"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"L71","gates":["M50"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+      // 2F
+      {"parkingCode":"F02","gates":["F26"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F04","gates":["F27"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F08","gates":["F28"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F10","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F11","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F12","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F13","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":true},
+      {"parkingCode":"F14","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F16","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F17","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F18","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F19","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F20","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F22","gates":["F31"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F26","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F27","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F28","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F30","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F32","gates":["F34"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F34","gates":["F35"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F66","gates":["F47"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F68","gates":["F48"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F70","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F71","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F72","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F73","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F74","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F75","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F76","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F80","gates":["F50"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F82","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F83","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F84","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F86","gates":["F52"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F90","gates":["F53"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F92","gates":["F54"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F94","gates":["F55"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F96","gates":["F56"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"F25","gates":["F25"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F24","gates":["F24"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F21","gates":["F21"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F23","gates":["F23"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F46","gates":["F46"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F45","gates":["F45"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F44","gates":["F44"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F41","gates":["F41"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+      {"parkingCode":"F43","gates":["F43"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+      // 2G
+      {"parkingCode":"J10","gates":["G21"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J11","gates":["G23"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+      {"parkingCode":"J12","gates":["G25"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+      {"parkingCode":"J13","gates":["G27"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J14","gates":["G29"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J15","gates":["G29","G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J16","gates":["G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J17","gates":["G28"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J18","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+      {"parkingCode":"J19","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J20","gates":["G24"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J21","gates":["G22"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+      {"parkingCode":"J30","gates":["G31"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J31","gates":["G33"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J32","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J33","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J34","gates":["G37"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J35","gates":["G39"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J36","gates":["G39","G40"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J37","gates":["G40"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+      {"parkingCode":"J38","gates":["G38"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J39","gates":["G36"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J40","gates":["G34"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+      {"parkingCode":"J41","gates":["G32"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false}
+    ];
 
-        let debounceTimer;
+    // ===== RECHERCHE =====
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
+    const resultsDiv = document.getElementById('results');
+    const resultsCount = document.getElementById('resultsCount');
+    const modal = document.getElementById('modal');
+    const modalBody = document.getElementById('modalBody');
+    const toast = document.getElementById('toast');
+    let debounceTimer;
 
-        searchInput.addEventListener('input', (e) => {
-            const value = e.target.value;
-            clearBtn.classList.toggle('visible', value.length > 0);
-            
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => search(value), 150);
-        });
+    searchInput.addEventListener('input', (e) => {
+      const value = e.target.value;
+      clearBtn.classList.toggle('visible', value.length > 0);
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => search(value), 150);
+    });
 
-        clearBtn.addEventListener('click', () => {
-            searchInput.value = '';
-            clearBtn.classList.remove('visible');
-            search('');
-            searchInput.focus();
-        });
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearBtn.classList.remove('visible');
+      search('');
+      searchInput.focus();
+    });
 
-        function search(query) {
-            const normalized = query.toUpperCase().trim();
-            
-            if (!normalized) {
-                displayResults(mappings);
-                return;
-            }
-
-            const results = mappings.filter(m => {
-                const searchText = (m.parkingCode + ' ' + m.gates.join(' ')).toUpperCase();
-                return searchText.includes(normalized);
-            });
-
-            displayResults(results);
-        }
-
-        function displayResults(results) {
-            resultsCount.textContent = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
-            
-            if (results.length === 0) {
-                resultsDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
-                        <div class="empty-state-title">Aucun résultat</div>
-                        <div class="empty-state-text">Essayez un autre code de parking ou de porte</div>
-                    </div>
-                `;
-                return;
-            }
-
-            resultsDiv.innerHTML = results.map(m => `
-                <div class="mapping-card" onclick='showDetail(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
-                    <div class="card-main">
-                        <div class="parking-code">${m.parkingCode}</div>
-                        <div class="arrow">→</div>
-                        <div class="gates">${m.gates.join(', ')}</div>
-                    </div>
-                    <div class="badges">
-                        <span class="badge badge-terminal">📍 ${m.terminal}</span>
-                        <span class="badge badge-section">🔖 ${m.section}</span>
-                        ${m.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
-                        ${m.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
-                        ${m.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function showDetail(mapping) {
-            modalBody.innerHTML = `
-                <div class="modal-main-info">
-                    <div class="modal-parking">${mapping.parkingCode}</div>
-                    <div class="modal-arrow">↓</div>
-                    <div class="modal-gates">${mapping.gates.join(', ')}</div>
-                    <div class="modal-badges">
-                        <span class="badge badge-terminal">📍 ${mapping.terminal}</span>
-                        <span class="badge badge-section">🔖 ${mapping.section}</span>
-                        ${mapping.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
-                        ${mapping.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
-                        ${mapping.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
-                    </div>
-                </div>
-                <button class="action-btn btn-primary" onclick='copyText("${mapping.gates.join(', ')}")'>
-                    <span>Copier les portes</span>
-                    <span>📋</span>
-                </button>
-                <button class="action-btn btn-secondary" onclick='copyText("${mapping.terminal}")'>
-                    <span>Copier le terminal</span>
-                    <span>📋</span>
-                </button>
-            `;
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            modal.classList.remove('active');
-        }
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast();
-            });
-        }
-
-        function showToast() {
-            toast.classList.add('active');
-            setTimeout(() => {
-                toast.classList.remove('active');
-            }, 2000);
-        }
-
-        const shareModal = document.getElementById('shareModal');
-
-function openShareModal(){
-  shareModal.classList.add('active');
-}
-
-function closeShareModal(){
-  shareModal.classList.remove('active');
-}
-
-shareModal.addEventListener('click', (e) => {
-  if (e.target === shareModal) closeShareModal();
-});
-
-function copyCurrentUrl(){
-  const url = window.location.href;
-  if (url.includes('file://')) {
-    showToast("⚠️ Ouvre l'app via GitHub Pages pour copier le lien");
-    return;
-  }
-  navigator.clipboard.writeText(url).then(() => showToast("✓ Lien copié"));
-}
-
-// Améliore ton showToast pour afficher un message (optionnel)
-function showToast(message){
-  toast.textContent = message || "✓ Copié dans le presse-papiers";
-  toast.classList.add('active');
-  setTimeout(() => toast.classList.remove('active'), 2000);
-}
-// ========== SCANNER (Étape 1 - Interface uniquement) ==========
-function openScanner() {
-    const scannerModal = document.getElementById('scannerModal');
-    scannerModal.classList.add('active');
-    document.getElementById('scannerStatus').textContent = 'Initialisation de la caméra...';
-    
-    // TODO: On ajoutera le vrai scanner à l'étape 2
-    console.log('Scanner ouvert - fonctionnalité à venir');
-}
-
-function closeScanner() {
-    const scannerModal = document.getElementById('scannerModal');
-    scannerModal.classList.remove('active');
-}
-
-// Fermer en cliquant en dehors
-document.addEventListener('DOMContentLoaded', function() {
-    const scannerModal = document.getElementById('scannerModal');
-    if (scannerModal) {
-        scannerModal.addEventListener('click', (e) => {
-            if (e.target.id === 'scannerModal') {
-                closeScanner();
-            }
-        });
+    function search(query) {
+      const normalized = query.toUpperCase().trim();
+      if (!normalized) { displayResults(mappings); return; }
+      const results = mappings.filter(m => {
+        const searchText = (m.parkingCode + ' ' + m.gates.join(' ')).toUpperCase();
+        return searchText.includes(normalized);
+      });
+      displayResults(results);
     }
-});
-        
 
-        
-        // Initialisation
-        displayResults(mappings);
-    </script>
-    
+    function displayResults(results) {
+      resultsCount.textContent = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
+      if (results.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-title">Aucun résultat</div>
+            <div class="empty-state-text">Essayez un autre code de parking ou de porte</div>
+          </div>`;
+        return;
+      }
+      resultsDiv.innerHTML = results.map(m => `
+        <div class="mapping-card" onclick='showDetail(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
+          <div class="card-main">
+            <div class="parking-code">${m.parkingCode}</div>
+            <div class="arrow">→</div>
+            <div class="gates">${m.gates.join(', ')}</div>
+          </div>
+          <div class="badges">
+            <span class="badge badge-terminal">📍 ${m.terminal}</span>
+            <span class="badge badge-section">🔖 ${m.section}</span>
+            ${m.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
+            ${m.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
+            ${m.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
+          </div>
+        </div>`).join('');
+    }
+
+    function showDetail(mapping) {
+      modalBody.innerHTML = `
+        <div class="modal-main-info">
+          <div class="modal-parking">${mapping.parkingCode}</div>
+          <div class="modal-arrow">↓</div>
+          <div class="modal-gates">${mapping.gates.join(', ')}</div>
+          <div class="modal-badges">
+            <span class="badge badge-terminal">📍 ${mapping.terminal}</span>
+            <span class="badge badge-section">🔖 ${mapping.section}</span>
+            ${mapping.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
+            ${mapping.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
+            ${mapping.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
+          </div>
+        </div>
+        <button class="action-btn btn-primary" onclick='copyText("${mapping.gates.join(', ')}") '>
+          <span>Copier les portes</span><span>📋</span>
+        </button>
+        <button class="action-btn btn-secondary" onclick='copyText("${mapping.terminal}")'>
+          <span>Copier le terminal</span><span>📋</span>
+        </button>`;
+      modal.classList.add('active');
+    }
+
+    function closeModal() { modal.classList.remove('active'); }
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => showToast());
+    }
+
+    function showToast(message) {
+      toast.textContent = message || "✓ Copié dans le presse-papiers";
+      toast.classList.add('active');
+      setTimeout(() => toast.classList.remove('active'), 2000);
+    }
+
+    // ===== PARTAGE =====
+    const shareModal = document.getElementById('shareModal');
+    function openShareModal() { shareModal.classList.add('active'); }
+    function closeShareModal() { shareModal.classList.remove('active'); }
+    shareModal.addEventListener('click', (e) => { if (e.target === shareModal) closeShareModal(); });
+
+    function copyCurrentUrl() {
+      const url = window.location.href;
+      if (url.includes('file://')) { showToast("⚠️ Ouvre l'app via GitHub Pages pour copier le lien"); return; }
+      navigator.clipboard.writeText(url).then(() => showToast("✓ Lien copié"));
+    }
+
+    // ===== SCANNER PDF417 =====
+    let scannerActive = false;
+    let codeReader = null;
+
+    async function openScanner() {
+      const scannerModal = document.getElementById('scannerModal');
+      scannerModal.classList.add('active');
+
+      // Réinitialise le contenu du container
+      document.getElementById('scannerContainer').innerHTML = `
+        <video id="scanner-video" playsinline></video>
+        <div class="scanner-instructions">Pointez vers le code-barres PDF417 de la carte d'embarquement</div>
+        <div class="scanner-status" id="scannerStatus">Chargement de la librairie...</div>
+      `;
+
+      try {
+        const { BrowserPDF417Reader } = await import('https://unpkg.com/@zxing/browser@0.1.4/esm/index.js');
+        codeReader = new BrowserPDF417Reader();
+        scannerActive = true;
+
+        const videoEl = document.getElementById('scanner-video');
+        document.getElementById('scannerStatus').textContent = 'Caméra active — pointez le code-barres';
+
+        await codeReader.decodeFromConstraints(
+          { video: { facingMode: 'environment' } },
+          videoEl,
+          (result, error) => {
+            if (result && scannerActive) {
+              scannerActive = false;
+              const raw = result.getText();
+              const flightNumber = extractFlightNumber(raw);
+              handleScanResult(flightNumber, raw);
+            }
+          }
+        );
+
+      } catch (err) {
+        const status = document.getElementById('scannerStatus');
+        if (status) status.textContent = '❌ Caméra non disponible : ' + err.message;
+      }
+    }
+
+    function closeScanner() {
+      scannerActive = false;
+      if (codeReader) { codeReader.reset(); codeReader = null; }
+      document.getElementById('scannerModal').classList.remove('active');
+    }
+
+    function extractFlightNumber(raw) {
+      try {
+        // Tentative 1 : format BCBP standard (positions 23-30)
+        const bcbpFlight = raw.substring(23, 30).trim().replace(/\s+/g, '');
+        if (/^[A-Z0-9]{2,3}\d{1,4}$/.test(bcbpFlight)) return bcbpFlight;
+
+        // Tentative 2 : regex générique sur tout le texte
+        const match = raw.match(/\b([A-Z]{2,3})\s?(\d{3,4})\b/);
+        if (match) return match[1] + match[2];
+
+      } catch(e) {}
+      return null;
+    }
+
+    function handleScanResult(flightNumber, raw) {
+      if (navigator.vibrate) navigator.vibrate(200);
+
+      const container = document.getElementById('scannerContainer');
+
+      if (flightNumber) {
+        container.innerHTML = `
+          <div class="boarding-pass-result">
+            <div class="passenger-header">
+              <div style="font-size:48px;">✅</div>
+              <div style="font-size:36px;font-weight:700;color:#1d1d1f;margin-top:10px;">✈️ ${flightNumber}</div>
+              <div style="color:#86868b;margin-top:8px;font-size:14px;">Vol détecté</div>
+            </div>
+            <button class="scan-another-btn" onclick="openFlightInfo('${flightNumber}')" style="font-size:18px;padding:20px;margin-top:20px;">
+              🔍 Voir la porte sur Paris Aéroport
+            </button>
+            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:12px;" onclick="resetScanner()">
+              📷 Scanner une autre carte
+            </button>
+            <button class="scan-another-btn" style="background:#f5f5f7;color:#86868b;margin-top:12px;font-size:14px;" onclick="closeScanner()">
+              ✕ Fermer
+            </button>
+          </div>`;
+      } else {
+        container.innerHTML = `
+          <div class="boarding-pass-result">
+            <div class="passenger-header">
+              <div style="font-size:48px;">❌</div>
+              <div style="font-size:18px;font-weight:600;margin-top:10px;">Vol non détecté</div>
+              <div style="color:#86868b;margin-top:8px;font-size:14px;">Le code n'a pas pu être lu correctement</div>
+            </div>
+            <button class="scan-another-btn" onclick="resetScanner()">🔄 Réessayer</button>
+            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:12px;" onclick="closeScanner()">✕ Fermer</button>
+          </div>`;
+      }
+    }
+
+    function openFlightInfo(flightNumber) {
+      const url = `https://www.parisaeroport.fr/fr/passagers/vols/cdg?search=${flightNumber}`;
+      window.open(url, '_blank');
+    }
+
+    function resetScanner() {
+      if (codeReader) { codeReader.reset(); codeReader = null; }
+      scannerActive = false;
+      openScanner();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const scannerModal = document.getElementById('scannerModal');
+      if (scannerModal) {
+        scannerModal.addEventListener('click', (e) => {
+          if (e.target.id === 'scannerModal') closeScanner();
+        });
+      }
+    });
+
+    // Init
+    displayResults(mappings);
+  </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
