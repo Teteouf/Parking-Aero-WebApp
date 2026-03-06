@@ -11,6 +11,8 @@
   <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
   <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
   <link rel="manifest" href="manifest.json">
+  <!-- Librairie scanner PDF417 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.19.1/zxing.min.js"></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBF7EZST2X"></script>
   <script>
@@ -623,17 +625,6 @@
     let scannerActive = false;
     let codeReader = null;
 
-    function loadZxing() {
-      return new Promise((resolve, reject) => {
-        if (window.ZXingBrowser) { resolve(); return; }
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@zxing/browser@0.1.4/umd/index.min.js';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-    }
-
     async function openScanner() {
       const scannerModal = document.getElementById('scannerModal');
       scannerModal.classList.add('active');
@@ -641,34 +632,45 @@
       document.getElementById('scannerContainer').innerHTML = `
         <video id="scanner-video" playsinline></video>
         <div class="scanner-instructions">Pointez vers le code-barres PDF417 de la carte d'embarquement</div>
-        <div class="scanner-status" id="scannerStatus">Chargement...</div>
+        <div class="scanner-status" id="scannerStatus">Initialisation...</div>
       `;
 
       try {
-        await loadZxing();
-        const { BrowserPDF417Reader } = window.ZXingBrowser;
-        codeReader = new BrowserPDF417Reader();
+        // Attend que ZXing soit disponible
+        let attempts = 0;
+        while (!window.ZXing && attempts < 20) {
+          await new Promise(r => setTimeout(r, 200));
+          attempts++;
+        }
+
+        if (!window.ZXing) throw new Error("Librairie non chargée");
+
+        const hints = new Map();
+        hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, [window.ZXing.BarcodeFormat.PDF_417]);
+
+        codeReader = new window.ZXing.BrowserMultiFormatReader(hints);
         scannerActive = true;
 
         const videoEl = document.getElementById('scanner-video');
         document.getElementById('scannerStatus').textContent = 'Caméra active — pointez le code-barres';
 
-        await codeReader.decodeFromConstraints(
-          { video: { facingMode: 'environment' } },
-          videoEl,
-          (result, error) => {
-            if (result && scannerActive) {
-              scannerActive = false;
-              const raw = result.getText();
-              const flightNumber = extractFlightNumber(raw);
-              handleScanResult(flightNumber, raw);
-            }
+        const devices = await window.ZXing.BrowserCodeReader.listVideoInputDevices();
+        // Préférer la caméra arrière
+        const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear') || d.label.toLowerCase().includes('environment')) || devices[devices.length - 1];
+        const deviceId = backCamera ? backCamera.deviceId : undefined;
+
+        codeReader.decodeFromVideoDevice(deviceId, videoEl, (result, error) => {
+          if (result && scannerActive) {
+            scannerActive = false;
+            const raw = result.getText();
+            const flightNumber = extractFlightNumber(raw);
+            handleScanResult(flightNumber, raw);
           }
-        );
+        });
 
       } catch (err) {
         const status = document.getElementById('scannerStatus');
-        if (status) status.textContent = '❌ Caméra non disponible : ' + err.message;
+        if (status) status.textContent = '❌ Erreur : ' + err.message;
       }
     }
 
