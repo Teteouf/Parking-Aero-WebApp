@@ -1120,6 +1120,9 @@
             <button class="scan-another-btn" onclick="openFlightInfo('${primaryFlight}')" style="font-size:18px;padding:20px;margin-top:20px;">
               🔍 Voir la porte sur Paris Aéroport
             </button>
+            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:10px;" onclick="copyText('${primaryFlight}')">
+              📋 Copier ${primaryFlight}
+            </button>
             ${otherButtons}
             <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:12px;" onclick="resetScanner()">
               📷 Scanner une autre carte
@@ -1142,8 +1145,22 @@
       }
     }
 
+    function buildAdpFlightUrl(flightNumber) {
+      const encoded = encodeURIComponent(flightNumber);
+      return `https://www.parisaeroport.fr/fr/passagers/vols/tous-les-vols-depart/cdg?search=${encoded}&q=${encoded}&query=${encoded}&flight=${encoded}#search=${encoded}`;
+    }
+
     function openFlightInfo(flightNumber) {
-      const url = `https://www.parisaeroport.fr/fr/passagers/vols/cdg?search=${encodeURIComponent(flightNumber)}`;
+      const normalized = (flightNumber || '').toUpperCase().trim();
+      if (!normalized) return;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(normalized).then(() => {
+          showToast(`Vol ${normalized} copié`);
+        }).catch(() => {});
+      }
+
+      const url = buildAdpFlightUrl(normalized);
       window.open(url, '_blank');
     }
 
