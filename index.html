@@ -624,6 +624,9 @@
     // ===== SCANNER PDF417 =====
     let scannerActive = false;
     let codeReader = null;
+    let nativeDetectorTimer = null;
+    let nativeDetectorBusy = false;
+    let scanHintTimer = null;
 
     async function loadScriptWithTimeout(src, timeoutMs = 8000) {
       return new Promise((resolve, reject) => {
@@ -705,6 +708,29 @@
       return 'Impossible d\'ouvrir la camera. Verifiez les permissions navigateur et ouvrez la page en HTTPS.';
     }
 
+    function stopScannerHelpers() {
+      if (nativeDetectorTimer) {
+        clearInterval(nativeDetectorTimer);
+        nativeDetectorTimer = null;
+      }
+      if (scanHintTimer) {
+        clearTimeout(scanHintTimer);
+        scanHintTimer = null;
+      }
+      nativeDetectorBusy = false;
+    }
+
+    function buildVideoConstraints(deviceId) {
+      const video = {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        advanced: [{ focusMode: 'continuous' }]
+      };
+      if (deviceId) video.deviceId = { exact: deviceId };
+      return { video, audio: false };
+    }
+
     async function requestCameraPermission(videoEl) {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Camera non supportee');
@@ -715,11 +741,7 @@
       videoEl.setAttribute('muted', '');
       videoEl.muted = true;
 
-      const testStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
-        audio: false
-      });
-
+      const testStream = await navigator.mediaDevices.getUserMedia(buildVideoConstraints());
       testStream.getTracks().forEach(track => track.stop());
     }
 
@@ -731,7 +753,78 @@
       }) || devices[devices.length - 1];
     }
 
+    async function startNativeDetector(videoEl) {
+      if (!('BarcodeDetector' in window)) return;
+
+      let supportedFormats = [];
+      try {
+        if (typeof window.BarcodeDetector.getSupportedFormats === 'function') {
+          supportedFormats = await window.BarcodeDetector.getSupportedFormats();
+        }
+      } catch (_) {
+        return;
+      }
+
+      const formats = ['pdf417', 'aztec', 'qr_code', 'data_matrix'].filter(f => supportedFormats.includes(f));
+      if (!formats.length) return;
+
+      let detector;
+      try {
+        detector = new window.BarcodeDetector({ formats });
+      } catch (_) {
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return;
+
+      nativeDetectorTimer = setInterval(async () => {
+        if (!scannerActive || nativeDetectorBusy) return;
+        if (!videoEl || videoEl.readyState < 2 || !videoEl.videoWidth || !videoEl.videoHeight) return;
+
+        nativeDetectorBusy = true;
+        try {
+          canvas.width = videoEl.videoWidth;
+          canvas.height = videoEl.videoHeight;
+          ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+          const barcodes = await detector.detect(canvas);
+          if (!scannerActive || !barcodes || !barcodes.length) return;
+
+          const rawValue = barcodes[0].rawValue;
+          if (rawValue) {
+            onBarcodeDetected(rawValue);
+          }
+        } catch (_) {
+          // Ignore temporary detector errors.
+        } finally {
+          nativeDetectorBusy = false;
+        }
+      }, 250);
+    }
+
+    function onBarcodeDetected(raw) {
+      if (!scannerActive || !raw) return;
+
+      scannerActive = false;
+      stopScannerHelpers();
+      if (codeReader) {
+        codeReader.reset();
+        codeReader = null;
+      }
+
+      const scanInfo = extractFlightInfo(raw);
+      handleScanResult(scanInfo, raw);
+    }
+
     async function openScanner() {
+      stopScannerHelpers();
+      scannerActive = false;
+      if (codeReader) {
+        codeReader.reset();
+        codeReader = null;
+      }
+
       const scannerModal = document.getElementById('scannerModal');
       scannerModal.classList.add('active');
 
@@ -760,7 +853,22 @@
         }
 
         const hints = new Map();
-        hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, [window.ZXing.BarcodeFormat.PDF_417]);
+        const formats = [
+          window.ZXing.BarcodeFormat.PDF_417,
+          window.ZXing.BarcodeFormat.AZTEC,
+          window.ZXing.BarcodeFormat.QR_CODE,
+          window.ZXing.BarcodeFormat.DATA_MATRIX
+        ].filter(Boolean);
+
+        if (formats.length) {
+          hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+        }
+        if (window.ZXing.DecodeHintType.TRY_HARDER) {
+          hints.set(window.ZXing.DecodeHintType.TRY_HARDER, true);
+        }
+        if (window.ZXing.DecodeHintType.ALSO_INVERTED) {
+          hints.set(window.ZXing.DecodeHintType.ALSO_INVERTED, true);
+        }
 
         codeReader = new window.ZXing.BrowserMultiFormatReader(hints);
         scannerActive = true;
@@ -768,25 +876,27 @@
 
         const onDecode = (result, error) => {
           if (!scannerActive) return;
-
           if (result) {
-            scannerActive = false;
-            const raw = result.getText();
-            const scanInfo = extractFlightInfo(raw);
-            handleScanResult(scanInfo, raw);
+            onBarcodeDetected(result.getText());
           }
         };
 
         if (typeof codeReader.decodeFromConstraints === 'function') {
-          const constraints = deviceId
-            ? { video: { deviceId: { exact: deviceId } }, audio: false }
-            : { video: { facingMode: { ideal: 'environment' } }, audio: false };
-          codeReader.decodeFromConstraints(constraints, videoEl, onDecode);
+          codeReader.decodeFromConstraints(buildVideoConstraints(deviceId), videoEl, onDecode);
         } else {
           codeReader.decodeFromVideoDevice(deviceId, videoEl, onDecode);
         }
+
+        // Fallback natif Android (souvent meilleur sur PDF417 difficiles)
+        startNativeDetector(videoEl);
+
+        scanHintTimer = setTimeout(() => {
+          if (!scannerActive) return;
+          setScannerStatus('Toujours rien ? Approchez (15-20 cm), eclairez mieux et tournez la carte de 90°.');
+        }, 7000);
       } catch (err) {
         scannerActive = false;
+        stopScannerHelpers();
         if (codeReader) {
           codeReader.reset();
           codeReader = null;
@@ -797,6 +907,7 @@
 
     function closeScanner() {
       scannerActive = false;
+      stopScannerHelpers();
       if (codeReader) { codeReader.reset(); codeReader = null; }
       document.getElementById('scannerModal').classList.remove('active');
     }
