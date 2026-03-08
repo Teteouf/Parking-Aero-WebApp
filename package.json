@@ -1,0 +1,17 @@
+{
+  "name": "parking-aero-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scanner PDF417 + recherche automatique de porte ADP",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "^1.51.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

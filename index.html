@@ -1086,6 +1086,113 @@
       };
     }
 
+    const GATE_API_ENDPOINT = window.GATE_API_ENDPOINT || '/api/gate';
+    let gateLookupRequestId = 0;
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    async function fetchGateForFlight(flightNumber, timeoutMs = 15000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const url = `${GATE_API_ENDPOINT}?flight=${encodeURIComponent(flightNumber)}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        return await response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    function setGateLookupPanel(content) {
+      const panel = document.getElementById('gateLookupPanel');
+      if (panel) panel.innerHTML = content;
+    }
+
+    function renderGateLookupLoading(flightNumber) {
+      setGateLookupPanel(`
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:#1d1d1f;font-weight:600;">
+          <span>⏳</span><span>Recherche auto de la porte pour ${escapeHtml(flightNumber)}...</span>
+        </div>
+      `);
+    }
+
+    function renderGateLookupSuccess(result) {
+      const gate = escapeHtml(result.gate || 'N/A');
+      const terminal = result.terminal ? ` · Terminal ${escapeHtml(result.terminal)}` : '';
+      const status = result.status ? ` · ${escapeHtml(result.status)}` : '';
+      const source = result.source ? `Source: ${escapeHtml(result.source)}` : 'Source: ADP';
+
+      setGateLookupPanel(`
+        <div style="text-align:center;">
+          <div style="font-size:34px;font-weight:800;color:#00a35a;line-height:1.1;">🚪 ${gate}</div>
+          <div style="margin-top:8px;color:#1d1d1f;font-weight:600;">Porte détectée automatiquement${terminal}${status}</div>
+          <div style="margin-top:6px;color:#86868b;font-size:12px;">${source}</div>
+        </div>
+      `);
+    }
+
+    function renderGateLookupFailure(message) {
+      setGateLookupPanel(`
+        <div style="text-align:center;">
+          <div style="font-weight:700;color:#d97706;">⚠️ Porte non trouvée automatiquement</div>
+          <div style="margin-top:6px;color:#86868b;font-size:13px;">${escapeHtml(message || 'Utilisez le bouton ADP en secours.')}</div>
+        </div>
+      `);
+    }
+
+    async function startAutoGateLookup(flightNumber) {
+      const normalized = (flightNumber || '').toUpperCase().trim();
+      if (!normalized) return;
+
+      gateLookupRequestId += 1;
+      const requestId = gateLookupRequestId;
+      renderGateLookupLoading(normalized);
+
+      try {
+        const result = await fetchGateForFlight(normalized);
+        if (requestId !== gateLookupRequestId) return;
+
+        if (result && result.found && result.gate) {
+          renderGateLookupSuccess(result);
+          if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
+          return;
+        }
+
+        renderGateLookupFailure(result && result.message ? result.message : 'Aucun résultat ADP pour ce vol.');
+      } catch (error) {
+        if (requestId !== gateLookupRequestId) return;
+
+        let message = 'Service auto indisponible, utilisez ADP en secours.';
+        if (error && error.name === 'AbortError') {
+          message = 'Recherche trop longue (timeout). Utilisez ADP en secours.';
+        } else if (error && error.message && error.message.startsWith('HTTP 404')) {
+          message = 'API /api/gate absente. Démarrez le backend automatique.';
+        }
+
+        renderGateLookupFailure(message);
+      }
+    }
+
+    function lookupAnotherDetectedFlight(flightNumber) {
+      startAutoGateLookup(flightNumber);
+    }
+
     function handleScanResult(scanInfo, raw) {
       if (navigator.vibrate) navigator.vibrate(200);
 
@@ -1104,8 +1211,8 @@
 
         const otherSegments = (scanInfo.segments || []).filter(seg => seg.flightCode !== primaryFlight);
         const otherButtons = otherSegments.slice(0, 3).map(seg => `
-            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:10px;" onclick="openFlightInfo('${seg.flightCode}')">
-              🔎 ${seg.flightCode}${seg.from && seg.to ? ` (${seg.from} → ${seg.to})` : ''}
+            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:10px;" onclick="lookupAnotherDetectedFlight('${seg.flightCode}')">
+              🔎 Tester ${seg.flightCode}${seg.from && seg.to ? ` (${seg.from} → ${seg.to})` : ''}
             </button>`).join('');
 
         container.innerHTML = `
@@ -1117,8 +1224,9 @@
               ${routeLine}
               ${departureHint}
             </div>
-            <button class="scan-another-btn" onclick="openFlightInfo('${primaryFlight}')" style="font-size:18px;padding:20px;margin-top:20px;">
-              🔍 Voir la porte sur Paris Aéroport
+            <div id="gateLookupPanel" style="margin-top:16px;padding:14px;border-radius:12px;background:#f5f5f7;"></div>
+            <button class="scan-another-btn" onclick="openFlightInfo('${primaryFlight}')" style="font-size:18px;padding:20px;margin-top:12px;">
+              🌐 Ouvrir ADP (secours)
             </button>
             <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:10px;" onclick="copyText('${primaryFlight}')">
               📋 Copier ${primaryFlight}
@@ -1131,6 +1239,8 @@
               ✕ Fermer
             </button>
           </div>`;
+
+        startAutoGateLookup(primaryFlight);
       } else {
         container.innerHTML = `
           <div class="boarding-pass-result">
