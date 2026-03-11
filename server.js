@@ -21,31 +21,44 @@ function normalizeFlight(input) {
   return value;
 }
 
+function splitFlightCode(flight) {
+  const match = String(flight).match(/^([A-Z0-9]{2,3})(\d{1,5})$/);
+  if (!match) return null;
+  return {
+    carrier: match[1],
+    number: match[2],
+    normalizedNumber: match[2].replace(/^0+/, '') || match[2]
+  };
+}
+
 function normalizeText(value) {
   return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
 function buildFlightRegex(flight) {
-  const match = flight.match(/^([A-Z0-9]{2,3})(\d{1,5})$/);
-  if (!match) return null;
+  const parts = splitFlightCode(flight);
+  if (!parts) return null;
 
-  const carrier = match[1].split('').join('\\s*');
-  const digits = match[2].replace(/^0+/, '') || match[2];
-  return new RegExp(`${carrier}\\s*0*${digits}\\b`, 'i');
+  const carrier = parts.carrier.split('').join('\\s*');
+  return new RegExp(`${carrier}\\s*0*${parts.normalizedNumber}\\b`, 'i');
 }
 
 function extractGateFromChunk(chunk) {
-  if (!chunk) return null;
+  const text = String(chunk || '');
+  if (!text) return null;
 
-  const gateRegexes = [
-    /(?:GATE\/?PORTE|GATE|PORTE|EMBARQUEMENT)[^A-Z0-9]{0,25}([A-Z]\d{1,3})\b/i,
-    /\b([A-Z]\d{1,3})\b[^\n]{0,25}(?:GATE\/?PORTE|GATE|PORTE)/i
+  const labeledPatterns = [
+    /(?:GATE\/?PORTE|GATE|PORTE|EMBARQUEMENT)[^A-Z0-9]{0,25}([A-Z]{1,3}\d{0,3}[A-Z]?)\b/i,
+    /\b([A-Z]{1,3}\d{0,3}[A-Z]?)\b[^\n]{0,25}(?:GATE\/?PORTE|GATE|PORTE|EMBARQUEMENT)/i
   ];
 
-  for (const regex of gateRegexes) {
-    const match = chunk.match(regex);
+  for (const regex of labeledPatterns) {
+    const match = text.match(regex);
     if (match) {
-      return match[1].toUpperCase();
+      const raw = match[1].toUpperCase().trim();
+      if (raw.length >= 2 && raw.length <= 8 && !['CDG', 'ORY', 'PARIS'].includes(raw)) {
+        return raw;
+      }
     }
   }
 
@@ -78,6 +91,8 @@ function extractStatusFromChunk(chunk) {
 
 function extractGateFromText(fullText, flight) {
   const text = String(fullText || '');
+  if (!text) return null;
+
   const lines = text
     .split(/\r?\n+/)
     .map(line => line.trim())
@@ -96,7 +111,7 @@ function extractGateFromText(fullText, flight) {
   }
 
   for (const index of candidateIndexes) {
-    const around = lines.slice(Math.max(0, index - 9), Math.min(lines.length, index + 10)).join(' | ');
+    const around = lines.slice(Math.max(0, index - 10), Math.min(lines.length, index + 11)).join(' | ');
     const gate = extractGateFromChunk(around);
     if (gate) {
       return {
@@ -110,9 +125,7 @@ function extractGateFromText(fullText, flight) {
 
   const flightPos = text.toUpperCase().indexOf(flight.toUpperCase());
   if (flightPos >= 0) {
-    const start = Math.max(0, flightPos - 400);
-    const end = Math.min(text.length, flightPos + 700);
-    const around = text.slice(start, end);
+    const around = text.slice(Math.max(0, flightPos - 500), Math.min(text.length, flightPos + 900));
     const gate = extractGateFromChunk(around);
     if (gate) {
       return {
@@ -127,19 +140,71 @@ function extractGateFromText(fullText, flight) {
   return null;
 }
 
+function gateFromValue(value) {
+  if (typeof value !== 'string') return null;
+  const raw = value.trim().toUpperCase();
+  if (!raw) return null;
+
+  const fromLabel = extractGateFromChunk(raw);
+  if (fromLabel) return fromLabel;
+
+  const strictMatch = raw.match(/\b([A-Z]{1,3}\d{0,3}[A-Z]?)\b/);
+  if (!strictMatch) return null;
+
+  const gate = strictMatch[1];
+  if (gate.length < 2 || gate.length > 8) return null;
+  if (['CDG', 'ORY', 'PARIS'].includes(gate)) return null;
+  return gate;
+}
+
+function hasFlightInObject(current, parts, flightRegex, flightNorm) {
+  const jsonText = JSON.stringify(current || {});
+  if (!jsonText) return false;
+
+  const normalizedJson = normalizeText(jsonText);
+  if (normalizedJson.includes(flightNorm)) return true;
+  if (flightRegex && flightRegex.test(jsonText)) return true;
+
+  const entries = Object.entries(current || {});
+  let carriers = [];
+  let numbers = [];
+
+  for (const [key, value] of entries) {
+    const keyLower = key.toLowerCase();
+
+    if (typeof value === 'string' || typeof value === 'number') {
+      const raw = String(value).toUpperCase();
+      if (/carrier|airline|compagnie|iata|designator/.test(keyLower)) {
+        carriers.push(raw.replace(/[^A-Z0-9]/g, ''));
+      }
+      if (/flight|vol|numero|number/.test(keyLower)) {
+        numbers.push(raw.replace(/[^0-9]/g, ''));
+      }
+    }
+  }
+
+  carriers = carriers.filter(Boolean);
+  numbers = numbers.filter(Boolean);
+
+  for (const carrier of carriers) {
+    for (const number of numbers) {
+      const compact = `${carrier}${number.replace(/^0+/, '') || number}`;
+      if (compact === `${parts.carrier}${parts.normalizedNumber}`) return true;
+    }
+  }
+
+  return false;
+}
+
 function findGateInJsonPayloads(payloads, flight) {
   const flightNorm = normalizeText(flight);
   const flightRegex = buildFlightRegex(flight);
+  const parts = splitFlightCode(flight);
+  if (!parts) return null;
 
   const gateKeyRegex = /(gate|porte|boarding.?gate|gatecode|porte_embarquement)/i;
   const terminalKeyRegex = /(terminal)/i;
   const statusKeyRegex = /(status|etat)/i;
-
-  function parseGate(value) {
-    if (typeof value !== 'string') return null;
-    const gateMatch = value.toUpperCase().match(/\b[A-Z]\d{1,3}\b/);
-    return gateMatch ? gateMatch[0] : null;
-  }
 
   function walk(root) {
     const queue = [root];
@@ -157,8 +222,7 @@ function findGateInJsonPayloads(payloads, flight) {
       }
 
       const entries = Object.entries(current);
-      const asText = JSON.stringify(current);
-      const hasFlight = normalizeText(asText).includes(flightNorm) || (flightRegex ? flightRegex.test(asText) : false);
+      const hasFlight = hasFlightInObject(current, parts, flightRegex, flightNorm);
 
       if (hasFlight) {
         let gate = null;
@@ -166,21 +230,24 @@ function findGateInJsonPayloads(payloads, flight) {
         let status = null;
 
         for (const [key, value] of entries) {
-          if (typeof value === 'string') {
-            if (!gate && gateKeyRegex.test(key)) {
-              gate = parseGate(value);
-            }
-            if (!terminal && terminalKeyRegex.test(key)) {
-              terminal = value.trim();
-            }
-            if (!status && statusKeyRegex.test(key)) {
-              status = value.trim();
-            }
+          if (typeof value !== 'string' && typeof value !== 'number') continue;
+
+          const keyLower = key.toLowerCase();
+          const rawValue = String(value);
+
+          if (!gate && gateKeyRegex.test(keyLower)) {
+            gate = gateFromValue(rawValue);
+          }
+          if (!terminal && terminalKeyRegex.test(keyLower)) {
+            terminal = rawValue.trim();
+          }
+          if (!status && statusKeyRegex.test(keyLower)) {
+            status = rawValue.trim();
           }
         }
 
         if (!gate) {
-          gate = extractGateFromChunk(asText);
+          gate = extractGateFromChunk(JSON.stringify(current));
         }
 
         if (gate) {
@@ -188,7 +255,7 @@ function findGateInJsonPayloads(payloads, flight) {
             gate,
             terminal,
             status,
-            snippet: asText.slice(0, 500)
+            snippet: JSON.stringify(current).slice(0, 700)
           };
         }
       }
@@ -266,8 +333,47 @@ async function fillSearchInput(page, flight) {
         return true;
       }
     } catch (_) {
-      // Continue with the next selector.
+      // continue
     }
+  }
+
+  return false;
+}
+
+async function tryOpenFlightDetails(page, flight) {
+  try {
+    const clicked = await page.evaluate(flightCode => {
+      const norm = value => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const targetFlight = norm(flightCode);
+
+      const candidates = Array.from(document.querySelectorAll('a, button, [role="button"], article, li, div'))
+        .map(element => ({
+          element,
+          text: (element.innerText || element.textContent || '').trim()
+        }))
+        .filter(item => item.text && item.text.length <= 500)
+        .filter(item => norm(item.text).includes(targetFlight));
+
+      for (const candidate of candidates) {
+        const { element } = candidate;
+        try {
+          element.scrollIntoView({ block: 'center' });
+          element.click();
+          return true;
+        } catch (_) {
+          // no-op
+        }
+      }
+
+      return false;
+    }, flight);
+
+    if (clicked) {
+      await page.waitForTimeout(1400);
+      return true;
+    }
+  } catch (_) {
+    // no-op
   }
 
   return false;
@@ -306,7 +412,7 @@ async function lookupGateFromAdp(flight) {
       const data = await response.json();
       capturedJsonPayloads.push({ url, data });
     } catch (_) {
-      // Ignore parsing issues.
+      // ignore
     }
   });
 
@@ -321,7 +427,8 @@ async function lookupGateFromAdp(flight) {
       await acceptCookiesIfPresent(page);
       await fillSearchInput(page, flight);
 
-      for (let attempt = 0; attempt < 8; attempt += 1) {
+      let detailsOpened = false;
+      for (let attempt = 0; attempt < 10; attempt += 1) {
         await page.waitForTimeout(900);
 
         const domResult = await findFromDom(page, flight);
@@ -336,9 +443,12 @@ async function lookupGateFromAdp(flight) {
         if (jsonResult && jsonResult.gate) {
           return jsonResult;
         }
+
+        if (!detailsOpened && attempt >= 2) {
+          detailsOpened = await tryOpenFlightDetails(page, flight);
+        }
       }
 
-      // On some ADP views, clicking "Tous les vols" expands the relevant list.
       try {
         const allFlights = page.locator('a:has-text("Tous les vols"), button:has-text("Tous les vols")').first();
         if (await allFlights.isVisible({ timeout: 1000 })) {
