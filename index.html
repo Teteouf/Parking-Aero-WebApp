@@ -614,7 +614,6 @@
     let debounceTimer;
     let lastSecretCode = '';
     let af007Timer = null;
-    let nightModeInterval = null;
 
     searchInput.addEventListener('input', (e) => {
       const value = e.target.value;
@@ -747,16 +746,6 @@
         af007Overlay.setAttribute('aria-hidden', 'true');
       }, 1000);
     }
-
-    function isNightWindow(date = new Date()) {
-      const hour = date.getHours();
-      return hour >= 20 || hour < 6;
-    }
-
-    function applyNightModeIfNeeded() {
-      document.body.classList.toggle('night-mode', isNightWindow());
-    }
-
     function openEasterEggModal(mode) {
       if (!easterEggModal || !easterEggModalTitle || !easterEggModalBody) return;
 
@@ -1625,16 +1614,10 @@
           if (e.target === easterEggModal) closeEasterEggModal();
         });
       }
-
-      applyNightModeIfNeeded();
-      if (nightModeInterval) clearInterval(nightModeInterval);
-      nightModeInterval = setInterval(applyNightModeIfNeeded, 60000);
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) applyNightModeIfNeeded();
-      });
     });
 
     // Init
+    document.body.classList.remove('night-mode');
     displayResults(mappings);
   </script>
 </body>
