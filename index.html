@@ -184,6 +184,65 @@
       display: none; animation: toastIn 0.3s;
     }
     .toast.active { display: block; }
+    /* ===== EASTER EGGS ===== */
+    .af007-overlay {
+      position: fixed; inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(9, 9, 11, 0.8), rgba(3, 7, 18, 0.92));
+      color: #f9fafb; z-index: 4000;
+      display: none; align-items: center; justify-content: center;
+      text-align: center; padding: 24px;
+    }
+    .af007-overlay.active { display: flex; animation: af007Flash 1s ease; }
+    .af007-title { font-size: 34px; font-weight: 800; letter-spacing: 1px; }
+    .af007-subtitle { margin-top: 8px; font-size: 16px; opacity: 0.85; }
+
+    .easter-modal-body {
+      text-align: left; background: #f5f5f7;
+      border-radius: 12px; padding: 16px;
+      color: #1d1d1f; line-height: 1.5;
+    }
+    .easter-modal-title {
+      font-size: 20px; font-weight: 700; margin-bottom: 12px;
+      color: #0f172a;
+    }
+    .easter-modal-list { list-style: none; padding-left: 0; margin: 0; }
+    .easter-modal-list li { margin-bottom: 8px; color: #334155; }
+
+    body.night-mode {
+      background: #0b1220;
+      color: #e2e8f0;
+    }
+    body.night-mode .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+      box-shadow: 0 2px 12px rgba(2, 6, 23, 0.5);
+    }
+    body.night-mode .content { background: transparent; }
+    body.night-mode .mapping-card,
+    body.night-mode .boarding-pass-result,
+    body.night-mode .modal-content {
+      background: #111827;
+      color: #e5e7eb;
+      box-shadow: 0 2px 14px rgba(2, 6, 23, 0.4);
+    }
+    body.night-mode .results-count,
+    body.night-mode .empty-state-text,
+    body.night-mode .passenger-header div[style*="color:#86868b"] {
+      color: #94a3b8 !important;
+    }
+    body.night-mode .search-input {
+      background: rgba(15, 23, 42, 0.92);
+      color: #e2e8f0;
+    }
+    body.night-mode .search-icon { color: #94a3b8; }
+    body.night-mode .scanner-status {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    body.night-mode .easter-modal-body {
+      background: #111827;
+      color: #e5e7eb;
+    }
+    body.night-mode .easter-modal-title { color: #e5e7eb; }
+    body.night-mode .easter-modal-list li { color: #cbd5e1; }
 
     /* ===== SCANNER FAB ===== */
     .scanner-fab {
@@ -252,12 +311,18 @@
     }
     .scan-another-btn:active { opacity: 0.8; }
 
-    /* ===== ANIMATIONS ===== */
+        /* ===== ANIMATIONS ===== */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     @keyframes toastIn {
       from { opacity: 0; transform: translateX(-50%) translateY(20px); }
       to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    @keyframes af007Flash {
+      0%   { opacity: 0; transform: scale(1.04); }
+      20%  { opacity: 1; transform: scale(1); }
+      80%  { opacity: 1; }
+      100% { opacity: 0; transform: scale(1.02); }
     }
 
     @media (max-width: 375px) {
@@ -358,6 +423,29 @@
 
   <!-- ===== TOAST ===== -->
   <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
+
+
+  <!-- ===== EASTER EGG AF007 ===== -->
+  <div class="af007-overlay" id="af007Overlay" aria-hidden="true">
+    <div>
+      <div class="af007-title">AF007</div>
+      <div class="af007-subtitle">Mode Agent Secret activé</div>
+    </div>
+  </div>
+
+  <!-- ===== EASTER EGG MODAL ===== -->
+  <div class="modal share-modal" id="easterEggModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="easterEggModalTitle">Easter Egg</div>
+        <button class="close-btn" onclick="closeEasterEggModal()">✕</button>
+      </div>
+      <div class="easter-modal-body" id="easterEggModalBody"></div>
+      <button class="action-btn btn-secondary" onclick="closeEasterEggModal()" style="margin-top:16px;">
+        <span>Fermer</span><span>✕</span>
+      </button>
+    </div>
+  </div>
 
   <!-- ===== BOUTON SCANNER ===== -->
   <button class="scanner-fab" onclick="openScanner()" aria-label="Scanner carte d'embarquement">📷</button>
@@ -519,7 +607,14 @@
     const modal = document.getElementById('modal');
     const modalBody = document.getElementById('modalBody');
     const toast = document.getElementById('toast');
+    const af007Overlay = document.getElementById('af007Overlay');
+    const easterEggModal = document.getElementById('easterEggModal');
+    const easterEggModalTitle = document.getElementById('easterEggModalTitle');
+    const easterEggModalBody = document.getElementById('easterEggModalBody');
     let debounceTimer;
+    let lastSecretCode = '';
+    let af007Timer = null;
+    let nightModeInterval = null;
 
     searchInput.addEventListener('input', (e) => {
       const value = e.target.value;
@@ -537,7 +632,28 @@
 
     function search(query) {
       const normalized = query.toUpperCase().trim();
-      if (!normalized) { displayResults(mappings); return; }
+      if (!normalized) {
+        lastSecretCode = '';
+        displayResults(mappings);
+        return;
+      }
+
+      if (normalized === 'BAGAGE') {
+        displayResults(mappings);
+        if (lastSecretCode !== normalized) openEasterEggModal('bagage');
+        lastSecretCode = normalized;
+        return;
+      }
+
+      if (normalized === 'PMR') {
+        const pmrFriendlyMappings = mappings.filter(m => m.ramp || m.elevator);
+        displayResults(pmrFriendlyMappings);
+        if (lastSecretCode !== normalized) openEasterEggModal('pmr');
+        lastSecretCode = normalized;
+        return;
+      }
+
+      lastSecretCode = '';
       const results = mappings.filter(m => {
         const searchText = (m.parkingCode + ' ' + m.gates.join(' ')).toUpperCase();
         return searchText.includes(normalized);
@@ -607,6 +723,83 @@
       toast.textContent = message || "✓ Copié dans le presse-papiers";
       toast.classList.add('active');
       setTimeout(() => toast.classList.remove('active'), 2000);
+    }
+
+    function isAf007FlightCode(flightCode) {
+      const normalized = (flightCode || '').toUpperCase().replace(/\s+/g, '');
+      return /^AF0*7$/.test(normalized);
+    }
+
+    function hasAf007Segment(scanInfo) {
+      if (!scanInfo) return false;
+      if (isAf007FlightCode(scanInfo.primaryFlight)) return true;
+      return (scanInfo.segments || []).some(seg => isAf007FlightCode(seg.flightCode));
+    }
+
+    function triggerAf007EasterEgg() {
+      if (!af007Overlay) return;
+      if (af007Timer) clearTimeout(af007Timer);
+
+      af007Overlay.classList.add('active');
+      af007Overlay.setAttribute('aria-hidden', 'false');
+      af007Timer = setTimeout(() => {
+        af007Overlay.classList.remove('active');
+        af007Overlay.setAttribute('aria-hidden', 'true');
+      }, 1000);
+    }
+
+    function isNightWindow(date = new Date()) {
+      const hour = date.getHours();
+      return hour >= 20 || hour < 6;
+    }
+
+    function applyNightModeIfNeeded() {
+      document.body.classList.toggle('night-mode', isNightWindow());
+    }
+
+    function openEasterEggModal(mode) {
+      if (!easterEggModal || !easterEggModalTitle || !easterEggModalBody) return;
+
+      const normalizedMode = (mode || '').toLowerCase();
+      if (normalizedMode === 'bagage') {
+        easterEggModalTitle.textContent = '🧳 Mode BAGAGE activé';
+        easterEggModalBody.innerHTML = `
+          <div class="easter-modal-title">Bienvenue en mode "retour tapis"</div>
+          <ul class="easter-modal-list">
+            <li>• Objectif du jour: récupérer la valise sans stress.</li>
+            <li>• Bonus: vous avez débloqué "Sprint au carrousel".</li>
+            <li>• Astuce: pour un départ, rescanner la carte suivante.</li>
+          </ul>
+        `;
+      } else if (normalizedMode === 'pmr') {
+        const rampCount = mappings.filter(m => m.ramp).length;
+        const elevatorCount = mappings.filter(m => m.elevator).length;
+        const pmrCount = mappings.filter(m => m.ramp || m.elevator).length;
+        easterEggModalTitle.textContent = '🧑‍🦽 Mode PMR activé';
+        easterEggModalBody.innerHTML = `
+          <div class="easter-modal-title">Mission PMR express</div>
+          <ul class="easter-modal-list">
+            <li>• Zones PMR utiles disponibles: <strong>${pmrCount}</strong>.</li>
+            <li>• Repères avec rampe: <strong>${rampCount}</strong> · avec ascenseur: <strong>${elevatorCount}</strong>.</li>
+            <li>• Astuce terrain: lancer la recherche d'une porte (ex: K43) puis orienter vers l'itinéraire le plus accessible.</li>
+            <li>• Clin d'oeil équipe PMR: "Confort + clarté + timing", le trio qui sauve les correspondances.</li>
+          </ul>
+        `;
+      } else {
+        easterEggModalTitle.textContent = 'Easter Egg';
+        easterEggModalBody.innerHTML = `
+          <div class="easter-modal-title">Code secret détecté</div>
+          <ul class="easter-modal-list">
+            <li>• Continuez la mission.</li>
+          </ul>
+        `;
+      }
+
+      easterEggModal.classList.add('active');
+    }
+
+    function closeEasterEggModal() {
+      if (easterEggModal) easterEggModal.classList.remove('active');
     }
 
     // ===== PARTAGE =====
@@ -1331,6 +1524,7 @@
 
     function handleScanResult(scanInfo, raw) {
       if (navigator.vibrate) navigator.vibrate(200);
+      if (hasAf007Segment(scanInfo)) triggerAf007EasterEgg();
 
       const container = document.getElementById('scannerContainer');
       const primaryFlight = scanInfo ? scanInfo.primaryFlight : null;
@@ -1425,6 +1619,19 @@
           if (e.target.id === 'scannerModal') closeScanner();
         });
       }
+
+      if (easterEggModal) {
+        easterEggModal.addEventListener('click', (e) => {
+          if (e.target === easterEggModal) closeEasterEggModal();
+        });
+      }
+
+      applyNightModeIfNeeded();
+      if (nightModeInterval) clearInterval(nightModeInterval);
+      nightModeInterval = setInterval(applyNightModeIfNeeded, 60000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) applyNightModeIfNeeded();
+      });
     });
 
     // Init
