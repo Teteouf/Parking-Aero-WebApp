@@ -935,6 +935,44 @@
       return `${carrierCode}${numberCode}`;
     }
 
+    function normalizeAirportCode(value) {
+      const cleaned = (value || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
+      return cleaned.length === 3 ? cleaned : '';
+    }
+
+    function dedupeSegments(segments) {
+      const byKey = new Map();
+
+      for (const segment of segments || []) {
+        if (!segment || !segment.flightCode) continue;
+
+        const key = `${segment.flightCode}-${segment.from || ''}-${segment.to || ''}-${segment.julianDate || ''}`;
+        const existing = byKey.get(key);
+        if (!existing) {
+          byKey.set(key, segment);
+          continue;
+        }
+
+        const existingConfidence = existing.confidence || 0;
+        const incomingConfidence = segment.confidence || 0;
+
+        if (incomingConfidence > existingConfidence) {
+          byKey.set(key, segment);
+          continue;
+        }
+
+        if (incomingConfidence === existingConfidence) {
+          const existingHasRoute = !!(existing.from && existing.to);
+          const incomingHasRoute = !!(segment.from && segment.to);
+          if (incomingHasRoute && !existingHasRoute) {
+            byKey.set(key, { ...existing, ...segment });
+          }
+        }
+      }
+
+      return [...byKey.values()];
+    }
+
     function parseBcbpSegments(raw) {
       const text = cleanBarcodeRaw(raw);
       if (!/^[MS][1-4]/.test(text) || text.length < 60) return null;
@@ -958,9 +996,9 @@
 
         const pnr = text.slice(cursor, cursor + 7).trim();
         cursor += 7;
-        const from = text.slice(cursor, cursor + 3).trim();
+        const from = normalizeAirportCode(text.slice(cursor, cursor + 3));
         cursor += 3;
-        const to = text.slice(cursor, cursor + 3).trim();
+        const to = normalizeAirportCode(text.slice(cursor, cursor + 3));
         cursor += 3;
         const carrier = text.slice(cursor, cursor + 3).trim();
         cursor += 3;
@@ -976,28 +1014,69 @@
         const conditionalSizeRaw = text.slice(cursor, cursor + 2);
         cursor += 2;
         const conditionalSize = parseHexLength(conditionalSizeRaw);
-        if (conditionalSize === null || cursor + conditionalSize > text.length) break;
+        if (conditionalSize === null || cursor + conditionalSize > text.length) {
+          break;
+        }
         cursor += conditionalSize;
 
         const flightCode = buildFlightCode(carrier, flightNumberRaw);
         const julianDate = /^\d{3}$/.test(dateOfFlightRaw) ? parseInt(dateOfFlightRaw, 10) : null;
-        if (flightCode && /^[A-Z0-9]{2,3}\d{1,5}$/.test(flightCode)) {
-          segments.push({ flightCode, from, to, carrier, pnr, julianDate });
+
+        if (flightCode && from && to && /^[A-Z0-9]{2,3}\d{1,5}$/.test(flightCode)) {
+          segments.push({
+            flightCode,
+            from,
+            to,
+            carrier,
+            pnr,
+            julianDate,
+            confidence: 3,
+            source: 'bcbp-fixed'
+          });
         }
       }
 
       if (!segments.length) return null;
 
-      const deduped = [];
-      const seen = new Set();
-      for (const segment of segments) {
-        const key = `${segment.flightCode}-${segment.from}-${segment.to}-${segment.julianDate || ''}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        deduped.push(segment);
+      return {
+        formatCode,
+        passengerName,
+        segments: dedupeSegments(segments)
+      };
+    }
+
+    function parseBcbpSegmentsByPattern(raw) {
+      const text = cleanBarcodeRaw(raw);
+      if (text.length < 45) return [];
+
+      const pattern = /([A-Z0-9 ]{7})([A-Z]{3})([A-Z]{3})([A-Z0-9 ]{3})([0-9 ]{5})(\d{3})([A-Z ])([A-Z0-9 ]{4})([A-Z0-9 ]{5})([A-Z0-9 ])([0-9A-F]{2})/g;
+      const segments = [];
+      let match;
+
+      while ((match = pattern.exec(text)) !== null) {
+        const pnr = match[1].trim();
+        const from = normalizeAirportCode(match[2]);
+        const to = normalizeAirportCode(match[3]);
+        const carrier = match[4].trim();
+        const flightCode = buildFlightCode(carrier, match[5]);
+        const julianDate = /^\d{3}$/.test(match[6]) ? parseInt(match[6], 10) : null;
+
+        if (!flightCode || !from || !to) continue;
+        if (!/^[A-Z0-9]{2,3}\d{1,5}$/.test(flightCode)) continue;
+
+        segments.push({
+          flightCode,
+          from,
+          to,
+          carrier,
+          pnr,
+          julianDate,
+          confidence: 2,
+          source: 'bcbp-pattern'
+        });
       }
 
-      return { formatCode, passengerName, segments: deduped };
+      return dedupeSegments(segments);
     }
 
     function estimateDateFromJulian(julianDate) {
@@ -1021,26 +1100,60 @@
       return best;
     }
 
+    function getSegmentDateDistance(segment, nowTs) {
+      const date = estimateDateFromJulian(segment && segment.julianDate);
+      if (!date) return Number.MAX_SAFE_INTEGER;
+      return Math.abs(date.getTime() - nowTs);
+    }
+
     function selectBestSegment(segments) {
-      if (!segments.length) return { selected: null, hasCdgDeparture: false };
+      if (!segments.length) {
+        return { selected: null, hasCdgDeparture: false, hasCdgArrival: false };
+      }
 
-      const cdgDepartures = segments.filter(segment => segment.from === 'CDG');
-      const candidates = cdgDepartures.length ? cdgDepartures : segments;
-      const now = Date.now();
+      const hasCdgDeparture = segments.some(segment => segment.from === 'CDG');
+      const hasCdgArrival = segments.some(segment => segment.to === 'CDG');
 
+      let candidates = hasCdgDeparture
+        ? segments.filter(segment => segment.from === 'CDG')
+        : segments.filter(segment => segment.to !== 'CDG');
+
+      if (!candidates.length) {
+        candidates = segments;
+      }
+
+      const nowTs = Date.now();
       let selected = candidates[0];
-      let bestScore = Number.MAX_SAFE_INTEGER;
-      for (const segment of candidates) {
-        const date = estimateDateFromJulian(segment.julianDate);
-        if (!date) continue;
-        const score = Math.abs(date.getTime() - now);
-        if (score < bestScore) {
+      let bestConfidence = selected.confidence || 0;
+      let bestDistance = getSegmentDateDistance(selected, nowTs);
+
+      for (const segment of candidates.slice(1)) {
+        const confidence = segment.confidence || 0;
+        const distance = getSegmentDateDistance(segment, nowTs);
+
+        if (confidence > bestConfidence) {
           selected = segment;
-          bestScore = score;
+          bestConfidence = confidence;
+          bestDistance = distance;
+          continue;
+        }
+
+        if (confidence === bestConfidence && distance < bestDistance) {
+          selected = segment;
+          bestDistance = distance;
+          continue;
+        }
+
+        if (confidence === bestConfidence && distance === bestDistance) {
+          const segmentIsArrival = segment.to === 'CDG';
+          const selectedIsArrival = selected.to === 'CDG';
+          if (!segmentIsArrival && selectedIsArrival) {
+            selected = segment;
+          }
         }
       }
 
-      return { selected, hasCdgDeparture: cdgDepartures.length > 0 };
+      return { selected, hasCdgDeparture, hasCdgArrival };
     }
 
     function fallbackRegexFlights(raw) {
@@ -1055,23 +1168,45 @@
         const flightCode = `${carrier}${number}`;
         if (!/^[A-Z0-9]{2,3}\d{2,5}$/.test(flightCode) || seen.has(flightCode)) continue;
         seen.add(flightCode);
-        flights.push({ flightCode, from: '', to: '', carrier, pnr: '', julianDate: null });
-        if (flights.length >= 3) break;
+        flights.push({
+          flightCode,
+          from: '',
+          to: '',
+          carrier,
+          pnr: '',
+          julianDate: null,
+          confidence: 1,
+          source: 'regex'
+        });
+        if (flights.length >= 4) break;
       }
       return flights;
     }
 
     function extractFlightInfo(raw) {
       const parsed = parseBcbpSegments(raw);
-      if (parsed && parsed.segments.length) {
-        const selection = selectBestSegment(parsed.segments);
+      const patternSegments = parseBcbpSegmentsByPattern(raw);
+
+      const mergedSegments = dedupeSegments([
+        ...(parsed && parsed.segments ? parsed.segments : []),
+        ...patternSegments
+      ]);
+
+      if (mergedSegments.length) {
+        const selection = selectBestSegment(mergedSegments);
+
+        const source = (parsed && parsed.segments && parsed.segments.length)
+          ? (patternSegments.length ? 'bcbp+pattern' : 'bcbp')
+          : 'bcbp-pattern';
+
         return {
           primaryFlight: selection.selected ? selection.selected.flightCode : null,
           primarySegment: selection.selected,
-          segments: parsed.segments,
+          segments: mergedSegments,
           hasCdgDeparture: selection.hasCdgDeparture,
-          passengerName: parsed.passengerName,
-          source: 'bcbp'
+          hasCdgArrival: selection.hasCdgArrival,
+          passengerName: parsed ? parsed.passengerName : '',
+          source
         };
       }
 
@@ -1081,6 +1216,7 @@
         primarySegment: fallbackSegments[0] || null,
         segments: fallbackSegments,
         hasCdgDeparture: false,
+        hasCdgArrival: false,
         passengerName: '',
         source: fallbackSegments.length ? 'regex' : 'none'
       };
@@ -1207,7 +1343,9 @@
         const routeLine = route ? `<div style="color:#86868b;margin-top:8px;font-size:14px;">${route}</div>` : '';
         const departureHint = scanInfo.hasCdgDeparture
           ? `<div style="color:#00a35a;margin-top:8px;font-size:13px;font-weight:600;">Départ CDG détecté</div>`
-          : `<div style="color:#d97706;margin-top:8px;font-size:13px;font-weight:600;">Aucun départ CDG détecté sur ce code</div>`;
+          : scanInfo.hasCdgArrival
+            ? `<div style="color:#d97706;margin-top:8px;font-size:13px;font-weight:600;">Arrivée CDG détectée, aucun départ CDG trouvé</div>`
+            : `<div style="color:#d97706;margin-top:8px;font-size:13px;font-weight:600;">Aucun départ CDG détecté sur ce code</div>`;
 
         const otherSegments = (scanInfo.segments || []).filter(seg => seg.flightCode !== primaryFlight);
         const otherButtons = otherSegments.slice(0, 3).map(seg => `
