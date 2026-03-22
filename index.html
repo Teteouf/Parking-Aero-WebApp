@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <<<<<<< ours
+<<<<<<< ours
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1625,6 +1626,8 @@
 </body>
 </html>
 =======
+=======
+>>>>>>> theirs
     <!-- Bibliothèque Html5-QRCode pour scanner les codes-barres -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -2756,6 +2759,11 @@ const CITY_BY_IATA = {
 };
 
 const PARIS_AIRPORTS = new Set(['CDG', 'ORY', 'LBG']);
+<<<<<<< ours
+=======
+const KNOWN_GATE_CODES = Array.from(new Set(mappings.flatMap(mapping => mapping.gates)))
+    .sort((left, right) => right.length - left.length);
+>>>>>>> theirs
 
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -2773,6 +2781,51 @@ function normalizeAirport(iata) {
     return CITY_BY_IATA[code] ? `${CITY_BY_IATA[code]} - ${code}` : code;
 }
 
+<<<<<<< ours
+=======
+function formatGateSource(source, candidates = []) {
+    if (source === 'barcode-context') return 'Détectée dans le code-barres';
+    if (source === 'barcode-known-gates') return `Porte CDG détectée (${candidates.length} candidate${candidates.length > 1 ? 's' : ''})`;
+    if (source === 'barcode-generic') return 'Heuristique sur le code-barres';
+    return 'Non encodée sur cette carte';
+}
+
+function cleanupMergeArtifacts() {
+    const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}/, /\bours\b/i, /\btheirs\b/i];
+    const body = document.body;
+    if (!body || typeof document.createTreeWalker !== 'function') return;
+
+    const textNodesToRemove = [];
+    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+    let currentNode = walker.nextNode();
+
+    while (currentNode) {
+        const normalized = currentNode.textContent.replace(/\s+/g, ' ').trim();
+        if (normalized && markerPatterns.some(pattern => pattern.test(normalized))) {
+            textNodesToRemove.push(currentNode);
+        }
+        currentNode = walker.nextNode();
+    }
+
+    textNodesToRemove.forEach(node => node.remove());
+
+    const seenIds = new Set();
+    document.querySelectorAll('[id]').forEach(element => {
+        if (seenIds.has(element.id)) {
+            element.remove();
+            return;
+        }
+        seenIds.add(element.id);
+    });
+
+    document.querySelectorAll('.header').forEach((header, index) => {
+        if (index > 0) {
+            header.remove();
+        }
+    });
+}
+
+>>>>>>> theirs
 function openScanner() {
     if (isScanning) return;
 
@@ -2884,7 +2937,11 @@ function parseBoardingPass(data) {
     if (!segments.length) return null;
 
     const selectedSegment = choosePreferredSegment(segments);
+<<<<<<< ours
     const gate = extractGate(payload, selectedSegment);
+=======
+    const gateDetails = extractGate(payload, selectedSegment);
+>>>>>>> theirs
     const routeType = PARIS_AIRPORTS.has(selectedSegment.origin) && PARIS_AIRPORTS.has(selectedSegment.destination)
         ? 'Vol interne Paris'
         : 'Vol standard';
@@ -2900,7 +2957,13 @@ function parseBoardingPass(data) {
         flightNumber: `${selectedSegment.airline}${selectedSegment.flightNumberRaw}`.trim(),
         date: parseJulianDate(selectedSegment.julianDate),
         seatNumber: selectedSegment.seatNumber || 'Non spécifié',
+<<<<<<< ours
         gate,
+=======
+        gate: gateDetails.value,
+        gateSource: gateDetails.source,
+        gateCandidates: gateDetails.candidates,
+>>>>>>> theirs
         routeType
     };
 }
@@ -2936,6 +2999,7 @@ function choosePreferredSegment(segments) {
 }
 
 function extractGate(data, selectedSegment) {
+<<<<<<< ours
     const candidates = data.match(/\b[A-Z]\d{1,3}\b/g) || [];
     const gateCandidates = candidates.filter(token => !/\d{1,2}[A-Z]$/.test(token));
     if (!gateCandidates.length) return 'Non spécifiée';
@@ -2949,6 +3013,103 @@ function extractGate(data, selectedSegment) {
     }
 
     return gateCandidates.at(-1);
+=======
+    const contextualMatches = extractKnownGatesFromText(getSegmentContext(data, selectedSegment));
+    if (contextualMatches.length) {
+        return {
+            value: contextualMatches[0],
+            source: 'barcode-context',
+            candidates: contextualMatches
+        };
+    }
+
+    const allKnownMatches = extractKnownGatesFromText(data);
+    if (allKnownMatches.length) {
+        return {
+            value: allKnownMatches.at(-1),
+            source: 'barcode-known-gates',
+            candidates: allKnownMatches
+        };
+    }
+
+    const genericMatches = extractGenericGateCandidates(data);
+    if (genericMatches.length) {
+        return {
+            value: genericMatches.at(-1),
+            source: 'barcode-generic',
+            candidates: genericMatches
+        };
+    }
+
+    return {
+        value: 'Non spécifiée',
+        source: 'not-available',
+        candidates: []
+    };
+}
+
+function getSegmentContext(data, selectedSegment) {
+    if (!selectedSegment) return data;
+
+    const markers = [selectedSegment.pnr, selectedSegment.origin, selectedSegment.destination, selectedSegment.airline]
+        .filter(Boolean);
+    let startIndex = -1;
+
+    for (const marker of markers) {
+        const index = data.indexOf(marker);
+        if (index !== -1) {
+            startIndex = index;
+            break;
+        }
+    }
+
+    if (startIndex === -1) return data;
+    return data.substring(startIndex, Math.min(startIndex + 80, data.length));
+}
+
+function extractKnownGatesFromText(text) {
+    if (!text) return [];
+
+    const matches = [];
+    for (const gate of KNOWN_GATE_CODES) {
+        let index = text.indexOf(gate);
+        while (index !== -1) {
+            if (isLikelyStandaloneGate(text, index, gate.length)) {
+                matches.push(gate);
+            }
+            index = text.indexOf(gate, index + 1);
+        }
+    }
+
+    return Array.from(new Set(matches));
+}
+
+function extractGenericGateCandidates(text) {
+    if (!text) return [];
+
+    const genericPattern = /[A-Z]{1,2}\d{2,3}/g;
+    const matches = [];
+    let match;
+
+    while ((match = genericPattern.exec(text)) !== null) {
+        const candidate = match[0];
+        if (/\d{1,2}[A-Z]$/.test(candidate)) continue;
+        if (/^[A-Z]{2,3}\d{4,5}$/.test(candidate)) continue;
+        if (candidate.length > 4) continue;
+        if (!isLikelyStandaloneGate(text, match.index, candidate.length)) continue;
+        matches.push(candidate);
+    }
+
+    return Array.from(new Set(matches));
+}
+
+function isLikelyStandaloneGate(text, startIndex, gateLength) {
+    const previousChar = text[startIndex - 1] || '';
+    const nextChar = text[startIndex + gateLength] || '';
+    const previousIsAlphaNum = /[A-Z0-9]/.test(previousChar);
+    const nextIsAlphaNum = /[A-Z0-9]/.test(nextChar);
+    return !(previousIsAlphaNum && nextIsAlphaNum);
+>>>>>>> theirs
 }
 
 function parseJulianDate(julian) {
@@ -3000,6 +3161,14 @@ function displayBoardingPassInfo(bp) {
                     </div>
 
                     <div class="detail-row">
+<<<<<<< ours
+=======
+                        <div class="detail-label">Source porte</div>
+                        <div class="detail-value">${escapeHtml(formatGateSource(bp.gateSource, bp.gateCandidates))}</div>
+                    </div>
+
+                    <div class="detail-row">
+>>>>>>> theirs
                         <div class="detail-label">Siège</div>
                         <div class="detail-value">${escapeHtml(bp.seatNumber)}</div>
                     </div>
@@ -3035,6 +3204,11 @@ function resetScanner() {
 
 // Fermer en cliquant en dehors
 document.addEventListener('DOMContentLoaded', function() {
+<<<<<<< ours
+=======
+    cleanupMergeArtifacts();
+
+>>>>>>> theirs
     const scannerModal = document.getElementById('scannerModal');
     if (scannerModal) {
         scannerModal.addEventListener('click', (e) => {
@@ -3059,4 +3233,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+<<<<<<< ours
+>>>>>>> theirs
+=======
 >>>>>>> theirs
