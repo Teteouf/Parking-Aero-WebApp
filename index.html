@@ -112,6 +112,7 @@
     .badge-offsite   { background: rgba(239,68,68,0.15); color: #ef4444; }
     .badge-ramp      { background: rgba(34,197,94,0.15); color: #22c55e; }
     .badge-elevator  { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .badge-payday    { background: rgba(22,163,74,0.16); color: #15803d; }
 
     .empty-state { text-align: center; padding: 60px 20px; }
     .empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.3; }
@@ -184,6 +185,25 @@
       display: none; animation: toastIn 0.3s;
     }
     .toast.active { display: block; }
+    .celebration-layer {
+      position: fixed; inset: 0; overflow: hidden;
+      pointer-events: none; z-index: 3500;
+    }
+    .celebration-piece {
+      position: absolute; top: -14vh; left: 0;
+      opacity: 0; will-change: transform, opacity;
+      animation: celebrationDrop var(--piece-duration, 2200ms) linear forwards;
+      animation-delay: var(--piece-delay, 0ms);
+    }
+    .celebration-piece.money {
+      font-size: var(--piece-size, 28px);
+      filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.18));
+    }
+    .celebration-piece.confetti {
+      width: 10px; height: 18px; border-radius: 999px;
+      background: var(--piece-color, #22c55e);
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+    }
     /* ===== EASTER EGGS ===== */
     .af007-overlay {
       position: fixed; inset: 0;
@@ -318,6 +338,17 @@
       from { opacity: 0; transform: translateX(-50%) translateY(20px); }
       to   { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
+    @keyframes celebrationDrop {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -14vh, 0) rotate(0deg) scale(0.7);
+      }
+      12% { opacity: 1; }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--piece-drift, 0px), 120vh, 0) rotate(var(--piece-spin, 540deg)) scale(1.05);
+      }
+    }
     @keyframes af007Flash {
       0%   { opacity: 0; transform: scale(1.04); }
       20%  { opacity: 1; transform: scale(1); }
@@ -423,6 +454,7 @@
 
   <!-- ===== TOAST ===== -->
   <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
+  <div class="celebration-layer" id="celebrationLayer" aria-hidden="true"></div>
 
 
   <!-- ===== EASTER EGG AF007 ===== -->
@@ -654,13 +686,83 @@
     const modal = document.getElementById('modal');
     const modalBody = document.getElementById('modalBody');
     const toast = document.getElementById('toast');
+    const celebrationLayer = document.getElementById('celebrationLayer');
     const af007Overlay = document.getElementById('af007Overlay');
     const easterEggModal = document.getElementById('easterEggModal');
     const easterEggModalTitle = document.getElementById('easterEggModalTitle');
     const easterEggModalBody = document.getElementById('easterEggModalBody');
+    const PAYDAY_TOAST_MESSAGE = 'Virement détecté. Niveau de vie temporairement amélioré.';
+    const isPaydayToday = new Date().getDate() === 10;
     let debounceTimer;
     let lastSecretCode = '';
+    let toastTimer = null;
     let af007Timer = null;
+    let celebrationCleanupTimer = null;
+
+    function getPaydayBadgeHtml() {
+      return isPaydayToday ? '<span class="badge badge-payday">💸 Jour de paie</span>' : '';
+    }
+
+    function clearCelebrationLayer() {
+      if (celebrationCleanupTimer) {
+        clearTimeout(celebrationCleanupTimer);
+        celebrationCleanupTimer = null;
+      }
+      if (celebrationLayer) celebrationLayer.innerHTML = '';
+    }
+
+    function launchCelebration(options = {}) {
+      if (!celebrationLayer) return;
+
+      const variant = options.variant || 'money';
+      const count = options.count || 18;
+      const durationMs = options.durationMs || 2200;
+      const emojis = options.emojis || ['💸', '🪙', '💶'];
+      const colors = options.colors || ['#22c55e', '#f59e0b', '#60a5fa', '#f43f5e', '#a855f7'];
+
+      if (celebrationCleanupTimer) {
+        clearTimeout(celebrationCleanupTimer);
+      }
+
+      for (let index = 0; index < count; index += 1) {
+        const piece = document.createElement('span');
+        piece.className = `celebration-piece ${variant}`;
+        piece.style.left = `${Math.round(2 + Math.random() * 94)}%`;
+        piece.style.setProperty('--piece-delay', `${Math.round(Math.random() * 260)}ms`);
+        piece.style.setProperty('--piece-duration', `${durationMs + Math.round(Math.random() * 900)}ms`);
+        piece.style.setProperty('--piece-drift', `${Math.round((Math.random() - 0.5) * 180)}px`);
+        piece.style.setProperty('--piece-spin', `${Math.round((Math.random() - 0.5) * 900)}deg`);
+
+        if (variant === 'confetti') {
+          piece.style.setProperty('--piece-color', colors[index % colors.length]);
+        } else {
+          piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          piece.style.setProperty('--piece-size', `${24 + Math.round(Math.random() * 12)}px`);
+        }
+
+        celebrationLayer.appendChild(piece);
+      }
+
+      celebrationCleanupTimer = setTimeout(clearCelebrationLayer, durationMs + 1200);
+    }
+
+    function triggerPaydayRain() {
+      launchCelebration({
+        variant: 'money',
+        count: 18,
+        durationMs: 2200,
+        emojis: ['💸', '🪙', '💶', '💰']
+      });
+    }
+
+    function triggerTenConfetti() {
+      launchCelebration({
+        variant: 'confetti',
+        count: 26,
+        durationMs: 1800,
+        colors: ['#22c55e', '#f59e0b', '#60a5fa', '#f43f5e', '#a855f7', '#f97316']
+      });
+    }
 
     searchInput.addEventListener('input', (e) => {
       const value = e.target.value;
@@ -699,7 +801,13 @@
         return;
       }
 
-      lastSecretCode = '';
+      if (normalized === '10') {
+        if (lastSecretCode !== normalized) triggerTenConfetti();
+        lastSecretCode = normalized;
+      } else {
+        lastSecretCode = '';
+      }
+
       const results = mappings.filter(m => {
         const searchText = [
           m.parkingCode,
@@ -723,6 +831,7 @@
           </div>`;
         return;
       }
+      const paydayBadge = getPaydayBadgeHtml();
       resultsDiv.innerHTML = results.map(m => `
         <div class="mapping-card" onclick='showDetail(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
           <div class="card-main">
@@ -733,6 +842,7 @@
           <div class="badges">
             <span class="badge badge-terminal">📍 ${m.terminal}</span>
             <span class="badge badge-section">🔖 ${m.section}</span>
+            ${paydayBadge}
             ${m.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
             ${m.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
             ${m.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
@@ -749,6 +859,7 @@
           <div class="modal-badges">
             <span class="badge badge-terminal">📍 ${mapping.terminal}</span>
             <span class="badge badge-section">🔖 ${mapping.section}</span>
+            ${getPaydayBadgeHtml()}
             ${mapping.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
             ${mapping.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
             ${mapping.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
@@ -770,10 +881,15 @@
       navigator.clipboard.writeText(text).then(() => showToast());
     }
 
-    function showToast(message) {
+    function showToast(message, durationMs = 2000) {
+      if (!toast) return;
+      if (toastTimer) clearTimeout(toastTimer);
       toast.textContent = message || "✓ Copié dans le presse-papiers";
       toast.classList.add('active');
-      setTimeout(() => toast.classList.remove('active'), 2000);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('active');
+        toastTimer = null;
+      }, durationMs);
     }
 
     function isAf007FlightCode(flightCode) {
@@ -1665,6 +1781,13 @@
         easterEggModal.addEventListener('click', (e) => {
           if (e.target === easterEggModal) closeEasterEggModal();
         });
+      }
+
+      if (isPaydayToday) {
+        setTimeout(() => {
+          triggerPaydayRain();
+          showToast(PAYDAY_TOAST_MESSAGE, 3000);
+        }, 250);
       }
     });
 
