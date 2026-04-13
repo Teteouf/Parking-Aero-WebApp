@@ -1,1799 +1,3002 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CDG Parking">
-  <title>Antisèche de Parking</title>
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
-  <link rel="manifest" href="manifest.json">
-  <!-- Librairie scanner PDF417 -->
-  <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBF7EZST2X"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-GBF7EZST2X');
-  </script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f7;
-      color: #1d1d1f;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ===== HEADER ===== */
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-    .header h1 { font-size: 24px; font-weight: 600; }
-
-    .share-btn {
-      background: rgba(255,255,255,0.2);
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 12px;
-      width: 44px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 20px; transition: all 0.2s;
-    }
-    .share-btn:active { background: rgba(255,255,255,0.3); transform: scale(0.95); }
-
-    /* ===== SEARCH ===== */
-    .search-box { position: relative; }
-    .search-input {
-      width: 100%;
-      padding: 14px 45px 14px 45px;
-      border: none; border-radius: 12px;
-      font-size: 17px;
-      background: rgba(255,255,255,0.95);
-      text-transform: uppercase;
-      outline: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .search-icon {
-      position: absolute; left: 15px; top: 50%;
-      transform: translateY(-50%); color: #86868b;
-    }
-    .clear-btn {
-      position: absolute; right: 10px; top: 50%;
-      transform: translateY(-50%);
-      background: #d1d1d6; border: none; border-radius: 50%;
-      width: 28px; height: 28px; cursor: pointer;
-      display: none; align-items: center; justify-content: center;
-      color: white; font-size: 14px;
-    }
-    .clear-btn.visible { display: flex; }
-
-    /* ===== CONTENT ===== */
-    .content { padding: 20px; }
-    .results-count { color: #86868b; font-size: 14px; margin-bottom: 15px; font-weight: 500; }
-
-    .mapping-card {
-      background: white; border-radius: 16px; padding: 20px;
-      margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .mapping-card:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-
-    .card-main { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .parking-code { font-size: 28px; font-weight: 700; color: #1d1d1f; }
-    .arrow { color: #86868b; font-size: 24px; }
-    .gates { font-size: 28px; font-weight: 700; color: #007aff; }
-
-    .badges { display: flex; flex-wrap: wrap; gap: 8px; }
-    .badge {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 6px 12px; border-radius: 8px;
-      font-size: 13px; font-weight: 600; white-space: nowrap;
-    }
-    .badge-terminal  { background: rgba(147,51,234,0.15); color: #9333ea; }
-    .badge-section   { background: rgba(249,115,22,0.15); color: #f97316; }
-    .badge-offsite   { background: rgba(239,68,68,0.15); color: #ef4444; }
-    .badge-ramp      { background: rgba(34,197,94,0.15); color: #22c55e; }
-    .badge-elevator  { background: rgba(59,130,246,0.15); color: #3b82f6; }
-    .badge-payday    { background: rgba(22,163,74,0.16); color: #15803d; }
-
-    .empty-state { text-align: center; padding: 60px 20px; }
-    .empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.3; }
-    .empty-state-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-    .empty-state-text { color: #86868b; font-size: 15px; }
-
-    /* ===== MODALS ===== */
-    .modal {
-      display: none; position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 1000;
-      animation: fadeIn 0.2s;
-    }
-    .modal.active { display: flex; align-items: flex-end; }
-    .share-modal.active { align-items: center; }
-
-    .modal-content {
-      background: white; width: 100%;
-      border-radius: 20px 20px 0 0;
-      padding: 30px 20px; max-height: 90vh;
-      overflow-y: auto; animation: slideUp 0.3s;
-    }
-    .share-modal .modal-content { border-radius: 20px; max-width: 520px; margin: 0 auto; }
-
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    .modal-title { font-size: 22px; font-weight: 600; }
-    .close-btn {
-      background: #f5f5f7; border: none; border-radius: 50%;
-      width: 32px; height: 32px; cursor: pointer;
-      font-size: 18px; color: #1d1d1f;
-    }
-
-    .modal-main-info {
-      text-align: center; padding: 30px 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 16px; margin-bottom: 20px;
-    }
-    .modal-parking { font-size: 48px; font-weight: 700; color: white; margin-bottom: 10px; }
-    .modal-arrow { font-size: 24px; color: rgba(255,255,255,0.8); margin-bottom: 10px; }
-    .modal-gates { font-size: 48px; font-weight: 700; color: white; }
-    .modal-badges { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-
-    .action-btn {
-      width: 100%; padding: 16px; border: none; border-radius: 12px;
-      font-size: 17px; font-weight: 600; cursor: pointer;
-      margin-bottom: 12px; display: flex; align-items: center;
-      justify-content: space-between; transition: opacity 0.2s;
-    }
-    .action-btn:active { opacity: 0.7; }
-    .btn-primary { background: #007aff; color: white; }
-    .btn-secondary { background: #f5f5f7; color: #1d1d1f; }
-
-    /* ===== SHARE MODAL ===== */
-    .qr-container { text-align: center; padding: 20px; background: white; border-radius: 16px; margin: 10px 0 20px; }
-    .qr-code { width: 280px; height: 280px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .url-display { margin-top: 15px; padding: 12px; background: #f5f5f7; border-radius: 8px; font-family: monospace; font-size: 13px; color: #667eea; word-break: break-all; }
-    .tutorial { text-align: left; padding: 20px; background: #f5f5f7; border-radius: 12px; }
-    .tutorial-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
-    .platform-title { font-weight: 600; color: #667eea; margin-bottom: 8px; }
-    .tutorial-steps { list-style: none; padding-left: 0; }
-    .tutorial-steps li { padding: 8px 0 8px 24px; position: relative; color: #6e6e73; line-height: 1.5; }
-    .tutorial-steps li:before { content: "→"; position: absolute; left: 0; color: #667eea; font-weight: bold; }
-
-    /* ===== TOAST ===== */
-    .toast {
-      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.85); color: white;
-      padding: 12px 24px; border-radius: 20px;
-      font-size: 15px; font-weight: 500; z-index: 2000;
-      display: none; animation: toastIn 0.3s;
-    }
-    .toast.active { display: block; }
-    .celebration-layer {
-      position: fixed; inset: 0; overflow: hidden;
-      pointer-events: none; z-index: 3500;
-    }
-    .celebration-piece {
-      position: absolute; top: -14vh; left: 0;
-      opacity: 0; will-change: transform, opacity;
-      animation: celebrationDrop var(--piece-duration, 2200ms) linear forwards;
-      animation-delay: var(--piece-delay, 0ms);
-    }
-    .celebration-piece.money {
-      font-size: var(--piece-size, 28px);
-      filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.18));
-    }
-    .celebration-piece.confetti {
-      width: 10px; height: 18px; border-radius: 999px;
-      background: var(--piece-color, #22c55e);
-      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
-    }
-    /* ===== EASTER EGGS ===== */
-    .af007-overlay {
-      position: fixed; inset: 0;
-      background: radial-gradient(circle at 20% 20%, rgba(9, 9, 11, 0.8), rgba(3, 7, 18, 0.92));
-      color: #f9fafb; z-index: 4000;
-      display: none; align-items: center; justify-content: center;
-      text-align: center; padding: 24px;
-    }
-    .af007-overlay.active { display: flex; animation: af007Flash 1s ease; }
-    .af007-title { font-size: 34px; font-weight: 800; letter-spacing: 1px; }
-    .af007-subtitle { margin-top: 8px; font-size: 16px; opacity: 0.85; }
-
-    .easter-modal-body {
-      text-align: left; background: #f5f5f7;
-      border-radius: 12px; padding: 16px;
-      color: #1d1d1f; line-height: 1.5;
-    }
-    .easter-modal-title {
-      font-size: 20px; font-weight: 700; margin-bottom: 12px;
-      color: #0f172a;
-    }
-    .easter-modal-list { list-style: none; padding-left: 0; margin: 0; }
-    .easter-modal-list li { margin-bottom: 8px; color: #334155; }
-
-    body.night-mode {
-      background: #0b1220;
-      color: #e2e8f0;
-    }
-    body.night-mode .header {
-      background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
-      box-shadow: 0 2px 12px rgba(2, 6, 23, 0.5);
-    }
-    body.night-mode .content { background: transparent; }
-    body.night-mode .mapping-card,
-    body.night-mode .boarding-pass-result,
-    body.night-mode .modal-content {
-      background: #111827;
-      color: #e5e7eb;
-      box-shadow: 0 2px 14px rgba(2, 6, 23, 0.4);
-    }
-    body.night-mode .results-count,
-    body.night-mode .empty-state-text,
-    body.night-mode .passenger-header div[style*="color:#86868b"] {
-      color: #94a3b8 !important;
-    }
-    body.night-mode .search-input {
-      background: rgba(15, 23, 42, 0.92);
-      color: #e2e8f0;
-    }
-    body.night-mode .search-icon { color: #94a3b8; }
-    body.night-mode .scanner-status {
-      background: rgba(15, 23, 42, 0.6);
-    }
-    body.night-mode .easter-modal-body {
-      background: #111827;
-      color: #e5e7eb;
-    }
-    body.night-mode .easter-modal-title { color: #e5e7eb; }
-    body.night-mode .easter-modal-list li { color: #cbd5e1; }
-
-    /* ===== SCANNER FAB ===== */
-    .scanner-fab {
-      position: fixed; bottom: 90px; right: 20px;
-      width: 60px; height: 60px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; border: none; border-radius: 50%;
-      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
-      cursor: pointer; font-size: 28px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.3s ease; z-index: 999;
-    }
-    .scanner-fab:active { transform: scale(0.95); }
-
-    /* ===== SCANNER MODAL ===== */
-    .scanner-modal {
-      display: none; position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.95); z-index: 3000;
-      animation: fadeIn 0.3s;
-    }
-    .scanner-modal.active { display: flex; flex-direction: column; }
-
-    .scanner-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; padding: 20px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .scanner-header h2 { font-size: 20px; font-weight: 600; margin: 0; }
-    .scanner-close {
-      background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
-      width: 36px; height: 36px; color: white; font-size: 20px; cursor: pointer;
-    }
-
-    .scanner-container {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; padding: 20px;
-    }
-
-    #scanner-video {
-      width: 100%; max-width: 500px;
-      border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-
-    .scanner-instructions { margin-top: 20px; color: white; text-align: center; font-size: 16px; }
-    .scanner-status {
-      margin-top: 10px; padding: 12px 20px;
-      background: rgba(255,255,255,0.1); border-radius: 8px;
-      color: #fff; font-size: 14px; text-align: center;
-    }
-
-    /* ===== BOARDING PASS RESULT ===== */
-    .boarding-pass-result {
-      background: white; border-radius: 16px;
-      padding: 30px 20px; max-width: 500px; width: 90%;
-      animation: slideUp 0.3s;
-    }
-    .passenger-header {
-      text-align: center; padding-bottom: 20px;
-      border-bottom: 2px solid #f5f5f7; margin-bottom: 20px;
-    }
-    .scan-another-btn {
-      width: 100%; padding: 16px; margin-top: 12px;
-      background: #667eea; color: white; border: none;
-      border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer;
-    }
-    .scan-another-btn:active { opacity: 0.8; }
-
-        /* ===== ANIMATIONS ===== */
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
-    @keyframes celebrationDrop {
-      0% {
-        opacity: 0;
-        transform: translate3d(0, -14vh, 0) rotate(0deg) scale(0.7);
-      }
-      12% { opacity: 1; }
-      100% {
-        opacity: 0;
-        transform: translate3d(var(--piece-drift, 0px), 120vh, 0) rotate(var(--piece-spin, 540deg)) scale(1.05);
-      }
-    }
-    @keyframes af007Flash {
-      0%   { opacity: 0; transform: scale(1.04); }
-      20%  { opacity: 1; transform: scale(1); }
-      80%  { opacity: 1; }
-      100% { opacity: 0; transform: scale(1.02); }
-    }
-
-    @media (max-width: 375px) {
-      .parking-code, .gates { font-size: 24px; }
-      .modal-parking, .modal-gates { font-size: 40px; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- ===== HEADER ===== -->
-  <div class="header">
-    <div class="header-top">
-      <h1>✈️ CDG Parking Mapper</h1>
-      <button class="share-btn" onclick="openShareModal()" aria-label="Partager QR Code">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
-          <rect x="3.5" y="3.5" width="3" height="3" fill="white"/>
-          <rect x="13" y="1" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
-          <rect x="15.5" y="3.5" width="3" height="3" fill="white"/>
-          <rect x="1" y="13" width="8" height="8" rx="1" stroke="white" stroke-width="1.8" fill="none"/>
-          <rect x="3.5" y="15.5" width="3" height="3" fill="white"/>
-          <rect x="13" y="13" width="3" height="3" fill="white"/>
-          <rect x="18" y="13" width="3" height="3" fill="white"/>
-          <rect x="13" y="18" width="3" height="3" fill="white"/>
-          <rect x="18" y="18" width="3" height="3" fill="white"/>
-          <rect x="15.5" y="15.5" width="3" height="3" fill="white"/>
-        </svg>
-      </button>
-    </div>
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="text" class="search-input" id="searchInput"
-        placeholder="Code parking ou porte (ex: E22, K43)"
-        autocomplete="off" autocapitalize="characters">
-      <button class="clear-btn" id="clearBtn">✕</button>
-    </div>
-  </div>
-
-  <!-- ===== CONTENT ===== -->
-  <div class="content">
-    <div class="results-count" id="resultsCount"></div>
-    <div id="results"></div>
-  </div>
-
-  <!-- ===== MODAL DÉTAIL ===== -->
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title">Détails</div>
-        <button class="close-btn" onclick="closeModal()">✕</button>
-      </div>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <!-- ===== MODAL PARTAGE ===== -->
-  <div class="modal share-modal" id="shareModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title">Partager l'application</div>
-        <button class="close-btn" onclick="closeShareModal()">✕</button>
-      </div>
-      <div class="qr-container">
-        <div class="qr-code">
-          <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper" style="width:100%;height:100%;object-fit:contain;">
-        </div>
-        <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
-      </div>
-      <div class="tutorial">
-        <div class="tutorial-title">📲 Installer comme une app</div>
-        <div class="tutorial-section">
-          <div class="platform-title">🍎 iPhone / iPad (Safari)</div>
-          <ul class="tutorial-steps">
-            <li>Ouvrez ce site dans <strong>Safari</strong></li>
-            <li>Appuyez sur <strong>Partage</strong> 📤</li>
-            <li>Sélectionnez <strong>"Sur l'écran d'accueil"</strong></li>
-            <li>Nommez (ex: "CDG Parking")</li>
-            <li><strong>Ajouter</strong></li>
-          </ul>
-        </div>
-        <div class="tutorial-section">
-          <div class="platform-title">🤖 Android (Chrome)</div>
-          <ul class="tutorial-steps">
-            <li>Ouvrez ce site dans <strong>Chrome</strong></li>
-            <li>Menu <strong>⋮</strong></li>
-            <li><strong>"Ajouter à l'écran d'accueil"</strong></li>
-            <li>Nommez (ex: "CDG Parking")</li>
-            <li><strong>Ajouter</strong></li>
-          </ul>
-        </div>
-      </div>
-      <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top:20px;">
-        <span>Copier le lien de partage</span><span>🔗</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== TOAST ===== -->
-  <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
-  <div class="celebration-layer" id="celebrationLayer" aria-hidden="true"></div>
-
-
-  <!-- ===== EASTER EGG AF007 ===== -->
-  <div class="af007-overlay" id="af007Overlay" aria-hidden="true">
-    <div>
-      <div class="af007-title">AF007</div>
-      <div class="af007-subtitle">Mode Agent Secret activé</div>
-    </div>
-  </div>
-
-  <!-- ===== EASTER EGG MODAL ===== -->
-  <div class="modal share-modal" id="easterEggModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title" id="easterEggModalTitle">Easter Egg</div>
-        <button class="close-btn" onclick="closeEasterEggModal()">✕</button>
-      </div>
-      <div class="easter-modal-body" id="easterEggModalBody"></div>
-      <button class="action-btn btn-secondary" onclick="closeEasterEggModal()" style="margin-top:16px;">
-        <span>Fermer</span><span>✕</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== BOUTON SCANNER ===== -->
-  <button class="scanner-fab" onclick="openScanner()" aria-label="Scanner carte d'embarquement">📷</button>
-
-  <!-- ===== MODAL SCANNER ===== -->
-  <div class="scanner-modal" id="scannerModal">
-    <div class="scanner-header">
-      <h2>📷 Scanner la carte d'embarquement</h2>
-      <button class="scanner-close" onclick="closeScanner()">✕</button>
-    </div>
-    <div class="scanner-container" id="scannerContainer">
-      <video id="scanner-video" playsinline></video>
-      <div class="scanner-instructions">Pointez vers le code-barres PDF417 de la carte d'embarquement</div>
-      <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
-    </div>
-  </div>
-
-  <script>
-    // ===== DONNÉES =====
-    const mappings = [
-      // 2E K
-      {"parkingCode":"E10","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E12","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E14","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E16","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E18","gates":["K49"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E20","gates":["K45","K47"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"E22","gates":["K43"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E24","gates":["K41"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E26","gates":["K37","K39"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"E30","gates":["K35"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E32","gates":["K33"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E34","gates":["K31"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E38","gates":["K30"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E40","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E42","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E44","gates":["K36"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
-      // 2E S3
-      {"parkingCode":"K71","gates":["L36","L34"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K65","gates":["L30","L32"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K59","gates":["L26","L28"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K53","gates":["L22","L24"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"K21","gates":["L42"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K17","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"K13","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"K09","gates":["L46"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K05","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K01","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F03","gates":["L51"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E29","gates":["L35"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E27","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E25","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E21","gates":["L31"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E15","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"E17","gates":["L29"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E13","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"E09","gates":["L25"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E05","gates":["L23"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"E01","gates":["L21"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F15","gates":["L45"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"F07","gates":["L47"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F09","gates":["L49"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      // 2E S4
-      {"parkingCode":"K26","gates":["M31"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K32","gates":["M29"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K38","gates":["M27"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K44","gates":["M25"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K52","gates":["M41"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K58","gates":["M43"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K70","gates":["M47"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K76","gates":["M49"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"L27","gates":["M28"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"L33","gates":["M26"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"L39","gates":["M24"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"L53","gates":["M44"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"K64","gates":["M45"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"L59","gates":["M46"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"L65","gates":["M48"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"L71","gates":["M50"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      // 2F
-      {"parkingCode":"F02","gates":["F26"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F04","gates":["F27"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F08","gates":["F28"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F10","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F11","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F12","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F13","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":true},
-      {"parkingCode":"F14","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F16","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F17","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F18","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F19","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F20","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F22","gates":["F31"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F26","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F27","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F28","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F30","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F32","gates":["F34"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F34","gates":["F35"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F66","gates":["F47"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F68","gates":["F48"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F70","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F71","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F72","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F73","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F74","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F75","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F76","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F80","gates":["F50"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F82","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F83","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F84","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F86","gates":["F52"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F90","gates":["F53"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F92","gates":["F54"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F94","gates":["F55"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F96","gates":["F56"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"F25","gates":["F25"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F24","gates":["F24"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F21","gates":["F21"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F23","gates":["F23"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F46","gates":["F46"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F45","gates":["F45"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F44","gates":["F44"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F41","gates":["F41"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-      {"parkingCode":"F43","gates":["F43"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
-      // 2G
-      {"parkingCode":"J10","gates":["G21"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J11","gates":["G23"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-      {"parkingCode":"J12","gates":["G25"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-      {"parkingCode":"J13","gates":["G27"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J14","gates":["G29"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J15","gates":["G29","G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J16","gates":["G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J17","gates":["G28"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J18","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-      {"parkingCode":"J19","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J20","gates":["G24"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J21","gates":["G22"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-      {"parkingCode":"J30","gates":["G31"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J31","gates":["G33"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J32","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J33","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J34","gates":["G37"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J35","gates":["G39"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J36","gates":["G39","G40"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J37","gates":["G40"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
-      {"parkingCode":"J38","gates":["G38"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J39","gates":["G36"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J40","gates":["G34"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"J41","gates":["G32"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
-      // Terminal 1 Z / S4
-      {"parkingCode":"Z01","gates":["Z40","Z41"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Z02","gates":["Z42"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Z03","gates":["Z43"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Z04","gates":["Z44"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Z05","gates":["Z45"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Z06","gates":["Z46"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Z07","gates":["Z48"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Z09","gates":["Z47"],"terminal":"1Z","section":"S4","offsite":false,"ramp":false,"elevator":false},
-      // Terminal 1 Y / S5
-      {"parkingCode":"Y01","gates":["Y50","Y51"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Y02","gates":["Y52"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Y03","gates":["Y53"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Y04","gates":["Y54"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Y05","gates":["Y55"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Y06","gates":["Y56"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Y07","gates":["Y57"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"Y08","gates":["Y57"],"terminal":"1Y","section":"S5","offsite":false,"ramp":false,"elevator":false},
-      // Terminal 1 X / S6
-      {"parkingCode":"X01","gates":["X60"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"X02","gates":["X62"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"X03","gates":["X63"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"X04","gates":["X64"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"X05","gates":["X65"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"X06","gates":["X66"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"X07","gates":["X67"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"X08","gates":["X68"],"terminal":"1Y","section":"S6","offsite":false,"ramp":false,"elevator":false},
-      // Terminal 1 U / S3
-      {"parkingCode":"U03","gates":["U24"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U04","gates":["U23"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U05","gates":["U20"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U06","gates":["U10"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U07","gates":["U11"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U09","gates":["U12"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U10","gates":["U14"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U11","gates":["U15","U16"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U12","gates":["U18"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U13","gates":["U22"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U14","gates":["U26"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U15","gates":["U28"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U16","gates":["U30"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"U17","gates":["U31","U32"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"W04","gates":["U34"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"W05","gates":["U35","U36"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"W06","gates":["U37"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false},
-      {"parkingCode":"W07","gates":["U38"],"terminal":"1U","section":"S3","offsite":false,"ramp":false,"elevator":false}
-    ];
-
-    // ===== RECHERCHE =====
-    const searchInput = document.getElementById('searchInput');
-    const clearBtn = document.getElementById('clearBtn');
-    const resultsDiv = document.getElementById('results');
-    const resultsCount = document.getElementById('resultsCount');
-    const modal = document.getElementById('modal');
-    const modalBody = document.getElementById('modalBody');
-    const toast = document.getElementById('toast');
-    const celebrationLayer = document.getElementById('celebrationLayer');
-    const af007Overlay = document.getElementById('af007Overlay');
-    const easterEggModal = document.getElementById('easterEggModal');
-    const easterEggModalTitle = document.getElementById('easterEggModalTitle');
-    const easterEggModalBody = document.getElementById('easterEggModalBody');
-    const PAYDAY_TOAST_MESSAGE = 'Virement détecté. Niveau de vie temporairement amélioré.';
-    const isPaydayToday = new Date().getDate() === 10;
-    let debounceTimer;
-    let lastSecretCode = '';
-    let toastTimer = null;
-    let af007Timer = null;
-    let celebrationCleanupTimer = null;
-
-    function getPaydayBadgeHtml() {
-      return isPaydayToday ? '<span class="badge badge-payday">💸 Jour de paie</span>' : '';
-    }
-
-    function clearCelebrationLayer() {
-      if (celebrationCleanupTimer) {
-        clearTimeout(celebrationCleanupTimer);
-        celebrationCleanupTimer = null;
-      }
-      if (celebrationLayer) celebrationLayer.innerHTML = '';
-    }
-
-    function launchCelebration(options = {}) {
-      if (!celebrationLayer) return;
-
-      const variant = options.variant || 'money';
-      const count = options.count || 18;
-      const durationMs = options.durationMs || 2200;
-      const emojis = options.emojis || ['💸', '🪙', '💶'];
-      const colors = options.colors || ['#22c55e', '#f59e0b', '#60a5fa', '#f43f5e', '#a855f7'];
-
-      if (celebrationCleanupTimer) {
-        clearTimeout(celebrationCleanupTimer);
-      }
-
-      for (let index = 0; index < count; index += 1) {
-        const piece = document.createElement('span');
-        piece.className = `celebration-piece ${variant}`;
-        piece.style.left = `${Math.round(2 + Math.random() * 94)}%`;
-        piece.style.setProperty('--piece-delay', `${Math.round(Math.random() * 260)}ms`);
-        piece.style.setProperty('--piece-duration', `${durationMs + Math.round(Math.random() * 900)}ms`);
-        piece.style.setProperty('--piece-drift', `${Math.round((Math.random() - 0.5) * 180)}px`);
-        piece.style.setProperty('--piece-spin', `${Math.round((Math.random() - 0.5) * 900)}deg`);
-
-        if (variant === 'confetti') {
-          piece.style.setProperty('--piece-color', colors[index % colors.length]);
-        } else {
-          piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-          piece.style.setProperty('--piece-size', `${24 + Math.round(Math.random() * 12)}px`);
-        }
-
-        celebrationLayer.appendChild(piece);
-      }
-
-      celebrationCleanupTimer = setTimeout(clearCelebrationLayer, durationMs + 1200);
-    }
-
-    function triggerPaydayRain() {
-      launchCelebration({
-        variant: 'money',
-        count: 18,
-        durationMs: 2200,
-        emojis: ['💸', '🪙', '💶', '💰']
-      });
-    }
-
-    function triggerTenConfetti() {
-      launchCelebration({
-        variant: 'confetti',
-        count: 26,
-        durationMs: 1800,
-        colors: ['#22c55e', '#f59e0b', '#60a5fa', '#f43f5e', '#a855f7', '#f97316']
-      });
-    }
-
-    searchInput.addEventListener('input', (e) => {
-      const value = e.target.value;
-      clearBtn.classList.toggle('visible', value.length > 0);
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => search(value), 150);
-    });
-
-    clearBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      clearBtn.classList.remove('visible');
-      search('');
-      searchInput.focus();
-    });
-
-    function search(query) {
-      const normalized = query.toUpperCase().trim();
-      if (!normalized) {
-        lastSecretCode = '';
-        displayResults(mappings);
-        return;
-      }
-
-      if (normalized === 'BAGAGE') {
-        displayResults(mappings);
-        if (lastSecretCode !== normalized) openEasterEggModal('bagage');
-        lastSecretCode = normalized;
-        return;
-      }
-
-      if (normalized === 'PMR') {
-        const pmrFriendlyMappings = mappings.filter(m => m.ramp || m.elevator);
-        displayResults(pmrFriendlyMappings);
-        if (lastSecretCode !== normalized) openEasterEggModal('pmr');
-        lastSecretCode = normalized;
-        return;
-      }
-
-      if (normalized === '10') {
-        if (lastSecretCode !== normalized) triggerTenConfetti();
-        lastSecretCode = normalized;
-      } else {
-        lastSecretCode = '';
-      }
-
-      const results = mappings.filter(m => {
-        const searchText = [
-          m.parkingCode,
-          ...(m.gates || []),
-          m.terminal,
-          m.section
-        ].join(' ').toUpperCase();
-        return searchText.includes(normalized);
-      });
-      displayResults(results);
-    }
-
-    function displayResults(results) {
-      resultsCount.textContent = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
-      if (results.length === 0) {
-        resultsDiv.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
-            <div class="empty-state-title">Aucun résultat</div>
-            <div class="empty-state-text">Essayez un autre code de parking ou de porte</div>
-          </div>`;
-        return;
-      }
-      const paydayBadge = getPaydayBadgeHtml();
-      resultsDiv.innerHTML = results.map(m => `
-        <div class="mapping-card" onclick='showDetail(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
-          <div class="card-main">
-            <div class="parking-code">${m.parkingCode}</div>
-            <div class="arrow">→</div>
-            <div class="gates">${m.gates.join(', ')}</div>
-          </div>
-          <div class="badges">
-            <span class="badge badge-terminal">📍 ${m.terminal}</span>
-            <span class="badge badge-section">🔖 ${m.section}</span>
-            ${paydayBadge}
-            ${m.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
-            ${m.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
-            ${m.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
-          </div>
-        </div>`).join('');
-    }
-
-    function showDetail(mapping) {
-      modalBody.innerHTML = `
-        <div class="modal-main-info">
-          <div class="modal-parking">${mapping.parkingCode}</div>
-          <div class="modal-arrow">↓</div>
-          <div class="modal-gates">${mapping.gates.join(', ')}</div>
-          <div class="modal-badges">
-            <span class="badge badge-terminal">📍 ${mapping.terminal}</span>
-            <span class="badge badge-section">🔖 ${mapping.section}</span>
-            ${getPaydayBadgeHtml()}
-            ${mapping.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
-            ${mapping.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
-            ${mapping.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
-          </div>
-        </div>
-        <button class="action-btn btn-primary" onclick='copyText("${mapping.gates.join(', ')}") '>
-          <span>Copier les portes</span><span>📋</span>
-        </button>
-        <button class="action-btn btn-secondary" onclick='copyText("${mapping.terminal}")'>
-          <span>Copier le terminal</span><span>📋</span>
-        </button>`;
-      modal.classList.add('active');
-    }
-
-    function closeModal() { modal.classList.remove('active'); }
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-    function copyText(text) {
-      navigator.clipboard.writeText(text).then(() => showToast());
-    }
-
-    function showToast(message, durationMs = 2000) {
-      if (!toast) return;
-      if (toastTimer) clearTimeout(toastTimer);
-      toast.textContent = message || "✓ Copié dans le presse-papiers";
-      toast.classList.add('active');
-      toastTimer = setTimeout(() => {
-        toast.classList.remove('active');
-        toastTimer = null;
-      }, durationMs);
-    }
-
-    function isAf007FlightCode(flightCode) {
-      const normalized = (flightCode || '').toUpperCase().replace(/\s+/g, '');
-      return /^AF0*7$/.test(normalized);
-    }
-
-    function hasAf007Segment(scanInfo) {
-      if (!scanInfo) return false;
-      if (isAf007FlightCode(scanInfo.primaryFlight)) return true;
-      return (scanInfo.segments || []).some(seg => isAf007FlightCode(seg.flightCode));
-    }
-
-    function triggerAf007EasterEgg() {
-      if (!af007Overlay) return;
-      if (af007Timer) clearTimeout(af007Timer);
-
-      af007Overlay.classList.add('active');
-      af007Overlay.setAttribute('aria-hidden', 'false');
-      af007Timer = setTimeout(() => {
-        af007Overlay.classList.remove('active');
-        af007Overlay.setAttribute('aria-hidden', 'true');
-      }, 1000);
-    }
-    function openEasterEggModal(mode) {
-      if (!easterEggModal || !easterEggModalTitle || !easterEggModalBody) return;
-
-      const normalizedMode = (mode || '').toLowerCase();
-      if (normalizedMode === 'bagage') {
-        easterEggModalTitle.textContent = '🧳 Mode BAGAGE activé';
-        easterEggModalBody.innerHTML = `
-          <div class="easter-modal-title">Bienvenue en mode "retour tapis"</div>
-          <ul class="easter-modal-list">
-            <li>• Objectif du jour: récupérer la valise sans stress.</li>
-            <li>• Bonus: vous avez débloqué "Sprint au carrousel".</li>
-            <li>• Astuce: pour un départ, rescanner la carte suivante.</li>
-          </ul>
-        `;
-      } else if (normalizedMode === 'pmr') {
-        const rampCount = mappings.filter(m => m.ramp).length;
-        const elevatorCount = mappings.filter(m => m.elevator).length;
-        const pmrCount = mappings.filter(m => m.ramp || m.elevator).length;
-        easterEggModalTitle.textContent = '🧑‍🦽 Mode PMR activé';
-        easterEggModalBody.innerHTML = `
-          <div class="easter-modal-title">Mission PMR express</div>
-          <ul class="easter-modal-list">
-            <li>• Zones PMR utiles disponibles: <strong>${pmrCount}</strong>.</li>
-            <li>• Repères avec rampe: <strong>${rampCount}</strong> · avec ascenseur: <strong>${elevatorCount}</strong>.</li>
-            <li>• Astuce terrain: lancer la recherche d'une porte (ex: K43) puis orienter vers l'itinéraire le plus accessible.</li>
-            <li>• Clin d'oeil équipe PMR: "Confort + clarté + timing", le trio qui sauve les correspondances.</li>
-          </ul>
-        `;
-      } else {
-        easterEggModalTitle.textContent = 'Easter Egg';
-        easterEggModalBody.innerHTML = `
-          <div class="easter-modal-title">Code secret détecté</div>
-          <ul class="easter-modal-list">
-            <li>• Continuez la mission.</li>
-          </ul>
-        `;
-      }
-
-      easterEggModal.classList.add('active');
-    }
-
-    function closeEasterEggModal() {
-      if (easterEggModal) easterEggModal.classList.remove('active');
-    }
-
-    // ===== PARTAGE =====
-    const shareModal = document.getElementById('shareModal');
-    function openShareModal() { shareModal.classList.add('active'); }
-    function closeShareModal() { shareModal.classList.remove('active'); }
-    shareModal.addEventListener('click', (e) => { if (e.target === shareModal) closeShareModal(); });
-
-    function copyCurrentUrl() {
-      const url = window.location.href;
-      if (url.includes('file://')) { showToast("⚠️ Ouvre l'app via GitHub Pages pour copier le lien"); return; }
-      navigator.clipboard.writeText(url).then(() => showToast("✓ Lien copié"));
-    }
-
-    // ===== SCANNER PDF417 =====
-    let scannerActive = false;
-    let codeReader = null;
-    let nativeDetectorTimer = null;
-    let nativeDetectorBusy = false;
-    let scanHintTimer = null;
-
-    async function loadScriptWithTimeout(src, timeoutMs = 8000) {
-      return new Promise((resolve, reject) => {
-        let done = false;
-        const finish = (fn, value) => {
-          if (done) return;
-          done = true;
-          fn(value);
-        };
-
-        const existing = [...document.getElementsByTagName('script')].find(s => s.src === src);
-        if (existing) {
-          if (window.ZXing) {
-            finish(resolve);
-            return;
-          }
-          existing.addEventListener('load', () => finish(resolve), { once: true });
-          existing.addEventListener('error', () => finish(reject, new Error('Echec de chargement du scanner')), { once: true });
-          setTimeout(() => {
-            if (!window.ZXing) finish(reject, new Error('Timeout de chargement du scanner'));
-          }, timeoutMs);
-          return;
-        }
-
-        const script = document.createElement('script');
-        script.src = src;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => finish(resolve);
-        script.onerror = () => finish(reject, new Error('Echec de chargement du scanner'));
-        document.head.appendChild(script);
-
-        setTimeout(() => {
-          if (!window.ZXing) finish(reject, new Error('Timeout de chargement du scanner'));
-        }, timeoutMs);
-      });
-    }
-
-    async function ensureZXingLoaded() {
-      if (window.ZXing) return;
-
-      const sources = [
-        'https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js',
-        'https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js'
-      ];
-
-      let lastError = null;
-      for (const src of sources) {
-        try {
-          await loadScriptWithTimeout(src);
-          if (window.ZXing) return;
-        } catch (err) {
-          lastError = err;
-        }
-      }
-
-      throw lastError || new Error('Librairie scanner introuvable');
-    }
-
-    function setScannerStatus(message) {
-      const status = document.getElementById('scannerStatus');
-      if (status) status.textContent = message;
-    }
-
-    function getScannerErrorMessage(err) {
-      const message = (err && err.message ? err.message : '').toLowerCase();
-      if (message.includes('notallowed') || message.includes('permission') || message.includes('denied')) {
-        return 'Acces camera refuse. Autorisez la camera dans les reglages du navigateur.';
-      }
-      if (message.includes('notfound') || message.includes('devicesnotfound')) {
-        return 'Aucune camera detectee sur cet appareil.';
-      }
-      if (message.includes('secure') || message.includes('https') || message.includes('insecure')) {
-        return 'La camera exige HTTPS. Ouvrez l\'app via son lien web securise.';
-      }
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        return 'Ce navigateur ne supporte pas l\'acces camera.';
-      }
-      return 'Impossible d\'ouvrir la camera. Verifiez les permissions navigateur et ouvrez la page en HTTPS.';
-    }
-
-    function stopScannerHelpers() {
-      if (nativeDetectorTimer) {
-        clearInterval(nativeDetectorTimer);
-        nativeDetectorTimer = null;
-      }
-      if (scanHintTimer) {
-        clearTimeout(scanHintTimer);
-        scanHintTimer = null;
-      }
-      nativeDetectorBusy = false;
-    }
-
-    function buildVideoConstraints(deviceId) {
-      const video = {
-        facingMode: { ideal: 'environment' },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        advanced: [{ focusMode: 'continuous' }]
-      };
-      if (deviceId) video.deviceId = { exact: deviceId };
-      return { video, audio: false };
-    }
-
-    async function requestCameraPermission(videoEl) {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Camera non supportee');
-      }
-
-      videoEl.setAttribute('playsinline', '');
-      videoEl.setAttribute('autoplay', '');
-      videoEl.setAttribute('muted', '');
-      videoEl.muted = true;
-
-      const testStream = await navigator.mediaDevices.getUserMedia(buildVideoConstraints());
-      testStream.getTracks().forEach(track => track.stop());
-    }
-
-    function pickBackCameraDevice(devices) {
-      if (!devices || !devices.length) return undefined;
-      return devices.find(d => {
-        const label = (d.label || '').toLowerCase();
-        return label.includes('back') || label.includes('rear') || label.includes('environment');
-      }) || devices[devices.length - 1];
-    }
-
-    async function startNativeDetector(videoEl) {
-      if (!('BarcodeDetector' in window)) return;
-
-      let supportedFormats = [];
-      try {
-        if (typeof window.BarcodeDetector.getSupportedFormats === 'function') {
-          supportedFormats = await window.BarcodeDetector.getSupportedFormats();
-        }
-      } catch (_) {
-        return;
-      }
-
-      const formats = ['pdf417', 'aztec', 'qr_code', 'data_matrix'].filter(f => supportedFormats.includes(f));
-      if (!formats.length) return;
-
-      let detector;
-      try {
-        detector = new window.BarcodeDetector({ formats });
-      } catch (_) {
-        return;
-      }
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return;
-
-      nativeDetectorTimer = setInterval(async () => {
-        if (!scannerActive || nativeDetectorBusy) return;
-        if (!videoEl || videoEl.readyState < 2 || !videoEl.videoWidth || !videoEl.videoHeight) return;
-
-        nativeDetectorBusy = true;
-        try {
-          canvas.width = videoEl.videoWidth;
-          canvas.height = videoEl.videoHeight;
-          ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-          const barcodes = await detector.detect(canvas);
-          if (!scannerActive || !barcodes || !barcodes.length) return;
-
-          const rawValue = barcodes[0].rawValue;
-          if (rawValue) {
-            onBarcodeDetected(rawValue);
-          }
-        } catch (_) {
-          // Ignore temporary detector errors.
-        } finally {
-          nativeDetectorBusy = false;
-        }
-      }, 250);
-    }
-
-    function onBarcodeDetected(raw) {
-      if (!scannerActive || !raw) return;
-
-      scannerActive = false;
-      stopScannerHelpers();
-      if (codeReader) {
-        codeReader.reset();
-        codeReader = null;
-      }
-
-      const scanInfo = extractFlightInfo(raw);
-      handleScanResult(scanInfo, raw);
-    }
-
-    async function openScanner() {
-      stopScannerHelpers();
-      scannerActive = false;
-      if (codeReader) {
-        codeReader.reset();
-        codeReader = null;
-      }
-
-      const scannerModal = document.getElementById('scannerModal');
-      scannerModal.classList.add('active');
-
-      document.getElementById('scannerContainer').innerHTML = `
-        <video id="scanner-video" playsinline></video>
-        <div class="scanner-instructions">Pointez vers le code-barres PDF417 de la carte d'embarquement</div>
-        <div class="scanner-status" id="scannerStatus">Initialisation...</div>
-      `;
-
-      try {
-        setScannerStatus('Chargement du scanner...');
-        await ensureZXingLoaded();
-
-        const videoEl = document.getElementById('scanner-video');
-
-        setScannerStatus('Autorisez l\'acces a la camera...');
-        await requestCameraPermission(videoEl);
-
-        let deviceId;
-        try {
-          const devices = await window.ZXing.BrowserCodeReader.listVideoInputDevices();
-          const backCamera = pickBackCameraDevice(devices);
-          deviceId = backCamera ? backCamera.deviceId : undefined;
-        } catch (_) {
-          deviceId = undefined;
-        }
-
-        const hints = new Map();
-        const formats = [
-          window.ZXing.BarcodeFormat.PDF_417,
-          window.ZXing.BarcodeFormat.AZTEC,
-          window.ZXing.BarcodeFormat.QR_CODE,
-          window.ZXing.BarcodeFormat.DATA_MATRIX
-        ].filter(Boolean);
-
-        if (formats.length) {
-          hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-        }
-        if (window.ZXing.DecodeHintType.TRY_HARDER) {
-          hints.set(window.ZXing.DecodeHintType.TRY_HARDER, true);
-        }
-        if (window.ZXing.DecodeHintType.ALSO_INVERTED) {
-          hints.set(window.ZXing.DecodeHintType.ALSO_INVERTED, true);
-        }
-
-        codeReader = new window.ZXing.BrowserMultiFormatReader(hints);
-        scannerActive = true;
-        setScannerStatus('Camera active. Pointez le code-barres PDF417.');
-
-        const onDecode = (result, error) => {
-          if (!scannerActive) return;
-          if (result) {
-            onBarcodeDetected(result.getText());
-          }
-        };
-
-        if (typeof codeReader.decodeFromConstraints === 'function') {
-          codeReader.decodeFromConstraints(buildVideoConstraints(deviceId), videoEl, onDecode);
-        } else {
-          codeReader.decodeFromVideoDevice(deviceId, videoEl, onDecode);
-        }
-
-        // Fallback natif Android (souvent meilleur sur PDF417 difficiles)
-        startNativeDetector(videoEl);
-
-        scanHintTimer = setTimeout(() => {
-          if (!scannerActive) return;
-          setScannerStatus('Toujours rien ? Approchez (15-20 cm), eclairez mieux et tournez la carte de 90°.');
-        }, 7000);
-      } catch (err) {
-        scannerActive = false;
-        stopScannerHelpers();
-        if (codeReader) {
-          codeReader.reset();
-          codeReader = null;
-        }
-        setScannerStatus('❌ ' + getScannerErrorMessage(err));
-      }
-    }
-
-    function closeScanner() {
-      scannerActive = false;
-      stopScannerHelpers();
-      if (codeReader) { codeReader.reset(); codeReader = null; }
-      document.getElementById('scannerModal').classList.remove('active');
-    }
-
-    function cleanBarcodeRaw(raw) {
-      return (raw || '').toUpperCase().replace(/[^\x20-\x7E]/g, '');
-    }
-
-    function parseHexLength(value) {
-      if (!/^[0-9A-F]{2}$/.test(value)) return null;
-      return parseInt(value, 16);
-    }
-
-    function normalizeFlightNumberDigits(value) {
-      const digits = (value || '').replace(/\s+/g, '').trim();
-      if (!digits) return '';
-      const withoutLeadingZero = digits.replace(/^0+/, '');
-      return withoutLeadingZero || digits;
-    }
-
-    function buildFlightCode(carrier, flightNumber) {
-      const carrierCode = (carrier || '').replace(/\s+/g, '').trim();
-      const numberCode = normalizeFlightNumberDigits(flightNumber);
-      if (!carrierCode || !numberCode) return null;
-      return `${carrierCode}${numberCode}`;
-    }
-
-    function normalizeAirportCode(value) {
-      const cleaned = (value || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
-      return cleaned.length === 3 ? cleaned : '';
-    }
-
-    function dedupeSegments(segments) {
-      const byKey = new Map();
-
-      for (const segment of segments || []) {
-        if (!segment || !segment.flightCode) continue;
-
-        const key = `${segment.flightCode}-${segment.from || ''}-${segment.to || ''}-${segment.julianDate || ''}`;
-        const existing = byKey.get(key);
-        if (!existing) {
-          byKey.set(key, segment);
-          continue;
-        }
-
-        const existingConfidence = existing.confidence || 0;
-        const incomingConfidence = segment.confidence || 0;
-
-        if (incomingConfidence > existingConfidence) {
-          byKey.set(key, segment);
-          continue;
-        }
-
-        if (incomingConfidence === existingConfidence) {
-          const existingHasRoute = !!(existing.from && existing.to);
-          const incomingHasRoute = !!(segment.from && segment.to);
-          if (incomingHasRoute && !existingHasRoute) {
-            byKey.set(key, { ...existing, ...segment });
-          }
-        }
-      }
-
-      return [...byKey.values()];
-    }
-
-    function parseBcbpSegments(raw) {
-      const text = cleanBarcodeRaw(raw);
-      if (!/^[MS][1-4]/.test(text) || text.length < 60) return null;
-
-      let cursor = 0;
-      const formatCode = text.slice(cursor, cursor + 1);
-      cursor += 1;
-
-      const legCountRaw = text.slice(cursor, cursor + 1);
-      cursor += 1;
-      const legCount = parseInt(legCountRaw, 10);
-      if (!Number.isInteger(legCount) || legCount < 1 || legCount > 4) return null;
-
-      const passengerName = text.slice(cursor, cursor + 20).trim();
-      cursor += 20;
-      cursor += 1; // Electronic ticket indicator
-
-      const segments = [];
-      for (let i = 0; i < legCount; i++) {
-        if (cursor + 37 > text.length) break;
-
-        const pnr = text.slice(cursor, cursor + 7).trim();
-        cursor += 7;
-        const from = normalizeAirportCode(text.slice(cursor, cursor + 3));
-        cursor += 3;
-        const to = normalizeAirportCode(text.slice(cursor, cursor + 3));
-        cursor += 3;
-        const carrier = text.slice(cursor, cursor + 3).trim();
-        cursor += 3;
-        const flightNumberRaw = text.slice(cursor, cursor + 5);
-        cursor += 5;
-        const dateOfFlightRaw = text.slice(cursor, cursor + 3);
-        cursor += 3;
-        cursor += 1; // Compartment
-        cursor += 4; // Seat
-        cursor += 5; // Check-in sequence
-        cursor += 1; // Passenger status
-
-        const conditionalSizeRaw = text.slice(cursor, cursor + 2);
-        cursor += 2;
-        const conditionalSize = parseHexLength(conditionalSizeRaw);
-        if (conditionalSize === null || cursor + conditionalSize > text.length) {
-          break;
-        }
-        cursor += conditionalSize;
-
-        const flightCode = buildFlightCode(carrier, flightNumberRaw);
-        const julianDate = /^\d{3}$/.test(dateOfFlightRaw) ? parseInt(dateOfFlightRaw, 10) : null;
-
-        if (flightCode && from && to && /^[A-Z0-9]{2,3}\d{1,5}$/.test(flightCode)) {
-          segments.push({
-            flightCode,
-            from,
-            to,
-            carrier,
-            pnr,
-            julianDate,
-            confidence: 3,
-            source: 'bcbp-fixed'
-          });
-        }
-      }
-
-      if (!segments.length) return null;
-
-      return {
-        formatCode,
-        passengerName,
-        segments: dedupeSegments(segments)
-      };
-    }
-
-    function parseBcbpSegmentsByPattern(raw) {
-      const text = cleanBarcodeRaw(raw);
-      if (text.length < 45) return [];
-
-      const pattern = /([A-Z0-9 ]{7})([A-Z]{3})([A-Z]{3})([A-Z0-9 ]{3})([0-9 ]{5})(\d{3})([A-Z ])([A-Z0-9 ]{4})([A-Z0-9 ]{5})([A-Z0-9 ])([0-9A-F]{2})/g;
-      const segments = [];
-      let match;
-
-      while ((match = pattern.exec(text)) !== null) {
-        const pnr = match[1].trim();
-        const from = normalizeAirportCode(match[2]);
-        const to = normalizeAirportCode(match[3]);
-        const carrier = match[4].trim();
-        const flightCode = buildFlightCode(carrier, match[5]);
-        const julianDate = /^\d{3}$/.test(match[6]) ? parseInt(match[6], 10) : null;
-
-        if (!flightCode || !from || !to) continue;
-        if (!/^[A-Z0-9]{2,3}\d{1,5}$/.test(flightCode)) continue;
-
-        segments.push({
-          flightCode,
-          from,
-          to,
-          carrier,
-          pnr,
-          julianDate,
-          confidence: 2,
-          source: 'bcbp-pattern'
-        });
-      }
-
-      return dedupeSegments(segments);
-    }
-
-    function estimateDateFromJulian(julianDate) {
-      if (!Number.isInteger(julianDate) || julianDate < 1 || julianDate > 366) return null;
-
-      const now = Date.now();
-      const currentYear = new Date().getUTCFullYear();
-      const years = [currentYear, currentYear - 1, currentYear + 1];
-      let best = null;
-      let bestDiff = Number.MAX_SAFE_INTEGER;
-
-      for (const year of years) {
-        const date = new Date(Date.UTC(year, 0, 1));
-        date.setUTCDate(julianDate);
-        const diff = Math.abs(date.getTime() - now);
-        if (diff < bestDiff) {
-          best = date;
-          bestDiff = diff;
-        }
-      }
-      return best;
-    }
-
-    function getSegmentDateDistance(segment, nowTs) {
-      const date = estimateDateFromJulian(segment && segment.julianDate);
-      if (!date) return Number.MAX_SAFE_INTEGER;
-      return Math.abs(date.getTime() - nowTs);
-    }
-
-    function selectBestSegment(segments) {
-      if (!segments.length) {
-        return { selected: null, hasCdgDeparture: false, hasCdgArrival: false };
-      }
-
-      const hasCdgDeparture = segments.some(segment => segment.from === 'CDG');
-      const hasCdgArrival = segments.some(segment => segment.to === 'CDG');
-
-      let candidates = hasCdgDeparture
-        ? segments.filter(segment => segment.from === 'CDG')
-        : segments.filter(segment => segment.to !== 'CDG');
-
-      if (!candidates.length) {
-        candidates = segments;
-      }
-
-      const nowTs = Date.now();
-      let selected = candidates[0];
-      let bestConfidence = selected.confidence || 0;
-      let bestDistance = getSegmentDateDistance(selected, nowTs);
-
-      for (const segment of candidates.slice(1)) {
-        const confidence = segment.confidence || 0;
-        const distance = getSegmentDateDistance(segment, nowTs);
-
-        if (confidence > bestConfidence) {
-          selected = segment;
-          bestConfidence = confidence;
-          bestDistance = distance;
-          continue;
-        }
-
-        if (confidence === bestConfidence && distance < bestDistance) {
-          selected = segment;
-          bestDistance = distance;
-          continue;
-        }
-
-        if (confidence === bestConfidence && distance === bestDistance) {
-          const segmentIsArrival = segment.to === 'CDG';
-          const selectedIsArrival = selected.to === 'CDG';
-          if (!segmentIsArrival && selectedIsArrival) {
-            selected = segment;
-          }
-        }
-      }
-
-      return { selected, hasCdgDeparture, hasCdgArrival };
-    }
-
-    function fallbackRegexFlights(raw) {
-      const text = cleanBarcodeRaw(raw);
-      const matches = [...text.matchAll(/\b([A-Z0-9]{2,3})\s?([0-9]{2,5})\b/g)];
-      const flights = [];
-      const seen = new Set();
-
-      for (const match of matches) {
-        const carrier = match[1];
-        const number = normalizeFlightNumberDigits(match[2]);
-        const flightCode = `${carrier}${number}`;
-        if (!/^[A-Z0-9]{2,3}\d{2,5}$/.test(flightCode) || seen.has(flightCode)) continue;
-        seen.add(flightCode);
-        flights.push({
-          flightCode,
-          from: '',
-          to: '',
-          carrier,
-          pnr: '',
-          julianDate: null,
-          confidence: 1,
-          source: 'regex'
-        });
-        if (flights.length >= 4) break;
-      }
-      return flights;
-    }
-
-    function extractFlightInfo(raw) {
-      const parsed = parseBcbpSegments(raw);
-      const patternSegments = parseBcbpSegmentsByPattern(raw);
-
-      const mergedSegments = dedupeSegments([
-        ...(parsed && parsed.segments ? parsed.segments : []),
-        ...patternSegments
-      ]);
-
-      if (mergedSegments.length) {
-        const selection = selectBestSegment(mergedSegments);
-
-        const source = (parsed && parsed.segments && parsed.segments.length)
-          ? (patternSegments.length ? 'bcbp+pattern' : 'bcbp')
-          : 'bcbp-pattern';
-
-        return {
-          primaryFlight: selection.selected ? selection.selected.flightCode : null,
-          primarySegment: selection.selected,
-          segments: mergedSegments,
-          hasCdgDeparture: selection.hasCdgDeparture,
-          hasCdgArrival: selection.hasCdgArrival,
-          passengerName: parsed ? parsed.passengerName : '',
-          source
-        };
-      }
-
-      const fallbackSegments = fallbackRegexFlights(raw);
-      return {
-        primaryFlight: fallbackSegments[0] ? fallbackSegments[0].flightCode : null,
-        primarySegment: fallbackSegments[0] || null,
-        segments: fallbackSegments,
-        hasCdgDeparture: false,
-        hasCdgArrival: false,
-        passengerName: '',
-        source: fallbackSegments.length ? 'regex' : 'none'
-      };
-    }
-
-    const GATE_API_ENDPOINT = window.GATE_API_ENDPOINT || '/api/gate';
-    let gateLookupRequestId = 0;
-
-    function escapeHtml(value) {
-      return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    async function fetchGateForFlight(flightNumber, timeoutMs = 15000) {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const url = `${GATE_API_ENDPOINT}?flight=${encodeURIComponent(flightNumber)}`;
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' },
-          signal: controller.signal
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        return await response.json();
-      } finally {
-        clearTimeout(timeout);
-      }
-    }
-
-    function setGateLookupPanel(content) {
-      const panel = document.getElementById('gateLookupPanel');
-      if (panel) panel.innerHTML = content;
-    }
-
-    function renderGateLookupLoading(flightNumber) {
-      setGateLookupPanel(`
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:#1d1d1f;font-weight:600;">
-          <span>⏳</span><span>Recherche auto de la porte pour ${escapeHtml(flightNumber)}...</span>
-        </div>
-      `);
-    }
-
-    function renderGateLookupSuccess(result) {
-      const gate = escapeHtml(result.gate || 'N/A');
-      const terminal = result.terminal ? ` · Terminal ${escapeHtml(result.terminal)}` : '';
-      const status = result.status ? ` · ${escapeHtml(result.status)}` : '';
-      const source = result.source ? `Source: ${escapeHtml(result.source)}` : 'Source: ADP';
-
-      setGateLookupPanel(`
-        <div style="text-align:center;">
-          <div style="font-size:34px;font-weight:800;color:#00a35a;line-height:1.1;">🚪 ${gate}</div>
-          <div style="margin-top:8px;color:#1d1d1f;font-weight:600;">Porte détectée automatiquement${terminal}${status}</div>
-          <div style="margin-top:6px;color:#86868b;font-size:12px;">${source}</div>
-        </div>
-      `);
-    }
-
-    function renderGateLookupFailure(message) {
-      setGateLookupPanel(`
-        <div style="text-align:center;">
-          <div style="font-weight:700;color:#d97706;">⚠️ Porte non trouvée automatiquement</div>
-          <div style="margin-top:6px;color:#86868b;font-size:13px;">${escapeHtml(message || 'Utilisez le bouton ADP en secours.')}</div>
-        </div>
-      `);
-    }
-
-    async function startAutoGateLookup(flightNumber) {
-      const normalized = (flightNumber || '').toUpperCase().trim();
-      if (!normalized) return;
-
-      gateLookupRequestId += 1;
-      const requestId = gateLookupRequestId;
-      renderGateLookupLoading(normalized);
-
-      try {
-        const result = await fetchGateForFlight(normalized);
-        if (requestId !== gateLookupRequestId) return;
-
-        if (result && result.found && result.gate) {
-          renderGateLookupSuccess(result);
-          if (navigator.vibrate) navigator.vibrate([120, 80, 120]);
-          return;
-        }
-
-        renderGateLookupFailure(result && result.message ? result.message : 'Aucun résultat ADP pour ce vol.');
-      } catch (error) {
-        if (requestId !== gateLookupRequestId) return;
-
-        let message = 'Service auto indisponible, utilisez ADP en secours.';
-        if (error && error.name === 'AbortError') {
-          message = 'Recherche trop longue (timeout). Utilisez ADP en secours.';
-        } else if (error && error.message && error.message.startsWith('HTTP 404')) {
-          message = 'API /api/gate absente. Démarrez le backend automatique.';
-        }
-
-        renderGateLookupFailure(message);
-      }
-    }
-
-    function lookupAnotherDetectedFlight(flightNumber) {
-      startAutoGateLookup(flightNumber);
-    }
-
-    function handleScanResult(scanInfo, raw) {
-      if (navigator.vibrate) navigator.vibrate(200);
-      if (hasAf007Segment(scanInfo)) triggerAf007EasterEgg();
-
-      const container = document.getElementById('scannerContainer');
-      const primaryFlight = scanInfo ? scanInfo.primaryFlight : null;
-
-      if (primaryFlight) {
-        const primarySegment = scanInfo.primarySegment;
-        const route = primarySegment && primarySegment.from && primarySegment.to
-          ? `${primarySegment.from} → ${primarySegment.to}`
-          : '';
-        const routeLine = route ? `<div style="color:#86868b;margin-top:8px;font-size:14px;">${route}</div>` : '';
-        const departureHint = scanInfo.hasCdgDeparture
-          ? `<div style="color:#00a35a;margin-top:8px;font-size:13px;font-weight:600;">Départ CDG détecté</div>`
-          : scanInfo.hasCdgArrival
-            ? `<div style="color:#d97706;margin-top:8px;font-size:13px;font-weight:600;">Arrivée CDG détectée, aucun départ CDG trouvé</div>`
-            : `<div style="color:#d97706;margin-top:8px;font-size:13px;font-weight:600;">Aucun départ CDG détecté sur ce code</div>`;
-
-        const otherSegments = (scanInfo.segments || []).filter(seg => seg.flightCode !== primaryFlight);
-        const otherButtons = otherSegments.slice(0, 3).map(seg => `
-            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:10px;" onclick="lookupAnotherDetectedFlight('${seg.flightCode}')">
-              🔎 Tester ${seg.flightCode}${seg.from && seg.to ? ` (${seg.from} → ${seg.to})` : ''}
-            </button>`).join('');
-
-        container.innerHTML = `
-          <div class="boarding-pass-result">
-            <div class="passenger-header">
-              <div style="font-size:48px;">✅</div>
-              <div style="font-size:36px;font-weight:700;color:#1d1d1f;margin-top:10px;">✈️ ${primaryFlight}</div>
-              <div style="color:#86868b;margin-top:8px;font-size:14px;">Vol détecté</div>
-              ${routeLine}
-              ${departureHint}
-            </div>
-            <div id="gateLookupPanel" style="margin-top:16px;padding:14px;border-radius:12px;background:#f5f5f7;"></div>
-            <button class="scan-another-btn" onclick="openFlightInfo('${primaryFlight}')" style="font-size:18px;padding:20px;margin-top:12px;">
-              🌐 Ouvrir ADP (secours)
-            </button>
-            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:10px;" onclick="copyText('${primaryFlight}')">
-              📋 Copier ${primaryFlight}
-            </button>
-            ${otherButtons}
-            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:12px;" onclick="resetScanner()">
-              📷 Scanner une autre carte
-            </button>
-            <button class="scan-another-btn" style="background:#f5f5f7;color:#86868b;margin-top:12px;font-size:14px;" onclick="closeScanner()">
-              ✕ Fermer
-            </button>
-          </div>`;
-
-        startAutoGateLookup(primaryFlight);
-      } else {
-        container.innerHTML = `
-          <div class="boarding-pass-result">
-            <div class="passenger-header">
-              <div style="font-size:48px;">❌</div>
-              <div style="font-size:18px;font-weight:600;margin-top:10px;">Vol non détecté</div>
-              <div style="color:#86868b;margin-top:8px;font-size:14px;">Le code ne contient pas de vol exploitable (cas possible sur certaines cartes d'arrivée)</div>
-            </div>
-            <button class="scan-another-btn" onclick="resetScanner()">🔄 Réessayer</button>
-            <button class="scan-another-btn" style="background:#f5f5f7;color:#1d1d1f;margin-top:12px;" onclick="closeScanner()">✕ Fermer</button>
-          </div>`;
-      }
-    }
-
-    function buildAdpFlightUrl(flightNumber) {
-      const encoded = encodeURIComponent(flightNumber);
-      return `https://www.parisaeroport.fr/fr/passagers/vols/tous-les-vols-depart/cdg?search=${encoded}&q=${encoded}&query=${encoded}&flight=${encoded}#search=${encoded}`;
-    }
-
-    function openFlightInfo(flightNumber) {
-      const normalized = (flightNumber || '').toUpperCase().trim();
-      if (!normalized) return;
-
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(normalized).then(() => {
-          showToast(`Vol ${normalized} copié`);
-        }).catch(() => {});
-      }
-
-      const url = buildAdpFlightUrl(normalized);
-      window.open(url, '_blank');
-    }
-
-    function resetScanner() {
-      if (codeReader) { codeReader.reset(); codeReader = null; }
-      scannerActive = false;
-      openScanner();
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const scannerModal = document.getElementById('scannerModal');
-      if (scannerModal) {
-        scannerModal.addEventListener('click', (e) => {
-          if (e.target.id === 'scannerModal') closeScanner();
-        });
-      }
-
-      if (easterEggModal) {
-        easterEggModal.addEventListener('click', (e) => {
-          if (e.target === easterEggModal) closeEasterEggModal();
-        });
-      }
-
-      if (isPaydayToday) {
-        setTimeout(() => {
-          triggerPaydayRain();
-          showToast(PAYDAY_TOAST_MESSAGE, 3000);
-        }, 250);
-      }
-    });
-
-    // Init
-    document.body.classList.remove('night-mode');
-    displayResults(mappings);
-  </script>
-</body>
-</html>
+-<!DOCTYPE html>
+-<html lang="fr">
+-<head>
+-    <!-- Bibliothèque ZXing pour scanner les codes-barres -->
+-    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>
+-    
+-    <meta charset="UTF-8">
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+-    <meta name="apple-mobile-web-app-capable" content="yes">
+-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+-    <meta name="apple-mobile-web-app-title" content="CDG Parking">
+-    <title>Antisèche de Parking</title>
+-    <style>
+-        * {
+-            margin: 0;
+-            padding: 0;
+-            box-sizing: border-box;
+-        }
+-        .header-top{
+-  display:flex;
+-  justify-content:space-between;
+-  align-items:center;
+-  margin-bottom:15px;
+-}
+-        .header-top{
+-  display:flex;
+-  justify-content:space-between;
+-  align-items:center;
+-  margin-bottom:15px;
+-}
+-
+-.share-btn{
+-  background: rgba(255,255,255,0.2);
+-  border: 2px solid rgba(255,255,255,0.3);
+-  border-radius: 12px;
+-  width: 44px;
+-  height: 44px;
+-  display:flex;
+-  align-items:center;
+-  justify-content:center;
+-  cursor:pointer;
+-  font-size:20px;
+-}
+-
+-.share-btn:active{
+-  background: rgba(255,255,255,0.3);
+-  transform: scale(0.95);
+-}
+-
+-.share-modal.active{
+-  align-items:center;
+-}
+-
+-.share-modal .modal-content{
+-  max-width: 520px;
+-  margin: 0 auto;
+-  border-radius: 20px;
+-}
+-
+-.qr-container{
+-  text-align:center;
+-  padding:20px;
+-  background:white;
+-  border-radius:16px;
+-  margin: 10px 0 20px;
+-}
+-
+-.qr-code{
+-  width:280px;
+-  height:280px;
+-  margin:0 auto;
+-  background:white;
+-  padding:20px;
+-  border-radius:12px;
+-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+-}
+-
+-.url-display{
+-  margin-top:15px;
+-  padding:12px;
+-  background:#f5f5f7;
+-  border-radius:8px;
+-  font-family: monospace;
+-  font-size:13px;
+-  color:#667eea;
+-  word-break: break-all;
+-}
+-
+-.tutorial{
+-  text-align:left;
+-  padding:20px;
+-  background:#f5f5f7;
+-  border-radius:12px;
+-}
+-
+-.tutorial-title{
+-  font-size:18px;
+-  font-weight:600;
+-  margin-bottom:15px;
+-}
+-
+-.platform-title{
+-  font-weight:600;
+-  color:#667eea;
+-  margin-bottom:8px;
+-}
+-
+-.tutorial-steps{
+-  list-style:none;
+-  padding-left:0;
+-}
+-
+-.tutorial-steps li{
+-  padding:8px 0 8px 24px;
+-  position:relative;
+-  color:#6e6e73;
+-  line-height:1.5;
+-}
+-
+-.tutorial-steps li:before{
+-  content:"→";
+-  position:absolute;
+-  left:0;
+-  color:#667eea;
+-  font-weight:bold;
+-}
+-
+-
+-.share-btn{
+-  background: rgba(255,255,255,0.2);
+-  border: 2px solid rgba(255,255,255,0.3);
+-  border-radius: 12px;
+-  width: 44px;
+-  height: 44px;
+-  display: flex;
+-  align-items: center;
+-  justify-content: center;
+-  cursor: pointer;
+-  font-size: 20px;
+-  transition: all 0.2s;
+-}
+-
+-.share-btn:active{
+-  background: rgba(255,255,255,0.3);
+-  transform: scale(0.95);
+-}
+-
+-
+-        
+-        body {
+-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+-            background: #f5f5f7;
+-            color: #1d1d1f;
+-            -webkit-font-smoothing: antialiased;
+-        }
+-
+-        .header {
+-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+-            color: white;
+-            padding: 20px;
+-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+-            position: sticky;
+-            top: 0;
+-            z-index: 100;
+-        }
+-
+-        .header h1 {
+-            font-size: 24px;
+-            font-weight: 600;
+-            margin-bottom: 15px;
+-        }
+-
+-        .search-box {
+-            position: relative;
+-        }
+-
+-        .search-input {
+-            width: 100%;
+-            padding: 14px 45px 14px 45px;
+-            border: none;
+-            border-radius: 12px;
+-            font-size: 17px;
+-            background: rgba(255,255,255,0.95);
+-            text-transform: uppercase;
+-            outline: none;
+-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+-        }
+-
+-        .search-icon {
+-            position: absolute;
+-            left: 15px;
+-            top: 50%;
+-            transform: translateY(-50%);
+-            color: #86868b;
+-        }
+-
+-        .clear-btn {
+-            position: absolute;
+-            right: 10px;
+-            top: 50%;
+-            transform: translateY(-50%);
+-            background: #d1d1d6;
+-            border: none;
+-            border-radius: 50%;
+-            width: 28px;
+-            height: 28px;
+-            cursor: pointer;
+-            display: none;
+-            align-items: center;
+-            justify-content: center;
+-            color: white;
+-            font-size: 14px;
+-        }
+-
+-        .clear-btn.visible {
+-            display: flex;
+-        }
+-
+-        .content {
+-            padding: 20px;
+-        }
+-
+-        .results-count {
+-            color: #86868b;
+-            font-size: 14px;
+-            margin-bottom: 15px;
+-            font-weight: 500;
+-        }
+-
+-        .mapping-card {
+-            background: white;
+-            border-radius: 16px;
+-            padding: 20px;
+-            margin-bottom: 12px;
+-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+-            cursor: pointer;
+-            transition: transform 0.2s, box-shadow 0.2s;
+-        }
+-
+-        .mapping-card:active {
+-            transform: scale(0.98);
+-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+-        }
+-
+-        .card-main {
+-            display: flex;
+-            align-items: center;
+-            gap: 12px;
+-            margin-bottom: 12px;
+-        }
+-
+-        .parking-code {
+-            font-size: 28px;
+-            font-weight: 700;
+-            color: #1d1d1f;
+-        }
+-
+-        .arrow {
+-            color: #86868b;
+-            font-size: 24px;
+-        }
+-
+-        .gates {
+-            font-size: 28px;
+-            font-weight: 700;
+-            color: #007aff;
+-        }
+-
+-        .badges {
+-            display: flex;
+-            flex-wrap: wrap;
+-            gap: 8px;
+-        }
+-
+-        .badge {
+-            display: inline-flex;
+-            align-items: center;
+-            gap: 4px;
+-            padding: 6px 12px;
+-            border-radius: 8px;
+-            font-size: 13px;
+-            font-weight: 600;
+-            white-space: nowrap;
+-        }
+-
+-        .badge-terminal {
+-            background: rgba(147, 51, 234, 0.15);
+-            color: #9333ea;
+-        }
+-
+-        .badge-section {
+-            background: rgba(249, 115, 22, 0.15);
+-            color: #f97316;
+-        }
+-
+-        .badge-offsite {
+-            background: rgba(239, 68, 68, 0.15);
+-            color: #ef4444;
+-        }
+-
+-        .badge-ramp {
+-            background: rgba(34, 197, 94, 0.15);
+-            color: #22c55e;
+-        }
+-
+-        .badge-elevator {
+-            background: rgba(59, 130, 246, 0.15);
+-            color: #3b82f6;
+-        }
+-
+-        .notes {
+-            margin-top: 10px;
+-            padding: 10px;
+-            background: #f5f5f7;
+-            border-radius: 8px;
+-            font-size: 13px;
+-            color: #6e6e73;
+-        }
+-
+-        .empty-state {
+-            text-align: center;
+-            padding: 60px 20px;
+-        }
+-
+-        .empty-state-icon {
+-            font-size: 64px;
+-            margin-bottom: 20px;
+-            opacity: 0.3;
+-        }
+-
+-        .empty-state-title {
+-            font-size: 20px;
+-            font-weight: 600;
+-            margin-bottom: 8px;
+-            color: #1d1d1f;
+-        }
+-
+-        .empty-state-text {
+-            color: #86868b;
+-            font-size: 15px;
+-        }
+-
+-        .modal {
+-            display: none;
+-            position: fixed;
+-            top: 0;
+-            left: 0;
+-            width: 100%;
+-            height: 100%;
+-            background: rgba(0,0,0,0.5);
+-            z-index: 1000;
+-            animation: fadeIn 0.2s;
+-        }
+-
+-        .modal.active {
+-            display: flex;
+-            align-items: flex-end;
+-        }
+-
+-        @keyframes fadeIn {
+-            from { opacity: 0; }
+-            to { opacity: 1; }
+-        }
+-
+-        .modal-content {
+-            background: white;
+-            width: 100%;
+-            border-radius: 20px 20px 0 0;
+-            padding: 30px 20px;
+-            max-height: 90vh;
+-            overflow-y: auto;
+-            animation: slideUp 0.3s;
+-        }
+-
+-        @keyframes slideUp {
+-            from { transform: translateY(100%); }
+-            to { transform: translateY(0); }
+-        }
+-
+-        .modal-header {
+-            display: flex;
+-            justify-content: space-between;
+-            align-items: center;
+-            margin-bottom: 25px;
+-        }
+-
+-        .modal-title {
+-            font-size: 22px;
+-            font-weight: 600;
+-        }
+-
+-        .close-btn {
+-            background: #f5f5f7;
+-            border: none;
+-            border-radius: 50%;
+-            width: 32px;
+-            height: 32px;
+-            cursor: pointer;
+-            font-size: 18px;
+-            color: #1d1d1f;
+-        }
+-
+-        .modal-main-info {
+-            text-align: center;
+-            padding: 30px 20px;
+-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+-            border-radius: 16px;
+-            margin-bottom: 20px;
+-        }
+-
+-        .modal-parking {
+-            font-size: 48px;
+-            font-weight: 700;
+-            color: white;
+-            margin-bottom: 10px;
+-        }
+-
+-        .modal-arrow {
+-            font-size: 24px;
+-            color: rgba(255,255,255,0.8);
+-            margin-bottom: 10px;
+-        }
+-
+-        .modal-gates {
+-            font-size: 48px;
+-            font-weight: 700;
+-            color: white;
+-        }
+-
+-        .modal-badges {
+-            display: flex;
+-            justify-content: center;
+-            flex-wrap: wrap;
+-            gap: 10px;
+-            margin-top: 15px;
+-        }
+-
+-        .action-btn {
+-            width: 100%;
+-            padding: 16px;
+-            border: none;
+-            border-radius: 12px;
+-            font-size: 17px;
+-            font-weight: 600;
+-            cursor: pointer;
+-            margin-bottom: 12px;
+-            display: flex;
+-            align-items: center;
+-            justify-content: space-between;
+-            transition: opacity 0.2s;
+-        }
+-
+-        .action-btn:active {
+-            opacity: 0.7;
+-        }
+-
+-        .btn-primary {
+-            background: #007aff;
+-            color: white;
+-        }
+-
+-        .btn-secondary {
+-            background: #f5f5f7;
+-            color: #1d1d1f;
+-        }
+-
+-        .modal-notes {
+-            margin-top: 20px;
+-            padding: 15px;
+-            background: #f5f5f7;
+-            border-radius: 12px;
+-        }
+-
+-        .modal-notes-title {
+-            font-weight: 600;
+-            margin-bottom: 8px;
+-            color: #1d1d1f;
+-        }
+-
+-        .modal-notes-text {
+-            color: #6e6e73;
+-            line-height: 1.5;
+-        }
+-
+-        .toast {
+-            position: fixed;
+-            bottom: 80px;
+-            left: 50%;
+-            transform: translateX(-50%);
+-            background: rgba(0,0,0,0.85);
+-            color: white;
+-            padding: 12px 24px;
+-            border-radius: 20px;
+-            font-size: 15px;
+-            font-weight: 500;
+-            z-index: 2000;
+-            display: none;
+-            animation: toastIn 0.3s;
+-        }
+-
+-        .toast.active {
+-            display: block;
+-        }
+-
+-        @keyframes toastIn {
+-            from { 
+-                opacity: 0;
+-                transform: translateX(-50%) translateY(20px);
+-            }
+-            to { 
+-                opacity: 1;
+-                transform: translateX(-50%) translateY(0);
+-            }
+-        }
+-
+-        @media (max-width: 375px) {
+-            .parking-code, .gates {
+-                font-size: 24px;
+-            }
+-            .modal-parking, .modal-gates {
+-                font-size: 40px;
+-            }
+-        }
+-        /* ========== SCANNER BUTTON ========== */
+-.scanner-fab {
+-    position: fixed;
+-    bottom: 90px;
+-    right: 20px;
+-    width: 60px;
+-    height: 60px;
+-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+-    color: white;
+-    border: none;
+-    border-radius: 50%;
+-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+-    cursor: pointer;
+-    font-size: 28px;
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    transition: all 0.3s ease;
+-    z-index: 999;
+-}
+-
+-.scanner-fab:active {
+-    transform: scale(0.95);
+-}
+-
+-.scanner-fab:hover {
+-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+-}
+-
+-/* Modal Scanner */
+-.scanner-modal {
+-    display: none;
+-    position: fixed;
+-    top: 0;
+-    left: 0;
+-    width: 100%;
+-    height: 100%;
+-    background: rgba(0, 0, 0, 0.95);
+-    z-index: 3000;
+-    animation: fadeIn 0.3s;
+-}
+-
+-.scanner-modal.active {
+-    display: flex;
+-    flex-direction: column;
+-}
+-
+-.scanner-header {
+-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+-    color: white;
+-    padding: 20px;
+-    display: flex;
+-    justify-content: space-between;
+-    align-items: center;
+-}
+-
+-.scanner-header h2 {
+-    font-size: 20px;
+-    font-weight: 600;
+-    margin: 0;
+-}
+-
+-.scanner-close {
+-    background: rgba(255, 255, 255, 0.2);
+-    border: none;
+-    border-radius: 50%;
+-    width: 36px;
+-    height: 36px;
+-    color: white;
+-    font-size: 20px;
+-    cursor: pointer;
+-}
+-
+-.scanner-container {
+-    flex: 1;
+-    display: flex;
+-    flex-direction: column;
+-    align-items: center;
+-    justify-content: center;
+-    padding: 20px;
+-}
+-
+-#scanner-video {
+-    width: 100%;
+-    max-width: 500px;
+-    border-radius: 12px;
+-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+-}
+-
+-.scanner-instructions {
+-    margin-top: 20px;
+-    color: white;
+-    text-align: center;
+-    font-size: 16px;
+-}
+-
+-.scanner-status {
+-    margin-top: 10px;
+-    padding: 12px 20px;
+-    background: rgba(255, 255, 255, 0.1);
+-    border-radius: 8px;
+-    color: #fff;
+-    font-size: 14px;
+-}
+-
+-/* Résultat du scan */
+-.boarding-pass-result {
+-    background: white;
+-    border-radius: 16px;
+-    padding: 30px 20px;
+-    max-width: 500px;
+-    width: 90%;
+-    animation: slideUp 0.3s;
+-}
+-
+-.passenger-header {
+-    text-align: center;
+-    padding-bottom: 20px;
+-    border-bottom: 2px solid #f5f5f7;
+-    margin-bottom: 20px;
+-}
+-
+-.passenger-name {
+-    font-size: 28px;
+-    font-weight: 700;
+-    color: #1d1d1f;
+-    margin-bottom: 5px;
+-}
+-
+-.flight-number {
+-    font-size: 20px;
+-    color: #667eea;
+-    font-weight: 600;
+-}
+-
+-.flight-details {
+-    display: flex;
+-    flex-direction: column;
+-    gap: 15px;
+-}
+-
+-.detail-row {
+-    display: flex;
+-    justify-content: space-between;
+-    align-items: center;
+-    padding: 15px;
+-    background: #f5f5f7;
+-    border-radius: 12px;
+-}
+-
+-.detail-label {
+-    font-size: 13px;
+-    color: #86868b;
+-    font-weight: 600;
+-    text-transform: uppercase;
+-}
+-
+-.detail-value {
+-    font-size: 18px;
+-    color: #1d1d1f;
+-    font-weight: 600;
+-}
+-
+-.route-display {
+-    display: flex;
+-    align-items: center;
+-    gap: 10px;
+-}
+-
+-.route-airport {
+-    font-size: 24px;
+-    font-weight: 700;
+-    color: #1d1d1f;
+-}
+-
+-.route-arrow {
+-    color: #86868b;
+-    font-size: 20px;
+-}
+-
+-.scan-another-btn {
+-    width: 100%;
+-    padding: 16px;
+-    margin-top: 20px;
+-    background: #667eea;
+-    color: white;
+-    border: none;
+-    border-radius: 12px;
+-    font-size: 17px;
+-    font-weight: 600;
+-    cursor: pointer;
+-}
+-
+-.scan-another-btn:active {
+-    opacity: 0.8;
+-}
+-    </style>
+-</head>
+-<body>
+-    <div class="header">
+-    <div class="header-top">
+-        <h1>✈️ CDG Parking Mapper</h1>
+-        <button class="share-btn" onclick="openShareModal()" aria-label="Partager">📤</button>
+-    </div>
+-
+-    <div class="search-box">
+-            <span class="search-icon">🔍</span>
+-            <input 
+-                type="text" 
+-                class="search-input" 
+-                id="searchInput"
+-                placeholder="Code parking ou porte (ex: E22, K43)"
+-                autocomplete="off"
+-                autocapitalize="characters"
+-            >
+-            <button class="clear-btn" id="clearBtn">✕</button>
+-        </div>
+-    </div>
+-
+-    <div class="content">
+-        <div class="results-count" id="resultsCount"></div>
+-        <div id="results"></div>
+-    </div>
+-
+-    <div class="modal" id="modal">
+-        <div class="modal-content">
+-            <div class="modal-header">
+-                <div class="modal-title">Détails</div>
+-                <button class="close-btn" onclick="closeModal()">✕</button>
+-            </div>
+-            <div id="modalBody"></div>
+-        </div>
+-    </div>
+-<div class="modal share-modal" id="shareModal">
+-  <div class="modal-content">
+-    <div class="modal-header">
+-      <div class="modal-title">📤 Partager l'application</div>
+-      <button class="close-btn" onclick="closeShareModal()">✕</button>
+-    </div>
+-
+-    <div class="qr-container">
+-      <div class="qr-code">
+-        <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper" style="width:100%;height:100%;object-fit:contain;">
+-      </div>
+-      <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
+-    </div>
+-
+-    <div class="tutorial">
+-      <div class="tutorial-title">📲 Installer comme une app</div>
+-
+-      <div class="tutorial-section">
+-        <div class="platform-title">🍎 iPhone / iPad (Safari)</div>
+-        <ul class="tutorial-steps">
+-          <li>Ouvrez ce site dans <strong>Safari</strong></li>
+-          <li>Appuyez sur <strong>Partage</strong> 📤</li>
+-          <li>Sélectionnez <strong>"Sur l'écran d'accueil"</strong></li>
+-          <li>Nommez (ex: "CDG Parking")</li>
+-          <li><strong>Ajouter</strong></li>
+-        </ul>
+-      </div>
+-
+-      <div class="tutorial-section">
+-        <div class="platform-title">🤖 Android (Chrome)</div>
+-        <ul class="tutorial-steps">
+-          <li>Ouvrez ce site dans <strong>Chrome</strong></li>
+-          <li>Menu <strong>⋮</strong></li>
+-          <li><strong>"Ajouter à l'écran d'accueil"</strong></li>
+-          <li>Nommez (ex: "CDG Parking")</li>
+-          <li><strong>Ajouter</strong></li>
+-        </ul>
+-      </div>
+-    </div>
+-
+-    <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top: 20px;">
+-      <span>Copier le lien de partage</span>
+-      <span>🔗</span>
+-    </button>
+-  </div>
+-</div>
+-
+-    <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
+-<!-- Bouton Scanner flottant -->
+-<button class="scanner-fab" onclick="openScanner()" aria-label="Scanner carte d'embarquement">
+-    📷
+-</button>
+-
+-<!-- Modal Scanner -->
+-<div class="scanner-modal" id="scannerModal">
+-    <div class="scanner-header">
+-        <h2>📷 Scanner la carte d'embarquement</h2>
+-        <button class="scanner-close" onclick="closeScanner()">✕</button>
+-    </div>
+-    <div class="scanner-container" id="scannerContainer">
+-        <video id="scanner-video" playsinline></video>
+-        <div class="scanner-instructions">
+-            Placez le code-barres de la carte d'embarquement dans le cadre
+-        </div>
+-        <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
+-    </div>
+-</div>
+-    <script>
+-        const mappings = [
+-            // 2E K
+-            {"parkingCode":"E10","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E12","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E14","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E16","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E18","gates":["K49"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E20","gates":["K45","K47"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"E22","gates":["K43"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E24","gates":["K41"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E26","gates":["K37","K39"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"E30","gates":["K35"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E32","gates":["K33"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E34","gates":["K31"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E38","gates":["K30"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E40","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E42","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E44","gates":["K36"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
+-            
+-            // 2E S3
+-            {"parkingCode":"K71","gates":["L36","L34"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K65","gates":["L30","L32"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K59","gates":["L26","L28"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K53","gates":["L22","L24"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"K21","gates":["L42"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K17","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"K13","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"K09","gates":["L46"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K05","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K01","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F03","gates":["L53"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E29","gates":["L35"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E27","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E25","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E21","gates":["L31"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E17","gates":["L29"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E13","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"E09","gates":["L25"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E05","gates":["L23"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"E01","gates":["L21"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F15","gates":["L45"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"F07","gates":["L47"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F09","gates":["L49"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+-            
+-            // 2E S4
+-            {"parkingCode":"K26","gates":["M31"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K32","gates":["M29"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K38","gates":["M27"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K44","gates":["M25"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K52","gates":["M41"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K58","gates":["M43"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K70","gates":["M47"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K76","gates":["M49"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"L27","gates":["M28"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"L33","gates":["M26"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"L39","gates":["M24"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"L53","gates":["M44"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"K64","gates":["M45"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"L59","gates":["M46"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"L65","gates":["M48"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"L71","gates":["M50"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
+-            
+-            // 2F
+-            {"parkingCode":"F02","gates":["F26"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F04","gates":["F27"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F08","gates":["F28"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F10","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F11","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F12","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F13","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":true},
+-            {"parkingCode":"F14","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F16","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F17","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F18","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F19","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F20","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F22","gates":["F31"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F26","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F27","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F28","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F30","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F32","gates":["F34"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F34","gates":["F35"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F66","gates":["F47"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F68","gates":["F48"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F70","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F71","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F72","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F73","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F74","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F75","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F76","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F80","gates":["F50"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F82","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F83","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F84","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F86","gates":["F52"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F90","gates":["F53"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F92","gates":["F54"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F94","gates":["F55"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F96","gates":["F56"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"F25","gates":["F25"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F24","gates":["F24"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F21","gates":["F21"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F23","gates":["F23"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F46","gates":["F46"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F45","gates":["F45"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F44","gates":["F44"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F41","gates":["F41"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+-            {"parkingCode":"F43","gates":["F43"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
+-            
+-            // 2G
+-            {"parkingCode":"J10","gates":["G21"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J11","gates":["G23"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+-            {"parkingCode":"J12","gates":["G25"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+-            {"parkingCode":"J13","gates":["G27"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J14","gates":["G29"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J15","gates":["G29","G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J16","gates":["G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J17","gates":["G28"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J18","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+-            {"parkingCode":"J19","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J20","gates":["G24"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J21","gates":["G22"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+-            {"parkingCode":"J30","gates":["G31"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J31","gates":["G33"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J32","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J33","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J34","gates":["G37"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J35","gates":["G39"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J36","gates":["G39","G40"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J37","gates":["G40"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
+-            {"parkingCode":"J38","gates":["G38"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J39","gates":["G36"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J40","gates":["G34"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
+-            {"parkingCode":"J41","gates":["G32"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false}
+-        ];
+-
+-        const searchInput = document.getElementById('searchInput');
+-        const clearBtn = document.getElementById('clearBtn');
+-        const resultsDiv = document.getElementById('results');
+-        const resultsCount = document.getElementById('resultsCount');
+-        const modal = document.getElementById('modal');
+-        const modalBody = document.getElementById('modalBody');
+-        const toast = document.getElementById('toast');
+-
+-        let debounceTimer;
+-
+-        searchInput.addEventListener('input', (e) => {
+-            const value = e.target.value;
+-            clearBtn.classList.toggle('visible', value.length > 0);
+-            
+-            clearTimeout(debounceTimer);
+-            debounceTimer = setTimeout(() => search(value), 150);
+-        });
+-
+-        clearBtn.addEventListener('click', () => {
+-            searchInput.value = '';
+-            clearBtn.classList.remove('visible');
+-            search('');
+-            searchInput.focus();
+-        });
+-
+-        function search(query) {
+-            const normalized = query.toUpperCase().trim();
+-            
+-            if (!normalized) {
+-                displayResults(mappings);
+-                return;
+-            }
+-
+-            const results = mappings.filter(m => {
+-                const searchText = (m.parkingCode + ' ' + m.gates.join(' ')).toUpperCase();
+-                return searchText.includes(normalized);
+-            });
+-
+-            displayResults(results);
+-        }
+-
+-        function displayResults(results) {
+-            resultsCount.textContent = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
+-            
+-            if (results.length === 0) {
+-                resultsDiv.innerHTML = `
+-                    <div class="empty-state">
+-                        <div class="empty-state-icon">🔍</div>
+-                        <div class="empty-state-title">Aucun résultat</div>
+-                        <div class="empty-state-text">Essayez un autre code de parking ou de porte</div>
+-                    </div>
+-                `;
+-                return;
+-            }
+-
+-            resultsDiv.innerHTML = results.map(m => `
+-                <div class="mapping-card" onclick='showDetail(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
+-                    <div class="card-main">
+-                        <div class="parking-code">${m.parkingCode}</div>
+-                        <div class="arrow">→</div>
+-                        <div class="gates">${m.gates.join(', ')}</div>
+-                    </div>
+-                    <div class="badges">
+-                        <span class="badge badge-terminal">📍 ${m.terminal}</span>
+-                        <span class="badge badge-section">🔖 ${m.section}</span>
+-                        ${m.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
+-                        ${m.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
+-                        ${m.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
+-                    </div>
+-                </div>
+-            `).join('');
+-        }
+-
+-        function showDetail(mapping) {
+-            modalBody.innerHTML = `
+-                <div class="modal-main-info">
+-                    <div class="modal-parking">${mapping.parkingCode}</div>
+-                    <div class="modal-arrow">↓</div>
+-                    <div class="modal-gates">${mapping.gates.join(', ')}</div>
+-                    <div class="modal-badges">
+-                        <span class="badge badge-terminal">📍 ${mapping.terminal}</span>
+-                        <span class="badge badge-section">🔖 ${mapping.section}</span>
+-                        ${mapping.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
+-                        ${mapping.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
+-                        ${mapping.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
+-                    </div>
+-                </div>
+-                <button class="action-btn btn-primary" onclick='copyText("${mapping.gates.join(', ')}")'>
+-                    <span>Copier les portes</span>
+-                    <span>📋</span>
+-                </button>
+-                <button class="action-btn btn-secondary" onclick='copyText("${mapping.terminal}")'>
+-                    <span>Copier le terminal</span>
+-                    <span>📋</span>
+-                </button>
+-            `;
+-            modal.classList.add('active');
+-        }
+-
+-        function closeModal() {
+-            modal.classList.remove('active');
+-        }
+-
+-        modal.addEventListener('click', (e) => {
+-            if (e.target === modal) closeModal();
+-        });
+-
+-        function copyText(text) {
+-            navigator.clipboard.writeText(text).then(() => {
+-                showToast();
+-            });
+-        }
+-
+-        function showToast() {
+-            toast.classList.add('active');
+-            setTimeout(() => {
+-                toast.classList.remove('active');
+-            }, 2000);
+-        }
+-
+-        const shareModal = document.getElementById('shareModal');
+-
+-function openShareModal(){
+-  shareModal.classList.add('active');
+-}
+-
+-function closeShareModal(){
+-  shareModal.classList.remove('active');
+-}
+-
+-shareModal.addEventListener('click', (e) => {
+-  if (e.target === shareModal) closeShareModal();
+-});
+-
+-function copyCurrentUrl(){
+-  const url = window.location.href;
+-  if (url.includes('file://')) {
+-    showToast("⚠️ Ouvre l'app via GitHub Pages pour copier le lien");
+-    return;
+-  }
+-  navigator.clipboard.writeText(url).then(() => showToast("✓ Lien copié"));
+-}
+-
+-// Améliore ton showToast pour afficher un message (optionnel)
+-function showToast(message){
+-  toast.textContent = message || "✓ Copié dans le presse-papiers";
+-  toast.classList.add('active');
+-  setTimeout(() => toast.classList.remove('active'), 2000);
+-}
+-// ========== SCANNER DE CARTE D'EMBARQUEMENT ==========
+-let codeReader = null;
+-let selectedDeviceId = null;
+-
+-async function openScanner() {
+-    const scannerModal = document.getElementById('scannerModal');
+-    const videoElement = document.getElementById('scanner-video');
+-    const statusElement = document.getElementById('scannerStatus');
+-    
+-    scannerModal.classList.add('active');
+-    statusElement.textContent = 'Initialisation de la caméra...';
+-    
+-    try {
+-        // Initialiser ZXing
+-        if (typeof ZXing === 'undefined' || !ZXing.BrowserMultiFormatReader) {
+-    statusElement.textContent = '❌ Bibliothèque de scan non chargée';
+-    console.error('ZXing not loaded');
+-    return;
+-}
+-codeReader = new ZXing.BrowserMultiFormatReader();
+-        
+-        // Demander l'accès à la caméra
+-        const videoInputDevices = await codeReader.listVideoInputDevices();
+-        
+-        if (videoInputDevices.length === 0) {
+-            statusElement.textContent = '❌ Aucune caméra trouvée';
+-            return;
+-        }
+-        
+-        // Utiliser la caméra arrière si disponible (pour mobile)
+-        selectedDeviceId = videoInputDevices.find(device => 
+-            device.label.toLowerCase().includes('back') || 
+-            device.label.toLowerCase().includes('arrière')
+-        )?.deviceId || videoInputDevices[0].deviceId;
+-        
+-        statusElement.textContent = '📷 Positionnez le code-barres...';
+-        
+-        // Démarrer le scan
+-        codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
+-            if (result) {
+-                handleScanResult(result.text);
+-            }
+-            if (err && !(err instanceof ZXing.NotFoundException)) {
+-                console.error('Erreur scan:', err);
+-            }
+-        });
+-        
+-    } catch (error) {
+-        console.error('Erreur caméra:', error);
+-        statusElement.textContent = '❌ Impossible d\'accéder à la caméra';
+-    }
+-}
+-
+-function closeScanner() {
+-    const scannerModal = document.getElementById('scannerModal');
+-    
+-    // Arrêter le scanner
+-    if (codeReader) {
+-        codeReader.reset();
+-        codeReader = null;
+-    }
+-    
+-    scannerModal.classList.remove('active');
+-}
+-
+-function handleScanResult(barcode) {
+-    try {
+-        // Décoder le format IATA BCBP (Bar Coded Boarding Pass)
+-        const boardingPass = parseBoardingPass(barcode);
+-        
+-        if (boardingPass) {
+-            displayBoardingPassInfo(boardingPass);
+-        } else {
+-            document.getElementById('scannerStatus').textContent = '⚠️ Format de carte non reconnu';
+-        }
+-    } catch (error) {
+-        console.error('Erreur parsing:', error);
+-        document.getElementById('scannerStatus').textContent = '❌ Erreur de lecture';
+-    }
+-}
+-
+-// Parser simplifié pour le format IATA BCBP
+-function parseBoardingPass(data) {
+-    try {
+-        // Format IATA BCBP commence généralement par "M"
+-        if (!data.startsWith('M')) return null;
+-        
+-        // Structure basique: M1LASTNAME/FIRSTNAME EXXXXXXORIGIN DEST AIRLINE FLIGHTNUMBER...
+-        const passengerName = data.substring(2, 22).trim();
+-        const pnr = data.substring(23, 30).trim();
+-        const origin = data.substring(30, 33);
+-        const destination = data.substring(33, 36);
+-        const airline = data.substring(36, 39);
+-        const flightNumber = data.substring(39, 44).trim();
+-        const julianDate = data.substring(44, 47);
+-        const seatNumber = data.substring(47, 51).trim();
+-        
+-        // Extraire la porte si disponible (position variable selon compagnie)
+-        let gate = '';
+-        const gateMatch = data.match(/[A-Z]\d{1,3}/g);
+-        if (gateMatch && gateMatch.length > 2) {
+-            gate = gateMatch[gateMatch.length - 1];
+-        }
+-        
+-        return {
+-            passengerName,
+-            pnr,
+-            origin,
+-            destination,
+-            airline,
+-            flightNumber: airline + flightNumber,
+-            date: parseJulianDate(julianDate),
+-            seatNumber,
+-            gate: gate || 'Non spécifiée'
+-        };
+-    } catch (error) {
+-        console.error('Erreur parsing BCBP:', error);
+-        return null;
+-    }
+-}
+-
+-function parseJulianDate(julian) {
+-    const year = new Date().getFullYear();
+-    const date = new Date(year, 0);
+-    date.setDate(parseInt(julian));
+-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+-}
+-
+-function displayBoardingPassInfo(bp) {
+-    const container = document.getElementById('scannerContainer');
+-    
+-    container.innerHTML = `
+-        <div class="boarding-pass-result">
+-            <div class="passenger-header">
+-                <div class="passenger-name">${bp.passengerName}</div>
+-                <div class="flight-number">${bp.flightNumber}</div>
+-            </div>
+-            
+-            <div class="flight-details">
+-                <div class="detail-row">
+-                    <div>
+-                        <div class="detail-label">Trajet</div>
+-                        <div class="route-display">
+-                            <span class="route-airport">${bp.origin}</span>
+-                            <span class="route-arrow">✈️</span>
+-                            <span class="route-airport">${bp.destination}</span>
+-                        </div>
+-                    </div>
+-                </div>
+-                
+-                <div class="detail-row">
+-                    <div class="detail-label">Date</div>
+-                    <div class="detail-value">${bp.date}</div>
+-                </div>
+-                
+-                <div class="detail-row">
+-                    <div class="detail-label">Porte</div>
+-                    <div class="detail-value">${bp.gate}</div>
+-                </div>
+-                
+-                <div class="detail-row">
+-                    <div class="detail-label">Siège</div>
+-                    <div class="detail-value">${bp.seatNumber}</div>
+-                </div>
+-                
+-                <div class="detail-row">
+-                    <div class="detail-label">PNR</div>
+-                    <div class="detail-value">${bp.pnr}</div>
+-                </div>
+-            </div>
+-            
+-            <button class="scan-another-btn" onclick="resetScanner()">Scanner une autre carte</button>
+-        </div>
+-    `;
+-    
+-    // Arrêter le scanner après succès
+-    if (codeReader) {
+-        codeReader.reset();
+-    }
+-}
+-
+-function resetScanner() {
+-    const container = document.getElementById('scannerContainer');
+-    container.innerHTML = `
+-        <video id="scanner-video" playsinline></video>
+-        <div class="scanner-instructions">
+-            Placez le code-barres de la carte d'embarquement dans le cadre
+-        </div>
+-        <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
+-    `;
+-    openScanner();
+-}
+-
+-// Fermer en cliquant en dehors
+-document.addEventListener('DOMContentLoaded', function() {
+-    const scannerModal = document.getElementById('scannerModal');
+-    if (scannerModal) {
+-        scannerModal.addEventListener('click', (e) => {
+-            if (e.target.id === 'scannerModal') {
+-                closeScanner();
+-            }
+-        });
+-    }
+-});
+-        
+-        // Initialisation
+-        displayResults(mappings);
+-    </script>
+-    
+-</body>
+-
+-</html>
+-
+-
+-
+-
+-
+-
+-
++<!DOCTYPE html>
++<html lang="fr">
++<head>
++    <!-- Bibliothèque Html5-QRCode pour scanner les codes-barres -->
++    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
++
++    <meta charset="UTF-8">
++    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
++    <meta name="apple-mobile-web-app-capable" content="yes">
++    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
++    <meta name="apple-mobile-web-app-title" content="CDG Parking">
++    <title>Antisèche de Parking</title>
++    <style>
++        * {
++            margin: 0;
++            padding: 0;
++            box-sizing: border-box;
++        }
++        .header-top{
++  display:flex;
++  justify-content:space-between;
++  align-items:center;
++  margin-bottom:15px;
++}
++        .header-top{
++  display:flex;
++  justify-content:space-between;
++  align-items:center;
++  margin-bottom:15px;
++}
++
++.share-btn{
++  background: rgba(255,255,255,0.2);
++  border: 2px solid rgba(255,255,255,0.3);
++  border-radius: 12px;
++  width: 44px;
++  height: 44px;
++  display:flex;
++  align-items:center;
++  justify-content:center;
++  cursor:pointer;
++  font-size:20px;
++}
++
++.share-btn:active{
++  background: rgba(255,255,255,0.3);
++  transform: scale(0.95);
++}
++
++.share-modal.active{
++  align-items:center;
++}
++
++.share-modal .modal-content{
++  max-width: 520px;
++  margin: 0 auto;
++  border-radius: 20px;
++}
++
++.qr-container{
++  text-align:center;
++  padding:20px;
++  background:white;
++  border-radius:16px;
++  margin: 10px 0 20px;
++}
++
++.qr-code{
++  width:280px;
++  height:280px;
++  margin:0 auto;
++  background:white;
++  padding:20px;
++  border-radius:12px;
++  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
++}
++
++.url-display{
++  margin-top:15px;
++  padding:12px;
++  background:#f5f5f7;
++  border-radius:8px;
++  font-family: monospace;
++  font-size:13px;
++  color:#667eea;
++  word-break: break-all;
++}
++
++.tutorial{
++  text-align:left;
++  padding:20px;
++  background:#f5f5f7;
++  border-radius:12px;
++}
++
++.tutorial-title{
++  font-size:18px;
++  font-weight:600;
++  margin-bottom:15px;
++}
++
++.platform-title{
++  font-weight:600;
++  color:#667eea;
++  margin-bottom:8px;
++}
++
++.tutorial-steps{
++  list-style:none;
++  padding-left:0;
++}
++
++.tutorial-steps li{
++  padding:8px 0 8px 24px;
++  position:relative;
++  color:#6e6e73;
++  line-height:1.5;
++}
++
++.tutorial-steps li:before{
++  content:"→";
++  position:absolute;
++  left:0;
++  color:#667eea;
++  font-weight:bold;
++}
++
++
++.share-btn{
++  background: rgba(255,255,255,0.2);
++  border: 2px solid rgba(255,255,255,0.3);
++  border-radius: 12px;
++  width: 44px;
++  height: 44px;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  cursor: pointer;
++  font-size: 20px;
++  transition: all 0.2s;
++}
++
++.share-btn:active{
++  background: rgba(255,255,255,0.3);
++  transform: scale(0.95);
++}
++
++
++
++        body {
++            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
++            background: #f5f5f7;
++            color: #1d1d1f;
++            -webkit-font-smoothing: antialiased;
++        }
++
++        .header {
++            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++            color: white;
++            padding: 20px;
++            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
++            position: sticky;
++            top: 0;
++            z-index: 100;
++        }
++
++        .header h1 {
++            font-size: 24px;
++            font-weight: 600;
++            margin-bottom: 15px;
++        }
++
++        .search-box {
++            position: relative;
++        }
++
++        .search-input {
++            width: 100%;
++            padding: 14px 45px 14px 45px;
++            border: none;
++            border-radius: 12px;
++            font-size: 17px;
++            background: rgba(255,255,255,0.95);
++            text-transform: uppercase;
++            outline: none;
++            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
++        }
++
++        .search-icon {
++            position: absolute;
++            left: 15px;
++            top: 50%;
++            transform: translateY(-50%);
++            color: #86868b;
++        }
++
++        .clear-btn {
++            position: absolute;
++            right: 10px;
++            top: 50%;
++            transform: translateY(-50%);
++            background: #d1d1d6;
++            border: none;
++            border-radius: 50%;
++            width: 28px;
++            height: 28px;
++            cursor: pointer;
++            display: none;
++            align-items: center;
++            justify-content: center;
++            color: white;
++            font-size: 14px;
++        }
++
++        .clear-btn.visible {
++            display: flex;
++        }
++
++        .content {
++            padding: 20px;
++        }
++
++        .payday-banner {
++            margin: 14px 20px 0;
++            padding: 12px 14px;
++            border-radius: 12px;
++            display: none;
++            align-items: center;
++            justify-content: space-between;
++            gap: 10px;
++            font-size: 14px;
++            font-weight: 600;
++            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
++        }
++
++        .payday-banner.visible {
++            display: flex;
++        }
++
++        .payday-banner--cdi {
++            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
++            color: #065f46;
++        }
++
++        .payday-banner--interim {
++            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
++            color: #92400e;
++        }
++
++        .payday-banner-close {
++            border: none;
++            background: rgba(255,255,255,0.65);
++            color: inherit;
++            border-radius: 8px;
++            padding: 6px 10px;
++            font-weight: 600;
++            cursor: pointer;
++        }
++
++        .results-count {
++            color: #86868b;
++            font-size: 14px;
++            margin-bottom: 15px;
++            font-weight: 500;
++        }
++
++        .mapping-card {
++            background: white;
++            border-radius: 16px;
++            padding: 20px;
++            margin-bottom: 12px;
++            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
++            cursor: pointer;
++            transition: transform 0.2s, box-shadow 0.2s;
++        }
++
++        .mapping-card:active {
++            transform: scale(0.98);
++            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
++        }
++
++        .card-main {
++            display: flex;
++            align-items: center;
++            gap: 12px;
++            margin-bottom: 12px;
++        }
++
++        .parking-code {
++            font-size: 28px;
++            font-weight: 700;
++            color: #1d1d1f;
++        }
++
++        .arrow {
++            color: #86868b;
++            font-size: 24px;
++        }
++
++        .gates {
++            font-size: 28px;
++            font-weight: 700;
++            color: #007aff;
++        }
++
++        .badges {
++            display: flex;
++            flex-wrap: wrap;
++            gap: 8px;
++        }
++
++        .badge {
++            display: inline-flex;
++            align-items: center;
++            gap: 4px;
++            padding: 6px 12px;
++            border-radius: 8px;
++            font-size: 13px;
++            font-weight: 600;
++            white-space: nowrap;
++        }
++
++        .badge-terminal {
++            background: rgba(147, 51, 234, 0.15);
++            color: #9333ea;
++        }
++
++        .badge-section {
++            background: rgba(249, 115, 22, 0.15);
++            color: #f97316;
++        }
++
++        .badge-offsite {
++            background: rgba(239, 68, 68, 0.15);
++            color: #ef4444;
++        }
++
++        .badge-ramp {
++            background: rgba(34, 197, 94, 0.15);
++            color: #22c55e;
++        }
++
++        .badge-elevator {
++            background: rgba(59, 130, 246, 0.15);
++            color: #3b82f6;
++        }
++
++        .notes {
++            margin-top: 10px;
++            padding: 10px;
++            background: #f5f5f7;
++            border-radius: 8px;
++            font-size: 13px;
++            color: #6e6e73;
++        }
++
++        .empty-state {
++            text-align: center;
++            padding: 60px 20px;
++        }
++
++        .empty-state-icon {
++            font-size: 64px;
++            margin-bottom: 20px;
++            opacity: 0.3;
++        }
++
++        .empty-state-title {
++            font-size: 20px;
++            font-weight: 600;
++            margin-bottom: 8px;
++            color: #1d1d1f;
++        }
++
++        .empty-state-text {
++            color: #86868b;
++            font-size: 15px;
++        }
++
++        .modal {
++            display: none;
++            position: fixed;
++            top: 0;
++            left: 0;
++            width: 100%;
++            height: 100%;
++            background: rgba(0,0,0,0.5);
++            z-index: 1000;
++            animation: fadeIn 0.2s;
++        }
++
++        .modal.active {
++            display: flex;
++            align-items: flex-end;
++        }
++
++        @keyframes fadeIn {
++            from { opacity: 0; }
++            to { opacity: 1; }
++        }
++
++        .modal-content {
++            background: white;
++            width: 100%;
++            border-radius: 20px 20px 0 0;
++            padding: 30px 20px;
++            max-height: 90vh;
++            overflow-y: auto;
++            animation: slideUp 0.3s;
++        }
++
++        @keyframes slideUp {
++            from { transform: translateY(100%); }
++            to { transform: translateY(0); }
++        }
++
++        .modal-header {
++            display: flex;
++            justify-content: space-between;
++            align-items: center;
++            margin-bottom: 25px;
++        }
++
++        .modal-title {
++            font-size: 22px;
++            font-weight: 600;
++        }
++
++        .close-btn {
++            background: #f5f5f7;
++            border: none;
++            border-radius: 50%;
++            width: 32px;
++            height: 32px;
++            cursor: pointer;
++            font-size: 18px;
++            color: #1d1d1f;
++        }
++
++        .modal-main-info {
++            text-align: center;
++            padding: 30px 20px;
++            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++            border-radius: 16px;
++            margin-bottom: 20px;
++        }
++
++        .modal-parking {
++            font-size: 48px;
++            font-weight: 700;
++            color: white;
++            margin-bottom: 10px;
++        }
++
++        .modal-arrow {
++            font-size: 24px;
++            color: rgba(255,255,255,0.8);
++            margin-bottom: 10px;
++        }
++
++        .modal-gates {
++            font-size: 48px;
++            font-weight: 700;
++            color: white;
++        }
++
++        .modal-badges {
++            display: flex;
++            justify-content: center;
++            flex-wrap: wrap;
++            gap: 10px;
++            margin-top: 15px;
++        }
++
++        .action-btn {
++            width: 100%;
++            padding: 16px;
++            border: none;
++            border-radius: 12px;
++            font-size: 17px;
++            font-weight: 600;
++            cursor: pointer;
++            margin-bottom: 12px;
++            display: flex;
++            align-items: center;
++            justify-content: space-between;
++            transition: opacity 0.2s;
++        }
++
++        .action-btn:active {
++            opacity: 0.7;
++        }
++
++        .btn-primary {
++            background: #007aff;
++            color: white;
++        }
++
++        .btn-secondary {
++            background: #f5f5f7;
++            color: #1d1d1f;
++        }
++
++        .modal-notes {
++            margin-top: 20px;
++            padding: 15px;
++            background: #f5f5f7;
++            border-radius: 12px;
++        }
++
++        .modal-notes-title {
++            font-weight: 600;
++            margin-bottom: 8px;
++            color: #1d1d1f;
++        }
++
++        .modal-notes-text {
++            color: #6e6e73;
++            line-height: 1.5;
++        }
++
++        .toast {
++            position: fixed;
++            bottom: 80px;
++            left: 50%;
++            transform: translateX(-50%);
++            background: rgba(0,0,0,0.85);
++            color: white;
++            padding: 12px 24px;
++            border-radius: 20px;
++            font-size: 15px;
++            font-weight: 500;
++            z-index: 2000;
++            display: none;
++            animation: toastIn 0.3s;
++        }
++
++        .toast.active {
++            display: block;
++        }
++
++        @keyframes toastIn {
++            from {
++                opacity: 0;
++                transform: translateX(-50%) translateY(20px);
++            }
++            to {
++                opacity: 1;
++                transform: translateX(-50%) translateY(0);
++            }
++        }
++
++        @media (max-width: 375px) {
++            .parking-code, .gates {
++                font-size: 24px;
++            }
++            .modal-parking, .modal-gates {
++                font-size: 40px;
++            }
++        }
++        /* ========== SCANNER BUTTON ========== */
++.scanner-fab {
++    position: fixed;
++    bottom: 90px;
++    right: 20px;
++    width: 60px;
++    height: 60px;
++    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++    color: white;
++    border: none;
++    border-radius: 50%;
++    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
++    cursor: pointer;
++    font-size: 28px;
++    display: flex;
++    align-items: center;
++    justify-content: center;
++    transition: all 0.3s ease;
++    z-index: 999;
++}
++
++.scanner-fab:active {
++    transform: scale(0.95);
++}
++
++.scanner-fab:hover {
++    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
++}
++
++/* Modal Scanner */
++.scanner-modal {
++    display: none;
++    position: fixed;
++    top: 0;
++    left: 0;
++    width: 100%;
++    height: 100%;
++    background: rgba(0, 0, 0, 0.95);
++    z-index: 3000;
++    animation: fadeIn 0.3s;
++}
++
++.scanner-modal.active {
++    display: flex;
++    flex-direction: column;
++}
++
++.scanner-header {
++    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++    color: white;
++    padding: 20px;
++    display: flex;
++    justify-content: space-between;
++    align-items: center;
++}
++
++.scanner-header h2 {
++    font-size: 20px;
++    font-weight: 600;
++    margin: 0;
++}
++
++.scanner-close {
++    background: rgba(255, 255, 255, 0.2);
++    border: none;
++    border-radius: 50%;
++    width: 36px;
++    height: 36px;
++    color: white;
++    font-size: 20px;
++    cursor: pointer;
++}
++
++.scanner-container {
++    flex: 1;
++    display: flex;
++    flex-direction: column;
++    align-items: center;
++    justify-content: center;
++    padding: 20px;
++}
++
++#scanner-reader {
++    width: 100%;
++    max-width: 500px;
++    border-radius: 12px;
++    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
++}
++
++.scanner-instructions {
++    margin-top: 20px;
++    color: white;
++    text-align: center;
++    font-size: 16px;
++}
++
++.scanner-status {
++    margin-top: 10px;
++    padding: 12px 20px;
++    background: rgba(255, 255, 255, 0.1);
++    border-radius: 8px;
++    color: #fff;
++    font-size: 14px;
++}
++
++/* Résultat du scan */
++.boarding-pass-result {
++    background: white;
++    border-radius: 16px;
++    padding: 30px 20px;
++    max-width: 500px;
++    width: 90%;
++    animation: slideUp 0.3s;
++}
++
++.passenger-header {
++    text-align: center;
++    padding-bottom: 20px;
++    border-bottom: 2px solid #f5f5f7;
++    margin-bottom: 20px;
++}
++
++.passenger-name {
++    font-size: 28px;
++    font-weight: 700;
++    color: #1d1d1f;
++    margin-bottom: 5px;
++}
++
++.flight-number {
++    font-size: 20px;
++    color: #667eea;
++    font-weight: 600;
++}
++
++.flight-details {
++    display: flex;
++    flex-direction: column;
++    gap: 15px;
++}
++
++.detail-row {
++    display: flex;
++    justify-content: space-between;
++    align-items: center;
++    padding: 15px;
++    background: #f5f5f7;
++    border-radius: 12px;
++}
++
++.detail-label {
++    font-size: 13px;
++    color: #86868b;
++    font-weight: 600;
++    text-transform: uppercase;
++}
++
++.detail-value {
++    font-size: 18px;
++    color: #1d1d1f;
++    font-weight: 600;
++}
++
++.route-display {
++    display: flex;
++    align-items: center;
++    gap: 10px;
++}
++
++.route-airport {
++    font-size: 24px;
++    font-weight: 700;
++    color: #1d1d1f;
++}
++
++.route-arrow {
++    color: #86868b;
++    font-size: 20px;
++}
++
++.scan-another-btn {
++    width: 100%;
++    padding: 16px;
++    margin-top: 20px;
++    background: #667eea;
++    color: white;
++    border: none;
++    border-radius: 12px;
++    font-size: 17px;
++    font-weight: 600;
++    cursor: pointer;
++}
++
++.scan-another-btn:active {
++    opacity: 0.8;
++}
++    </style>
++</head>
++<body>
++    <div class="header">
++    <div class="header-top">
++        <h1>✈️ CDG Parking Mapper</h1>
++        <button class="share-btn" onclick="openShareModal()" aria-label="Partager">📤</button>
++    </div>
++
++    <div class="search-box">
++            <span class="search-icon">🔍</span>
++            <input
++                type="text"
++                class="search-input"
++                id="searchInput"
++                placeholder="Code parking ou porte (ex: E22, K43)"
++                autocomplete="off"
++                autocapitalize="characters"
++            >
++            <button class="clear-btn" id="clearBtn">✕</button>
++        </div>
++    </div>
++
++
++    <div id="paydayBanner" class="payday-banner" aria-live="polite"></div>
++
++    <div class="content">
++        <div class="results-count" id="resultsCount"></div>
++        <div id="results"></div>
++    </div>
++
++    <div class="modal" id="modal">
++        <div class="modal-content">
++            <div class="modal-header">
++                <div class="modal-title">Détails</div>
++                <button class="close-btn" onclick="closeModal()">✕</button>
++            </div>
++            <div id="modalBody"></div>
++        </div>
++    </div>
++<div class="modal share-modal" id="shareModal">
++  <div class="modal-content">
++    <div class="modal-header">
++      <div class="modal-title">📤 Partager l'application</div>
++      <button class="close-btn" onclick="closeShareModal()">✕</button>
++    </div>
++
++    <div class="qr-container">
++      <div class="qr-code">
++        <img src="qr-cdg-parking.png" alt="QR Code CDG Parking Mapper" style="width:100%;height:100%;object-fit:contain;">
++      </div>
++      <div class="url-display">Scannez ce QR code pour accéder à l'app</div>
++    </div>
++
++    <div class="tutorial">
++      <div class="tutorial-title">📲 Installer comme une app</div>
++
++      <div class="tutorial-section">
++        <div class="platform-title">🍎 iPhone / iPad (Safari)</div>
++        <ul class="tutorial-steps">
++          <li>Ouvrez ce site dans <strong>Safari</strong></li>
++          <li>Appuyez sur <strong>Partage</strong> 📤</li>
++          <li>Sélectionnez <strong>"Sur l'écran d'accueil"</strong></li>
++          <li>Nommez (ex: "CDG Parking")</li>
++          <li><strong>Ajouter</strong></li>
++        </ul>
++      </div>
++
++      <div class="tutorial-section">
++        <div class="platform-title">🤖 Android (Chrome)</div>
++        <ul class="tutorial-steps">
++          <li>Ouvrez ce site dans <strong>Chrome</strong></li>
++          <li>Menu <strong>⋮</strong></li>
++          <li><strong>"Ajouter à l'écran d'accueil"</strong></li>
++          <li>Nommez (ex: "CDG Parking")</li>
++          <li><strong>Ajouter</strong></li>
++        </ul>
++      </div>
++    </div>
++
++    <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top: 20px;">
++      <span>Copier le lien de partage</span>
++      <span>🔗</span>
++    </button>
++  </div>
++</div>
++
++    <div class="toast" id="toast">✓ Copié dans le presse-papiers</div>
++<!-- Bouton Scanner flottant -->
++<button class="scanner-fab" onclick="openScanner()" aria-label="Scanner carte d'embarquement">
++    📷
++</button>
++
++<!-- Modal Scanner -->
++<div class="scanner-modal" id="scannerModal">
++    <div class="scanner-header">
++        <h2>📷 Scanner la carte d'embarquement</h2>
++        <button class="scanner-close" onclick="closeScanner()">✕</button>
++    </div>
++    <div class="scanner-container" id="scannerContainer">
++        <div id="scanner-reader" style="width: 100%; max-width: 500px;"></div>
++        <div class="scanner-instructions">
++            Placez le code-barres de la carte d'embarquement dans le cadre
++        </div>
++        <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
++    </div>
++</div>
++    <script>
++        const mappings = [
++            // 2E K
++            {"parkingCode":"E10","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E12","gates":["K57"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E14","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E16","gates":["K55"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E18","gates":["K49"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E20","gates":["K45","K47"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"E22","gates":["K43"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E24","gates":["K41"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E26","gates":["K37","K39"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"E30","gates":["K35"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E32","gates":["K33"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E34","gates":["K31"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E38","gates":["K30"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E40","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E42","gates":["K32","K34"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E44","gates":["K36"],"terminal":"2E","section":"K","offsite":false,"ramp":false,"elevator":true},
++
++            // 2E S3
++            {"parkingCode":"K71","gates":["L36","L34"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K65","gates":["L30","L32"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K59","gates":["L26","L28"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K53","gates":["L22","L24"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"K21","gates":["L42"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K17","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"K13","gates":["L44"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"K09","gates":["L46"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K05","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K01","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F03","gates":["L53"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E29","gates":["L35"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E27","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E25","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E21","gates":["L31"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E17","gates":["L29"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E13","gates":["L27"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"E09","gates":["L25"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E05","gates":["L23"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"E01","gates":["L21"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F15","gates":["L45"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"F07","gates":["L47"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F09","gates":["L49"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
++
++            // 2E S4
++            {"parkingCode":"K26","gates":["M31"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K32","gates":["M29"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K38","gates":["M27"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K44","gates":["M25"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K52","gates":["M41"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K58","gates":["M43"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K70","gates":["M47"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K76","gates":["M49"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"L27","gates":["M28"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"L33","gates":["M26"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"L39","gates":["M24"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"L53","gates":["M44"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"K64","gates":["M45"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"L59","gates":["M46"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"L65","gates":["M48"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"L71","gates":["M50"],"terminal":"2E","section":"S4","offsite":false,"ramp":false,"elevator":false},
++
++            // 2F
++            {"parkingCode":"F02","gates":["F26"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F04","gates":["F27"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F08","gates":["F28"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F10","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F11","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F12","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F13","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":true},
++            {"parkingCode":"F14","gates":["F29"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F16","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F17","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F18","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F19","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F20","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F22","gates":["F31"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F26","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F27","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F28","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F30","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F32","gates":["F34"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F34","gates":["F35"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F66","gates":["F47"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F68","gates":["F48"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F70","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F71","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F72","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F73","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F74","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F75","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F76","gates":["F49"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F80","gates":["F50"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F82","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F83","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F84","gates":["F51"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F86","gates":["F52"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F90","gates":["F53"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F92","gates":["F54"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F94","gates":["F55"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F96","gates":["F56"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"F25","gates":["F25"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F24","gates":["F24"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F21","gates":["F21"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F23","gates":["F23"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F46","gates":["F46"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F45","gates":["F45"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F44","gates":["F44"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F41","gates":["F41"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
++            {"parkingCode":"F43","gates":["F43"],"terminal":"2F","section":"F2","offsite":true,"ramp":false,"elevator":false},
++
++            // 2G
++            {"parkingCode":"J10","gates":["G21"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J11","gates":["G23"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
++            {"parkingCode":"J12","gates":["G25"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
++            {"parkingCode":"J13","gates":["G27"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J14","gates":["G29"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J15","gates":["G29","G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J16","gates":["G30"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J17","gates":["G28"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J18","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
++            {"parkingCode":"J19","gates":["G26"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J20","gates":["G24"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J21","gates":["G22"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
++            {"parkingCode":"J30","gates":["G31"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J31","gates":["G33"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J32","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J33","gates":["G35"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J34","gates":["G37"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J35","gates":["G39"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J36","gates":["G39","G40"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J37","gates":["G40"],"terminal":"2G","section":"G","offsite":false,"ramp":true,"elevator":false},
++            {"parkingCode":"J38","gates":["G38"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J39","gates":["G36"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J40","gates":["G34"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false},
++            {"parkingCode":"J41","gates":["G32"],"terminal":"2G","section":"G","offsite":false,"ramp":false,"elevator":false}
++        ];
++
++        const searchInput = document.getElementById('searchInput');
++        const clearBtn = document.getElementById('clearBtn');
++        const resultsDiv = document.getElementById('results');
++        const resultsCount = document.getElementById('resultsCount');
++        const modal = document.getElementById('modal');
++        const modalBody = document.getElementById('modalBody');
++        const toast = document.getElementById('toast');
++
++        let debounceTimer;
++
++        searchInput.addEventListener('input', (e) => {
++            const value = e.target.value;
++            clearBtn.classList.toggle('visible', value.length > 0);
++
++            clearTimeout(debounceTimer);
++            debounceTimer = setTimeout(() => search(value), 150);
++        });
++
++        clearBtn.addEventListener('click', () => {
++            searchInput.value = '';
++            clearBtn.classList.remove('visible');
++            search('');
++            searchInput.focus();
++        });
++
++        function search(query) {
++            const normalized = query.toUpperCase().trim();
++
++            if (!normalized) {
++                displayResults(mappings);
++                return;
++            }
++
++            const results = mappings.filter(m => {
++                const searchText = (m.parkingCode + ' ' + m.gates.join(' ')).toUpperCase();
++                return searchText.includes(normalized);
++            });
++
++            displayResults(results);
++        }
++
++        function displayResults(results) {
++            resultsCount.textContent = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
++
++            if (results.length === 0) {
++                resultsDiv.innerHTML = `
++                    <div class="empty-state">
++                        <div class="empty-state-icon">🔍</div>
++                        <div class="empty-state-title">Aucun résultat</div>
++                        <div class="empty-state-text">Essayez un autre code de parking ou de porte</div>
++                    </div>
++                `;
++                return;
++            }
++
++            resultsDiv.innerHTML = results.map(m => `
++                <div class="mapping-card" onclick='showDetail(${JSON.stringify(m).replace(/'/g, "&#39;")})'>
++                    <div class="card-main">
++                        <div class="parking-code">${m.parkingCode}</div>
++                        <div class="arrow">→</div>
++                        <div class="gates">${m.gates.join(', ')}</div>
++                    </div>
++                    <div class="badges">
++                        <span class="badge badge-terminal">📍 ${m.terminal}</span>
++                        <span class="badge badge-section">🔖 ${m.section}</span>
++                        ${m.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
++                        ${m.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
++                        ${m.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
++                    </div>
++                </div>
++            `).join('');
++        }
++
++        function showDetail(mapping) {
++            modalBody.innerHTML = `
++                <div class="modal-main-info">
++                    <div class="modal-parking">${mapping.parkingCode}</div>
++                    <div class="modal-arrow">↓</div>
++                    <div class="modal-gates">${mapping.gates.join(', ')}</div>
++                    <div class="modal-badges">
++                        <span class="badge badge-terminal">📍 ${mapping.terminal}</span>
++                        <span class="badge badge-section">🔖 ${mapping.section}</span>
++                        ${mapping.offsite ? '<span class="badge badge-offsite">✈️ Au large</span>' : ''}
++                        ${mapping.ramp ? '<span class="badge badge-ramp">↗️ Rampe</span>' : ''}
++                        ${mapping.elevator ? '<span class="badge badge-elevator">🛗 Ascenseur</span>' : ''}
++                    </div>
++                </div>
++                <button class="action-btn btn-primary" onclick='copyText("${mapping.gates.join(', ')}")'>
++                    <span>Copier les portes</span>
++                    <span>📋</span>
++                </button>
++                <button class="action-btn btn-secondary" onclick='copyText("${mapping.terminal}")'>
++                    <span>Copier le terminal</span>
++                    <span>📋</span>
++                </button>
++            `;
++            modal.classList.add('active');
++        }
++
++        function closeModal() {
++            modal.classList.remove('active');
++        }
++
++        modal.addEventListener('click', (e) => {
++            if (e.target === modal) closeModal();
++        });
++
++        function copyText(text) {
++            navigator.clipboard.writeText(text).then(() => {
++                showToast();
++            });
++        }
++
++        function showToast() {
++            toast.classList.add('active');
++            setTimeout(() => {
++                toast.classList.remove('active');
++            }, 2000);
++        }
++
++        const shareModal = document.getElementById('shareModal');
++
++function openShareModal(){
++  shareModal.classList.add('active');
++}
++
++function closeShareModal(){
++  shareModal.classList.remove('active');
++}
++
++shareModal.addEventListener('click', (e) => {
++  if (e.target === shareModal) closeShareModal();
++});
++
++function copyCurrentUrl(){
++  const url = window.location.href;
++  if (url.includes('file://')) {
++    showToast("⚠️ Ouvre l'app via GitHub Pages pour copier le lien");
++    return;
++  }
++  navigator.clipboard.writeText(url).then(() => showToast("✓ Lien copié"));
++}
++
++// Améliore ton showToast pour afficher un message (optionnel)
++function showToast(message){
++  toast.textContent = message || "✓ Copié dans le presse-papiers";
++  toast.classList.add('active');
++  setTimeout(() => toast.classList.remove('active'), 2000);
++}
++// ========== SCANNER DE CARTE D'EMBARQUEMENT ==========
++let html5QrcodeScanner = null;
++let isScanning = false;
++let hasResult = false;
++
++const CITY_BY_IATA = {
++    CDG: 'Paris (CDG)',
++    ORY: 'Paris (ORY)',
++    LBG: 'Paris-Le Bourget',
++    NCE: 'Nice',
++    MRS: 'Marseille',
++    TLS: 'Toulouse',
++    LYS: 'Lyon',
++    BOD: 'Bordeaux',
++    LHR: 'Londres Heathrow',
++    AMS: 'Amsterdam',
++    MAD: 'Madrid',
++    BCN: 'Barcelone',
++    JFK: 'New York JFK',
++    DXB: 'Dubaï'
++};
++
++const PARIS_AIRPORTS = new Set(['CDG', 'ORY', 'LBG']);
++const KNOWN_GATE_CODES = Array.from(new Set(mappings.flatMap(mapping => mapping.gates)))
++    .sort((left, right) => right.length - left.length);
++
++function escapeHtml(value) {
++    return String(value ?? '').replace(/[&<>"']/g, char => ({
++        '&': '&amp;',
++        '<': '&lt;',
++        '>': '&gt;',
++        '"': '&quot;',
++        "'": '&#39;'
++    }[char]));
++}
++
++function normalizeAirport(iata) {
++    const code = (iata || '').trim().toUpperCase();
++    if (!code) return 'Inconnu';
++    return CITY_BY_IATA[code] ? `${CITY_BY_IATA[code]} - ${code}` : code;
++}
++
++function formatGateSource(source, candidates = []) {
++    if (source === 'barcode-context') return 'Détectée dans le code-barres';
++    if (source === 'barcode-known-gates') return `Porte CDG détectée (${candidates.length} candidate${candidates.length > 1 ? 's' : ''})`;
++    if (source === 'barcode-generic') return 'Heuristique sur le code-barres';
++    return 'Non encodée sur cette carte';
++}
++
++function cleanupMergeArtifacts() {
++    const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}/, /\bours\b/i, /\btheirs\b/i];
++    const body = document.body;
++    if (!body || typeof document.createTreeWalker !== 'function') return;
++
++    const textNodesToRemove = [];
++    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
++    let currentNode = walker.nextNode();
++
++    while (currentNode) {
++        const normalized = currentNode.textContent.replace(/\s+/g, ' ').trim();
++        if (normalized && markerPatterns.some(pattern => pattern.test(normalized))) {
++            textNodesToRemove.push(currentNode);
++        }
++        currentNode = walker.nextNode();
++    }
++
++    textNodesToRemove.forEach(node => node.remove());
++
++    const seenIds = new Set();
++    document.querySelectorAll('[id]').forEach(element => {
++        if (seenIds.has(element.id)) {
++            element.remove();
++            return;
++        }
++        seenIds.add(element.id);
++    });
++
++    document.querySelectorAll('.header').forEach((header, index) => {
++        if (index > 0) {
++            header.remove();
++        }
++    });
++}
++
++
++function getPaydayConfig(date = new Date()) {
++    const day = date.getDate();
++
++    if (day === 5) {
++        return {
++            type: 'cdi',
++            key: 'salary_day_5',
++            message: '💼 Jour de paie CDI/CDD : bon mois à tous !'
++        };
++    }
++
++    if (day === 10) {
++        return {
++            type: 'interim',
++            key: 'salary_day_10',
++            message: '💸 Jour de paie intérim : on démarre le mois avec style !'
++        };
++    }
++
++    return null;
++}
++
++function initPaydayBanner() {
++    const banner = document.getElementById('paydayBanner');
++    if (!banner) return;
++
++    const config = getPaydayConfig();
++    if (!config) {
++        banner.className = 'payday-banner';
++        banner.innerHTML = '';
++        return;
++    }
++
++    const today = new Date().toISOString().slice(0, 10);
++    const dismissKey = `payday_banner_closed_${config.key}_${today}`;
++    if (localStorage.getItem(dismissKey) === '1') {
++        banner.className = 'payday-banner';
++        banner.innerHTML = '';
++        return;
++    }
++
++    const modifierClass = config.type === 'cdi' ? 'payday-banner--cdi' : 'payday-banner--interim';
++    banner.className = `payday-banner visible ${modifierClass}`;
++    banner.innerHTML = `
++        <span>${escapeHtml(config.message)}</span>
++        <button class="payday-banner-close" type="button" aria-label="Fermer la bannière">Fermer</button>
++    `;
++
++    const closeButton = banner.querySelector('.payday-banner-close');
++    if (closeButton) {
++        closeButton.addEventListener('click', () => {
++            localStorage.setItem(dismissKey, '1');
++            banner.className = 'payday-banner';
++            banner.innerHTML = '';
++        });
++    }
++}
++
++function openScanner() {
++    if (isScanning) return;
++
++    const scannerModal = document.getElementById('scannerModal');
++    const statusElement = document.getElementById('scannerStatus');
++
++    scannerModal.classList.add('active');
++    statusElement.textContent = 'Initialisation de la caméra...';
++    hasResult = false;
++
++    if (!html5QrcodeScanner) {
++        html5QrcodeScanner = new Html5Qrcode('scanner-reader');
++    }
++
++    const config = {
++        fps: 12,
++        disableFlip: true,
++        qrbox: { width: 360, height: 240 },
++        aspectRatio: 1.777778,
++        formatsToSupport: [
++            Html5QrcodeSupportedFormats.AZTEC,
++            Html5QrcodeSupportedFormats.PDF_417,
++            Html5QrcodeSupportedFormats.QR_CODE,
++            Html5QrcodeSupportedFormats.CODE_128,
++            Html5QrcodeSupportedFormats.CODE_39,
++            Html5QrcodeSupportedFormats.EAN_13,
++            Html5QrcodeSupportedFormats.EAN_8
++        ]
++    };
++
++    isScanning = true;
++
++    html5QrcodeScanner.start(
++        { facingMode: 'environment' },
++        config,
++        decodedText => {
++            if (hasResult) return;
++            hasResult = true;
++            statusElement.textContent = '✅ Code scanné';
++            handleScanResult(decodedText);
++        },
++        () => {}
++    ).then(() => {
++        statusElement.textContent = '📷 Positionnez le code-barres dans le cadre';
++    }).catch(err => {
++        console.error('Erreur caméra:', err);
++        statusElement.textContent = "❌ Impossible d'accéder à la caméra";
++        isScanning = false;
++    });
++}
++
++function stopScanner() {
++    if (!html5QrcodeScanner || !isScanning) {
++        isScanning = false;
++        return Promise.resolve();
++    }
++
++    return html5QrcodeScanner.stop()
++        .then(() => html5QrcodeScanner.clear())
++        .catch(err => console.error('Erreur arrêt scanner:', err))
++        .finally(() => {
++            isScanning = false;
++            hasResult = false;
++        });
++}
++
++function closeScanner() {
++    document.getElementById('scannerModal').classList.remove('active');
++    stopScanner();
++}
++
++function handleScanResult(barcode) {
++    try {
++        const boardingPass = parseBoardingPass(barcode);
++
++        if (!boardingPass) {
++            const status = document.getElementById('scannerStatus');
++            status.textContent = '⚠️ Code lu mais format BCBP non reconnu';
++            setTimeout(() => {
++                hasResult = false;
++                if (isScanning) {
++                    status.textContent = '📷 Positionnez le code-barres dans le cadre';
++                }
++            }, 2000);
++            return;
++        }
++
++        displayBoardingPassInfo(boardingPass);
++    } catch (error) {
++        console.error('Erreur parsing:', error);
++        document.getElementById('scannerStatus').textContent = '❌ Erreur de lecture';
++        setTimeout(() => {
++            hasResult = false;
++        }, 2000);
++    }
++}
++
++function parseBoardingPass(data) {
++    const payload = (data || '').trim();
++    if (!payload.startsWith('M') || payload.length < 58) return null;
++
++    const rawName = payload.substring(2, 22).trim();
++    const [lastname = '', firstname = ''] = rawName.split('/');
++    const passengerName = `${lastname} ${firstname}`.replace(/\s+/g, ' ').trim() || rawName;
++
++    const segmentCount = Number.parseInt(payload[1], 10);
++    const legCount = Number.isInteger(segmentCount) && segmentCount > 0 ? segmentCount : 1;
++    const segments = parseFlightSegments(payload, legCount);
++    if (!segments.length) return null;
++
++    const selectedSegment = choosePreferredSegment(segments);
++    const gateDetails = extractGate(payload, selectedSegment);
++    const routeType = PARIS_AIRPORTS.has(selectedSegment.origin) && PARIS_AIRPORTS.has(selectedSegment.destination)
++        ? 'Vol interne Paris'
++        : 'Vol standard';
++
++    return {
++        passengerName,
++        pnr: selectedSegment.pnr || 'Non disponible',
++        origin: selectedSegment.origin,
++        destination: selectedSegment.destination,
++        originLabel: normalizeAirport(selectedSegment.origin),
++        destinationLabel: normalizeAirport(selectedSegment.destination),
++        airline: selectedSegment.airline,
++        flightNumber: `${selectedSegment.airline}${selectedSegment.flightNumberRaw}`.trim(),
++        date: parseJulianDate(selectedSegment.julianDate),
++        seatNumber: selectedSegment.seatNumber || 'Non spécifié',
++        gate: gateDetails.value,
++        gateSource: gateDetails.source,
++        gateCandidates: gateDetails.candidates,
++        routeType
++    };
++}
++
++function parseFlightSegments(payload, legCount) {
++    const segments = [];
++    const LEG_OFFSET = 23;
++    const LEG_LENGTH = 35;
++
++    for (let index = 0; index < legCount; index += 1) {
++        const start = LEG_OFFSET + (index * LEG_LENGTH);
++        const chunk = payload.substring(start, start + LEG_LENGTH);
++        if (chunk.length < LEG_LENGTH) break;
++
++        segments.push({
++            pnr: chunk.substring(0, 7).trim(),
++            origin: chunk.substring(7, 10).toUpperCase(),
++            destination: chunk.substring(10, 13).toUpperCase(),
++            airline: chunk.substring(13, 16).trim().toUpperCase(),
++            flightNumberRaw: chunk.substring(16, 21).trim(),
++            julianDate: chunk.substring(21, 24),
++            seatNumber: chunk.substring(25, 29).trim()
++        });
++    }
++
++    return segments;
++}
++
++function choosePreferredSegment(segments) {
++    const departureFromParis = segments.find(segment => PARIS_AIRPORTS.has(segment.origin));
++    if (departureFromParis) return departureFromParis;
++    return segments[0];
++}
++
++function extractGate(data, selectedSegment) {
++    const contextualMatches = extractKnownGatesFromText(getSegmentContext(data, selectedSegment));
++    if (contextualMatches.length) {
++        return {
++            value: contextualMatches[0],
++            source: 'barcode-context',
++            candidates: contextualMatches
++        };
++    }
++
++    const allKnownMatches = extractKnownGatesFromText(data);
++    if (allKnownMatches.length) {
++        return {
++            value: allKnownMatches.at(-1),
++            source: 'barcode-known-gates',
++            candidates: allKnownMatches
++        };
++    }
++
++    const genericMatches = extractGenericGateCandidates(data);
++    if (genericMatches.length) {
++        return {
++            value: genericMatches.at(-1),
++            source: 'barcode-generic',
++            candidates: genericMatches
++        };
++    }
++
++    return {
++        value: 'Non spécifiée',
++        source: 'not-available',
++        candidates: []
++    };
++}
++
++function getSegmentContext(data, selectedSegment) {
++    if (!selectedSegment) return data;
++
++    const markers = [selectedSegment.pnr, selectedSegment.origin, selectedSegment.destination, selectedSegment.airline]
++        .filter(Boolean);
++    let startIndex = -1;
++
++    for (const marker of markers) {
++        const index = data.indexOf(marker);
++        if (index !== -1) {
++            startIndex = index;
++            break;
++        }
++    }
++
++    if (startIndex === -1) return data;
++    return data.substring(startIndex, Math.min(startIndex + 80, data.length));
++}
++
++function extractKnownGatesFromText(text) {
++    if (!text) return [];
++
++    const matches = [];
++    for (const gate of KNOWN_GATE_CODES) {
++        let index = text.indexOf(gate);
++        while (index !== -1) {
++            if (isLikelyStandaloneGate(text, index, gate.length)) {
++                matches.push(gate);
++            }
++            index = text.indexOf(gate, index + 1);
++        }
++    }
++
++    return Array.from(new Set(matches));
++}
++
++function extractGenericGateCandidates(text) {
++    if (!text) return [];
++
++    const genericPattern = /[A-Z]{1,2}\d{2,3}/g;
++    const matches = [];
++    let match;
++
++    while ((match = genericPattern.exec(text)) !== null) {
++        const candidate = match[0];
++        if (/\d{1,2}[A-Z]$/.test(candidate)) continue;
++        if (/^[A-Z]{2,3}\d{4,5}$/.test(candidate)) continue;
++        if (candidate.length > 4) continue;
++        if (!isLikelyStandaloneGate(text, match.index, candidate.length)) continue;
++        matches.push(candidate);
++    }
++
++    return Array.from(new Set(matches));
++}
++
++function isLikelyStandaloneGate(text, startIndex, gateLength) {
++    const previousChar = text[startIndex - 1] || '';
++    const nextChar = text[startIndex + gateLength] || '';
++    const previousIsAlphaNum = /[A-Z0-9]/.test(previousChar);
++    const nextIsAlphaNum = /[A-Z0-9]/.test(nextChar);
++    return !(previousIsAlphaNum && nextIsAlphaNum);
++}
++
++function parseJulianDate(julian) {
++    const day = Number.parseInt(julian, 10);
++    if (!Number.isInteger(day) || day < 1 || day > 366) return 'Date inconnue';
++
++    const date = new Date(new Date().getFullYear(), 0, day);
++    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
++}
++
++function displayBoardingPassInfo(bp) {
++    stopScanner().finally(() => {
++        const container = document.getElementById('scannerContainer');
++        const safeName = escapeHtml(bp.passengerName);
++
++        container.innerHTML = `
++            <div class="boarding-pass-result">
++                <div class="passenger-header">
++                    <div class="passenger-name">${safeName}</div>
++                    <div class="flight-number">${escapeHtml(bp.flightNumber || 'Vol non identifié')}</div>
++                </div>
++
++                <div class="flight-details">
++                    <div class="detail-row">
++                        <div>
++                            <div class="detail-label">Trajet</div>
++                            <div class="route-display">
++                                <span class="route-airport">${escapeHtml(bp.origin)}</span>
++                                <span class="route-arrow">✈️</span>
++                                <span class="route-airport">${escapeHtml(bp.destination)}</span>
++                            </div>
++                            <div class="detail-label" style="margin-top: 8px; text-transform: none;">${escapeHtml(bp.originLabel)} → ${escapeHtml(bp.destinationLabel)}</div>
++                        </div>
++                    </div>
++
++                    <div class="detail-row">
++                        <div class="detail-label">Type de trajet</div>
++                        <div class="detail-value">${escapeHtml(bp.routeType)}</div>
++                    </div>
++
++                    <div class="detail-row">
++                        <div class="detail-label">Date de vol</div>
++                        <div class="detail-value">${escapeHtml(bp.date)}</div>
++                    </div>
++
++                    <div class="detail-row">
++                        <div class="detail-label">Porte de départ</div>
++                        <div class="detail-value">${escapeHtml(bp.gate)}</div>
++                    </div>
++
++                    <div class="detail-row">
++                        <div class="detail-label">Source porte</div>
++                        <div class="detail-value">${escapeHtml(formatGateSource(bp.gateSource, bp.gateCandidates))}</div>
++                    </div>
++
++                    <div class="detail-row">
++                        <div class="detail-label">Siège</div>
++                        <div class="detail-value">${escapeHtml(bp.seatNumber)}</div>
++                    </div>
++
++                    <div class="detail-row">
++                        <div class="detail-label">PNR</div>
++                        <div class="detail-value">${escapeHtml(bp.pnr)}</div>
++                    </div>
++                </div>
++
++                <button class="scan-another-btn" onclick="resetScanner()">Scanner une autre carte</button>
++            </div>
++        `;
++    });
++}
++
++function resetScanner() {
++    const container = document.getElementById('scannerContainer');
++
++    container.innerHTML = `
++        <div id="scanner-reader" style="width: 100%; max-width: 500px;"></div>
++        <div class="scanner-instructions">
++            Placez le code-barres de la carte d'embarquement dans le cadre
++        </div>
++        <div class="scanner-status" id="scannerStatus">Initialisation de la caméra...</div>
++    `;
++
++    html5QrcodeScanner = null;
++    isScanning = false;
++    hasResult = false;
++    openScanner();
++}
++
++// Fermer en cliquant en dehors
++document.addEventListener('DOMContentLoaded', function() {
++    cleanupMergeArtifacts();
++    initPaydayBanner();
++
++    const scannerModal = document.getElementById('scannerModal');
++    if (scannerModal) {
++        scannerModal.addEventListener('click', (e) => {
++            if (e.target.id === 'scannerModal') {
++                closeScanner();
++            }
++        });
++    }
++});
++
++        // Initialisation
++        displayResults(mappings);
++    </script>
++
++</body>
++
++</html>
++
++
++
++
++
++
++
