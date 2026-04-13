@@ -3,6 +3,11 @@
 <head>
 <<<<<<< ours
 <<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1802,6 +1807,16 @@
 =======
 =======
 >>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
     <!-- Bibliothèque Html5-QRCode pour scanner les codes-barres -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -1823,6 +1838,11 @@
   align-items:center;
   margin-bottom:15px;
 }
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
 <<<<<<< ours
         .header-top{
   display:flex;
@@ -1848,6 +1868,21 @@
   background: rgba(255,255,255,0.3);
   transform: scale(0.95);
 }
+=======
+
+>>>>>>> theirs
+=======
+
+>>>>>>> theirs
+=======
+
+>>>>>>> theirs
+=======
+
+>>>>>>> theirs
+=======
+
+>>>>>>> theirs
 =======
 
 >>>>>>> theirs
@@ -3005,9 +3040,24 @@ function formatGateSource(source, candidates = []) {
 
 function cleanupMergeArtifacts() {
 <<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}/, /\bours\b/i, /\btheirs\b/i];
 =======
     const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}$/, /^<{7,}\s*ours$/i, /^>{7,}\s*theirs$/i];
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
 >>>>>>> theirs
     const body = document.body;
     if (!body || typeof document.createTreeWalker !== 'function') return;
@@ -3018,13 +3068,52 @@ function cleanupMergeArtifacts() {
 
     while (currentNode) {
         const normalized = currentNode.textContent.replace(/\s+/g, ' ').trim();
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
         if (normalized && markerPatterns.some(pattern => pattern.test(normalized))) {
             textNodesToRemove.push(currentNode);
         }
+=======
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+        const hasConflictTokens = /<{7,}|={7,}|>{7,}/.test(normalized);
+        const hasNamedConflictChunk = /<{7,}\s*ours|>{7,}\s*theirs/i.test(normalized);
+
+        if (normalized && (hasConflictTokens || hasNamedConflictChunk)) {
+            textNodesToRemove.push(currentNode);
+        }
+
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
         currentNode = walker.nextNode();
     }
 
     textNodesToRemove.forEach(node => node.remove());
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
 <<<<<<< ours
 
     const seenIds = new Set();
@@ -3041,6 +3130,16 @@ function cleanupMergeArtifacts() {
             header.remove();
         }
     });
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
 =======
 >>>>>>> theirs
 }
@@ -3483,6 +3582,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
 >>>>>>> theirs
 =======
 >>>>>>> theirs
