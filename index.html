@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<<<<<<< ours
+
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -1799,27 +1799,28 @@
   </script>
 </body>
 </html>
-=======
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
+
     <!-- Bibliothèque Html5-QRCode pour scanner les codes-barres -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<<<<<<< ours
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CDG Parking">
+=======
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CDG Parking">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+>>>>>>> theirs
     <title>Antisèche de Parking</title>
     <style>
         * {
@@ -1833,12 +1834,7 @@
   align-items:center;
   margin-bottom:15px;
 }
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
+
         .header-top{
   display:flex;
   justify-content:space-between;
@@ -1863,24 +1859,6 @@
   background: rgba(255,255,255,0.3);
   transform: scale(0.95);
 }
-=======
-
->>>>>>> theirs
-=======
-
->>>>>>> theirs
-=======
-
->>>>>>> theirs
-=======
-
->>>>>>> theirs
-=======
-
->>>>>>> theirs
-=======
-
->>>>>>> theirs
 
 .share-modal.active{
   align-items:center;
@@ -3034,26 +3012,11 @@ function formatGateSource(source, candidates = []) {
 }
 
 function cleanupMergeArtifacts() {
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
+
     const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}/, /\bours\b/i, /\btheirs\b/i];
 =======
     const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}$/, /^<{7,}\s*ours$/i, /^>{7,}\s*theirs$/i];
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
+
     const body = document.body;
     if (!body || typeof document.createTreeWalker !== 'function') return;
 
@@ -3063,53 +3026,22 @@ function cleanupMergeArtifacts() {
 
     while (currentNode) {
         const normalized = currentNode.textContent.replace(/\s+/g, ' ').trim();
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
+
         if (normalized && markerPatterns.some(pattern => pattern.test(normalized))) {
             textNodesToRemove.push(currentNode);
         }
-=======
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
+
         const hasConflictTokens = /<{7,}|={7,}|>{7,}/.test(normalized);
         const hasNamedConflictChunk = /<{7,}\s*ours|>{7,}\s*theirs/i.test(normalized);
 
         if (normalized && (hasConflictTokens || hasNamedConflictChunk)) {
             textNodesToRemove.push(currentNode);
         }
-
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
         currentNode = walker.nextNode();
     }
 
     textNodesToRemove.forEach(node => node.remove());
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
+
 
     const seenIds = new Set();
     document.querySelectorAll('[id]').forEach(element => {
@@ -3125,18 +3057,6 @@ function cleanupMergeArtifacts() {
             header.remove();
         }
     });
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
 }
 
 
@@ -3569,15 +3489,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
-
-
-
-
-
-
-
-<<<<<<< ours
-
->>>>>>> theirs
-=======
 
