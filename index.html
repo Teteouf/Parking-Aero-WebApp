@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<<<<<<< ours
+<<<<<<< ours
 
 
   <meta charset="UTF-8">
@@ -1800,16 +1802,26 @@
 </body>
 </html>
 
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
     <!-- Bibliothèque Html5-QRCode pour scanner les codes-barres -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <<<<<<< ours
+<<<<<<< ours
+<<<<<<< ours
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CDG Parking">
 =======
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1820,6 +1832,12 @@
     <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
+<<<<<<< ours
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
+=======
 >>>>>>> theirs
     <title>Antisèche de Parking</title>
     <style>
@@ -1835,6 +1853,8 @@
   margin-bottom:15px;
 }
 
+<<<<<<< ours
+<<<<<<< ours
         .header-top{
   display:flex;
   justify-content:space-between;
@@ -1859,6 +1879,10 @@
   background: rgba(255,255,255,0.3);
   transform: scale(0.95);
 }
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
 
 .share-modal.active{
   align-items:center;
@@ -3012,11 +3036,17 @@ function formatGateSource(source, candidates = []) {
 }
 
 function cleanupMergeArtifacts() {
+<<<<<<< ours
+<<<<<<< ours
 
     const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}/, /\bours\b/i, /\btheirs\b/i];
 =======
     const markerPatterns = [/^<{7,}/, /^={7,}$/, /^>{7,}$/, /^<{7,}\s*ours$/i, /^>{7,}\s*theirs$/i];
 
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
     const body = document.body;
     if (!body || typeof document.createTreeWalker !== 'function') return;
 
@@ -3026,22 +3056,38 @@ function cleanupMergeArtifacts() {
 
     while (currentNode) {
         const normalized = currentNode.textContent.replace(/\s+/g, ' ').trim();
+<<<<<<< ours
+<<<<<<< ours
 
         if (normalized && markerPatterns.some(pattern => pattern.test(normalized))) {
             textNodesToRemove.push(currentNode);
         }
 
+=======
+>>>>>>> theirs
+=======
+>>>>>>> theirs
         const hasConflictTokens = /<{7,}|={7,}|>{7,}/.test(normalized);
         const hasNamedConflictChunk = /<{7,}\s*ours|>{7,}\s*theirs/i.test(normalized);
 
         if (normalized && (hasConflictTokens || hasNamedConflictChunk)) {
             textNodesToRemove.push(currentNode);
         }
+<<<<<<< ours
+<<<<<<< ours
+=======
+
+>>>>>>> theirs
+=======
+
+>>>>>>> theirs
         currentNode = walker.nextNode();
     }
 
     textNodesToRemove.forEach(node => node.remove());
 
+<<<<<<< ours
+<<<<<<< ours
 
     const seenIds = new Set();
     document.querySelectorAll('[id]').forEach(element => {
@@ -3056,6 +3102,24 @@ function cleanupMergeArtifacts() {
         if (index > 0) {
             header.remove();
         }
+=======
+=======
+>>>>>>> theirs
+    const seenHeaderTitles = new Set();
+    document.querySelectorAll('.header h1').forEach(titleNode => {
+        const normalizedTitle = titleNode.textContent.replace(/\s+/g, ' ').trim();
+        if (!normalizedTitle) return;
+
+        if (seenHeaderTitles.has(normalizedTitle)) {
+            titleNode.closest('.header')?.remove();
+            return;
+        }
+
+        seenHeaderTitles.add(normalizedTitle);
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
     });
 }
 
@@ -3467,8 +3531,15 @@ function resetScanner() {
     openScanner();
 }
 
+
 // Fermer en cliquant en dehors
 document.addEventListener('DOMContentLoaded', function() {
+=======
+function initializeApp() {
+>>>>>>> theirs
+=======
+function initializeApp() {
+>>>>>>> theirs
     cleanupMergeArtifacts();
     initPaydayBanner();
 
@@ -3480,13 +3551,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
 });
 
         // Initialisation
         displayResults(mappings);
+
+
+    // Initialisation
+    displayResults(mappings);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
+
     </script>
 
 </body>
 
 </html>
-
