@@ -140,6 +140,21 @@
     .arrow { color: #86868b; font-size: 24px; }
     .gates { font-size: 28px; font-weight: 700; color: #007aff; }
 
+    /* Labels Parking / Porte (affiché quand ambiguïté) */
+    .code-block { display: flex; flex-direction: column; align-items: flex-start; }
+    .code-label { font-size: 10px; font-weight: 700; text-transform: uppercase;
+                  letter-spacing: 0.08em; color: #86868b; margin-bottom: 2px; }
+
+    /* Bouton signalement */
+    .report-btn {
+      width: 100%; padding: 14px 16px; border: 1.5px solid #e5e5ea;
+      border-radius: 12px; font-size: 15px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: space-between; transition: opacity 0.2s;
+      background: white; color: #86868b; margin-top: 4px;
+    }
+    .report-btn:active { opacity: 0.6; }
+
     .badges { display: flex; flex-wrap: wrap; gap: 8px; }
     .badge {
       display: inline-flex; align-items: center; gap: 4px;
@@ -540,7 +555,7 @@
     {"parkingCode":"K09","gates":["L46"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"K05","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"K01","gates":["L48"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
-    {"parkingCode":"F03","gates":["L53"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
+    {"parkingCode":"F03","gates":["L51"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"E29","gates":["L35"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"E27","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"E25","gates":["L33"],"terminal":"2E","section":"S3","offsite":false,"ramp":false,"elevator":false},
@@ -585,16 +600,16 @@
     {"parkingCode":"F18","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"F19","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"F20","gates":["F30"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-    {"parkingCode":"F22","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-    {"parkingCode":"F26","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+    {"parkingCode":"F22","gates":["F31"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+    {"parkingCode":"F26","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"F27","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-    {"parkingCode":"F28","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-    {"parkingCode":"F30","gates":["F34"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-    {"parkingCode":"F32","gates":["F35"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
-    {"parkingCode":"F34","gates":["F36"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+    {"parkingCode":"F28","gates":["F32"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+    {"parkingCode":"F30","gates":["F33"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+    {"parkingCode":"F32","gates":["F34"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
+    {"parkingCode":"F34","gates":["F35"],"terminal":"2F","section":"F1","offsite":false,"ramp":false,"elevator":false},
     {"parkingCode":"F21","gates":["F21"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
     {"parkingCode":"F23","gates":["F23"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
-    {"parkingCode":"F24","gates":["F32"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
+    {"parkingCode":"F24","gates":["F24"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
     {"parkingCode":"F25","gates":["F25"],"terminal":"2F","section":"F1","offsite":true,"ramp":false,"elevator":false},
     // 2F F2
     {"parkingCode":"F66","gates":["F47"],"terminal":"2F","section":"F2","offsite":false,"ramp":false,"elevator":false},
@@ -741,6 +756,23 @@
     return isPaydayToday ? '<span class="badge badge-payday">💸 Jour de paie</span>' : '';
   }
 
+  // Ambiguïté quand le code parking et la porte commencent par la même lettre (ex: F22 → F32)
+  function isAmbiguous(m) {
+    const parkLetter = m.parkingCode[0];
+    return m.gates.some(g => g[0] === parkLetter);
+  }
+
+  function cardMainHtml(m) {
+    const ambiguous = isAmbiguous(m);
+    const parkingEl = ambiguous
+      ? `<div class="code-block"><div class="code-label">Parking</div><div class="parking-code">${m.parkingCode}</div></div>`
+      : `<div class="parking-code">${m.parkingCode}</div>`;
+    const gatesEl = ambiguous
+      ? `<div class="code-block"><div class="code-label">Porte${m.gates.length > 1 ? 's' : ''}</div><div class="gates">${m.gates.join(', ')}</div></div>`
+      : `<div class="gates">${m.gates.join(', ')}</div>`;
+    return `<div class="card-main">${parkingEl}<div class="arrow">→</div>${gatesEl}</div>`;
+  }
+
   function badgesHtml(m, center = false) {
     const style = center ? 'justify-content:center;' : '';
     return `<div class="badges" style="${style}">
@@ -804,20 +836,38 @@
     }
     $('results').innerHTML = results.map(m => `
       <div class="mapping-card" onclick='showDetail(${JSON.stringify(m).replace(/'/g,"&#39;")})'>
-        <div class="card-main">
-          <div class="parking-code">${m.parkingCode}</div>
-          <div class="arrow">→</div>
-          <div class="gates">${m.gates.join(', ')}</div>
-        </div>
+        ${cardMainHtml(m)}
         ${badgesHtml(m)}
       </div>`).join('');
   }
 
   function showDetail(m) {
+    const ambiguous = isAmbiguous(m);
+    const parkLabel = ambiguous ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.7);margin-bottom:4px;">Parking</div>' : '';
+    const gateLabel = ambiguous ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.7);margin-bottom:4px;">Porte${m.gates.length > 1 ? 's' : ''}</div>` : '';
+
+    const subject = encodeURIComponent(`[CDG Parking] Signalement — ${m.parkingCode} → ${m.gates.join(', ')}`);
+    const body = encodeURIComponent(
+`Bonjour,
+
+Je signale une erreur ou un changement sur le mapping suivant :
+
+Parking : ${m.parkingCode}
+Porte(s) actuelle(s) : ${m.gates.join(', ')}
+Terminal : ${m.terminal} — Section : ${m.section}
+
+Correction / remarque :
+[À compléter]
+
+Merci !`
+    );
+
     $('modalBody').innerHTML = `
       <div class="modal-main-info">
+        ${parkLabel}
         <div class="modal-parking">${m.parkingCode}</div>
         <div class="modal-arrow">↓</div>
+        ${gateLabel}
         <div class="modal-gates">${m.gates.join(', ')}</div>
         <div class="modal-badges">${badgesHtml(m, true)}</div>
       </div>
@@ -826,7 +876,10 @@
       </button>
       <button class="action-btn btn-secondary" onclick='copyText("${m.terminal}")'>
         <span>Copier le terminal</span><span>📋</span>
-      </button>`;
+      </button>
+      <a href="mailto:dargos.theo@hotmail.fr?subject=${subject}&body=${body}" class="report-btn">
+        <span>⚠️ Signaler une erreur</span><span>✉️</span>
+      </a>`;
     $('modal').classList.add('active');
   }
 
