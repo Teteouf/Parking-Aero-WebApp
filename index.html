@@ -281,6 +281,64 @@
     .easter-modal-list { list-style: none; padding-left: 0; margin: 0; }
     .easter-modal-list li { margin-bottom: 8px; color: #334155; }
 
+    .welcome-card {
+      background: linear-gradient(145deg, #eef4ff 0%, #f8fbff 55%, #ffffff 100%);
+      border: 1px solid rgba(0,122,255,0.12);
+      border-radius: 18px;
+      padding: 22px 18px;
+      margin-bottom: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    .welcome-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(0,122,255,0.1);
+      color: #0057b8;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .welcome-message {
+      font-size: 18px;
+      line-height: 1.55;
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+    .welcome-message:last-child { margin-bottom: 0; }
+    .welcome-highlight {
+      font-weight: 700;
+      color: #0057b8;
+      white-space: nowrap;
+    }
+    .welcome-note {
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .welcome-codes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 4px 0 14px;
+    }
+    .welcome-code {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,122,255,0.08);
+      color: #0f172a;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
     /* ===== NIGHT MODE ===== */
     body.night-mode { background: #0b1220; color: #e2e8f0; }
     body.night-mode .header {
@@ -300,6 +358,19 @@
     body.night-mode .easter-modal-body { background: #111827; color: #e5e7eb; }
     body.night-mode .easter-modal-title { color: #e5e7eb; }
     body.night-mode .easter-modal-list li { color: #cbd5e1; }
+    body.night-mode .welcome-card {
+      background: linear-gradient(145deg, rgba(15,23,42,0.96) 0%, rgba(17,24,39,0.94) 100%);
+      border-color: rgba(96,165,250,0.22);
+      box-shadow: inset 0 1px 0 rgba(148,163,184,0.08);
+    }
+    body.night-mode .welcome-kicker { background: rgba(96,165,250,0.12); color: #93c5fd; }
+    body.night-mode .welcome-message { color: #e5e7eb; }
+    body.night-mode .welcome-highlight { color: #93c5fd; }
+    body.night-mode .welcome-note { color: #cbd5e1; }
+    body.night-mode .welcome-code {
+      background: rgba(96,165,250,0.12);
+      color: #e5e7eb;
+    }
 
     /* ===== SCANNER FAB ===== */
     .scanner-fab {
@@ -476,6 +547,41 @@
       </div>
       <button class="action-btn btn-primary" onclick="copyCurrentUrl()" style="margin-top:20px;">
         <span>Copier le lien de partage</span><span>🔗</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL MISE À JOUR -->
+  <div class="modal share-modal" id="welcomeModal" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Mise à jour</div>
+        <button class="close-btn" onclick="closeWelcomeModal()" aria-label="Fermer le message de mise à jour">✕</button>
+      </div>
+      <div class="welcome-card">
+        <div class="welcome-kicker">Mise à jour portes</div>
+        <p class="welcome-message">Changements effectués sur les portes suivantes :</p>
+        <div class="welcome-codes">
+          <span class="welcome-code">F03</span>
+          <span class="welcome-code">F16</span>
+          <span class="welcome-code">F22</span>
+          <span class="welcome-code">F26</span>
+          <span class="welcome-code">F27</span>
+          <span class="welcome-code">F28</span>
+          <span class="welcome-code">F30</span>
+          <span class="welcome-code">F32</span>
+          <span class="welcome-code">F34</span>
+          <span class="welcome-code">F82</span>
+          <span class="welcome-code">F83</span>
+          <span class="welcome-code">F84</span>
+          <span class="welcome-code">F86</span>
+          <span class="welcome-code">F96</span>
+        </div>
+        <p class="welcome-message">Si vous constatez une erreur, merci de la signaler via <span class="welcome-highlight">"Signaler une erreur"</span>.</p>
+      </div>
+      <div class="welcome-note">Ce message s'affichera une seule fois sur cet appareil.</div>
+      <button class="action-btn btn-primary" onclick="closeWelcomeModal()" style="margin-top:18px;">
+        <span>Compris</span><span>✈️</span>
       </button>
     </div>
   </div>
@@ -1003,6 +1109,35 @@ Merci !`
   // =====================================================================
   // PARTAGE
   // =====================================================================
+  const WELCOME_MODAL_SEEN_KEY = 'welcome_modal_seen_v2';
+
+  function hasSeenWelcomeModal() {
+    try {
+      return localStorage.getItem(WELCOME_MODAL_SEEN_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  function markWelcomeModalSeen() {
+    try {
+      localStorage.setItem(WELCOME_MODAL_SEEN_KEY, '1');
+    } catch {}
+  }
+
+  function openWelcomeModal() {
+    markWelcomeModalSeen();
+    $('welcomeModal')?.classList.add('active');
+    $('welcomeModal')?.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeWelcomeModal() {
+    $('welcomeModal')?.classList.remove('active');
+    $('welcomeModal')?.setAttribute('aria-hidden', 'true');
+  }
+
+  $('welcomeModal')?.addEventListener('click', e => { if (e.target === $('welcomeModal')) closeWelcomeModal(); });
+
   function openShareModal()  { $('shareModal').classList.add('active'); }
   function closeShareModal() { $('shareModal').classList.remove('active'); }
   $('shareModal').addEventListener('click', e => { if (e.target === $('shareModal')) closeShareModal(); });
@@ -1433,6 +1568,7 @@ Merci !`
     displayResults(mappings);
     initPaydayBanner();
     $('scannerModal')?.addEventListener('click', e => { if (e.target.id==='scannerModal') closeScanner(); });
+    if (!hasSeenWelcomeModal()) setTimeout(openWelcomeModal, 250);
   });
   </script>
 </body>
