@@ -27,7 +27,7 @@
     return `<article class="mapping-card"><button type="button" class="mapping-open" data-parking="${escapeHtml(mapping.parkingCode)}" aria-label="Parking ${escapeHtml(mapping.parkingCode)}, porte${mapping.gates.length > 1 ? 's' : ''} ${escapeHtml(mapping.gates.join(', '))}, détails">
       <span class="mapping-line"><span><span class="code-label">Parking</span><span class="point-code">${escapeHtml(mapping.parkingCode)}</span></span>
       <span class="direction" aria-hidden="true">↔</span><span><span class="code-label">Porte${mapping.gates.length > 1 ? 's' : ''}</span><span class="point-code gate-code">${escapeHtml(mapping.gates.join(', '))}</span></span></span>
-      <span class="mapping-meta">Terminal ${escapeHtml(mapping.terminal)} · Secteur ${escapeHtml(mapping.section)}</span>
+      <span class="mapping-meta">Terminal ${escapeHtml(mapping.terminal)} - Porte ${escapeHtml(mapping.section)}</span>
       ${mapping.offsite || mapping.ramp || mapping.elevator ? `<span class="badges">${badgeHtml(mapping)}</span>` : ''}</button>${favoriteButton({ mode: 'parking', query: mapping.parkingCode }, 'la correspondance ' + mapping.parkingCode)}</article>`;
   }
 
@@ -208,9 +208,9 @@
     const mapping = mappings.find(item => item.parkingCode === code);
     if (!mapping) return;
     const subject = encodeURIComponent(`[CDG Parking] Signalement — ${mapping.parkingCode} → ${mapping.gates.join(', ')}`);
-    const body = encodeURIComponent(`Bonjour,\n\nParking : ${mapping.parkingCode}\nPorte(s) : ${mapping.gates.join(', ')}\nTerminal : ${mapping.terminal} — Secteur : ${mapping.section}\n\nCorrection / remarque :\n[À compléter]\n\nMerci !`);
+    const body = encodeURIComponent(`Bonjour,\n\nParking : ${mapping.parkingCode}\nPorte(s) : ${mapping.gates.join(', ')}\nTerminal : ${mapping.terminal} - Porte : ${mapping.section}\n\nCorrection / remarque :\n[À compléter]\n\nMerci !`);
     $('detailBody').innerHTML = `<div class="detail-codes"><div><span class="code-label">Parking</span><span class="point-code">${escapeHtml(mapping.parkingCode)}</span></div><span class="direction" aria-hidden="true">↔</span><div><span class="code-label">Porte${mapping.gates.length > 1 ? 's' : ''}</span><span class="point-code gate-code">${escapeHtml(mapping.gates.join(', '))}</span></div></div>
-      <dl class="detail-list"><div><dt>Terminal</dt><dd>${escapeHtml(mapping.terminal)}</dd></div><div><dt>Secteur</dt><dd>${escapeHtml(mapping.section)}</dd></div>
+      <dl class="detail-list"><div><dt>Terminal</dt><dd>${escapeHtml(mapping.terminal)}</dd></div><div><dt>Porte</dt><dd>${escapeHtml(mapping.section)}</dd></div>
       ${mapping.offsite ? '<div><dt>Emplacement</dt><dd>Au large</dd></div>' : ''}${mapping.ramp ? '<div><dt>Accès</dt><dd>Rampe</dd></div>' : ''}${mapping.elevator ? '<div><dt>Accès</dt><dd>Ascenseur</dd></div>' : ''}</dl>
       <div class="detail-actions">${favoriteButton({ mode: 'parking', query: mapping.parkingCode }, 'la correspondance ' + mapping.parkingCode, true)}<button type="button" class="primary-button" data-copy="${escapeHtml(mapping.gates.join(', '))}">Copier ${mapping.gates.length > 1 ? 'les portes' : 'la porte'}</button><button type="button" class="secondary-button" data-copy="${escapeHtml(mapping.parkingCode)}">Copier le parking</button></div>
       <a class="report-link" href="mailto:dargos.theo@hotmail.fr?subject=${subject}&body=${body}">Signaler une erreur</a>`;
