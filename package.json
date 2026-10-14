@@ -1,15 +1,14 @@
 {
   "name": "parking-aero-webapp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Scanner PDF417 + recherche automatique de porte ADP",
+  "description": "Antisèche parking / porte CDG et répertoire IATA disponibles hors connexion",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.21.2",
-    "playwright": "^1.51.1"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "build": "node scripts/build-cache.js",
+    "test": "node --test",
+    "update:iata": "python scripts/update-iata.py && npm run build"
   },
   "engines": {
     "node": ">=20"

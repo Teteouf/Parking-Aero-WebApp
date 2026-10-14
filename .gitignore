@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+public/data/*.tmp
+test-results/
+cdg-parking-public.zip

@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "CDG Parking — Parkings, portes & IATA",
+  "short_name": "CDG Parking",
+  "description": "L’antisèche parking ↔ porte et le répertoire IATA des agents.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f9",
+  "theme_color": "#667eea",
+  "icons": [
+    { "src": "assets/app-icon-v2-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app-icon-v2-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app-icon-maskable-v2-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/app-icon-maskable-v2-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
