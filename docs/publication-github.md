@@ -10,6 +10,49 @@ son entrée dans `public/index.html`. Une publication de la racine du nouveau
 projet ne convient donc plus. Le workflow `.github/workflows/pages.yml`
 publie uniquement le contenu de `public/` et conserve l’adresse existante.
 
+## Incident après la fusion du 15 octobre 2026
+
+La fusion `acfdfd1` a déclenché deux publications concurrentes :
+
+- [Vérifier et publier CDG Parking](https://github.com/Teteouf/Parking-Aero-WebApp/actions/runs/38568995283)
+  a correctement publié le contenu de `public/` ; son job de déploiement
+  s’est terminé à 00:06:29, heure de Sydney.
+- [pages build and deployment](https://github.com/Teteouf/Parking-Aero-WebApp/actions/runs/38568994869)
+  a construit la racine avec Jekyll, transformé `README.md` en page d’accueil,
+  puis terminé son déploiement à 00:06:39. Cette publication a écrasé l’application.
+
+Les deux workflows étaient verts : il ne s’agissait ni d’un échec des tests
+ni d’un mauvais chemin dans l’artefact du workflow personnalisé. La racine
+ne contient plus `index.html`, car l’application est dans `public/index.html`.
+Ajouter une redirection vers `public/` déplacerait le chemin de l’application
+et ses données locales ; conserver la publication de `public/` évite cette migration.
+
+Lors du diagnostic, l’API Pages indiquait déjà `build_type: workflow`, donc
+la source **GitHub Actions** était activée. Le champ `source` pouvait encore
+mentionner `main` / `/` : c’est `build_type` qui distingue le mode de publication.
+Changer la source ne retire pas le contenu déjà publié et n’annule pas une
+ancienne exécution Jekyll déjà lancée.
+
+Le workflow vérifie désormais la source et l’absence d’exécution dynamique
+Pages inachevée juste avant le déploiement. Ses publications utilisent le groupe
+de concurrence `pages`, sans annuler une publication en cours. Les PR continuent
+à construire et tester sans publier.
+
+Pour rétablir le site **après autorisation de publication** :
+
+1. Vérifier **Settings → Pages → Source → GitHub Actions**.
+2. Attendre la fin des anciennes exécutions **pages build and deployment**,
+   ou les annuler. Le nouveau contrôle refuse de publier tant qu’elles restent actives.
+3. Publier le correctif via une branche et une PR vers `main`, puis fusionner,
+   ou, pour restaurer immédiatement la version déjà fusionnée, lancer
+   **Actions → Vérifier et publier CDG Parking → Run workflow → main**.
+4. Attendre la réussite du job de publication et vérifier l’adresse canonique
+   `/Parking-Aero-WebApp/`, sans ajouter `/public/`.
+
+Le lancement manuel sur `main` republie réellement le site : il doit aussi
+être autorisé. Si la vérification refuse la publication, corriger la source
+ou attendre l’ancien déploiement, puis relancer le workflow personnalisé.
+
 ## Préparation locale
 
 Le dossier de travail avait été extrait d’une archive, sans métadonnées Git.

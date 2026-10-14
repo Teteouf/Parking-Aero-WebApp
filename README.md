@@ -1,6 +1,6 @@
 # CDG Parking
 
-Antisèche mobile parking ↔ porte, avec détails de terminal, secteur, rampe,
+Antisèche mobile parking ↔ porte, avec détails de terminal, porte, rampe,
 ascenseur et emplacement au large. Un second onglet recherche les codes IATA
 des aéroports et villes. Le scanner, les données passager, l’API ADP,
 Playwright, les scripts externes et les animations de l’ancienne version ont
@@ -20,12 +20,26 @@ Ouvrir http://localhost:3000. `npm run dev` surveille le serveur Node.
 Variables facultatives : `PORT` et `HOST` (par défaut 3000 et 127.0.0.1).
 Le serveur ne publie que `public/`, jamais le code de `src/`.
 
+Pour reproduire le chemin GitHub Pages en local dans PowerShell :
+
+```powershell
+$env:BASE_PATH = '/Parking-Aero-WebApp/'
+npm start
+```
+
+Ouvrir http://localhost:3000/Parking-Aero-WebApp/. Sans `BASE_PATH`, le serveur
+continue à servir l’application à la racine. `npm test` vérifie les deux
+emplacements, les ressources et le cache hors connexion sous le chemin Pages.
+
 ## Publier le site
 
 Le workflow `.github/workflows/pages.yml` construit et vérifie l’application
 sur les pull requests, puis publie uniquement `public/` après une fusion dans
 `main`. Configurer GitHub Pages avec la source **GitHub Actions**.
 La procédure de première migration est dans [docs/publication-github.md](docs/publication-github.md).
+Avant chaque déploiement, le workflow vérifie que la source Pages est bien
+GitHub Actions et qu’aucun ancien déploiement Jekyll n’est encore en attente
+ou en cours. Sinon, il s’arrête avec les instructions de correction.
 
 Après chaque modification de fichier public, exécuter `npm run build`.
 Publier **le contenu de `public/`** sur un hébergement statique HTTPS, au même

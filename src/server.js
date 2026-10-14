@@ -10,7 +10,8 @@ const HOST = process.env.HOST || '127.0.0.1';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.png': 'image/png', '.ico': 'image/x-icon' };
 
-function createServer() {
+function createServer({ basePath = '/' } = {}) {
+  if (!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(basePath)) throw new Error('BASE_PATH must be a path such as / or /Parking-Aero-WebApp/.');
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
@@ -23,8 +24,16 @@ function createServer() {
     }
     let file;
     try {
-      const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+      const url = new URL(req.url, 'http://localhost');
+      let pathname = decodeURIComponent(url.pathname);
       if (pathname.includes('\\') || pathname.includes('\0')) throw new Error('Invalid path');
+      if (basePath !== '/' && pathname === basePath.slice(0, -1)) {
+        res.writeHead(308, { Location: basePath + url.search });
+        res.end();
+        return;
+      }
+      if (!pathname.startsWith(basePath)) { res.writeHead(404); res.end('Not found'); return; }
+      pathname = '/' + pathname.slice(basePath.length);
       file = path.resolve(PUBLIC_DIR, '.' + pathname);
       if (file !== PUBLIC_DIR && !file.startsWith(PUBLIC_DIR + path.sep)) throw new Error('Invalid path');
       if (pathname.endsWith('/')) file = path.join(file, 'index.html');
@@ -48,8 +57,9 @@ function createServer() {
 }
 
 if (require.main === module) {
-  const server = createServer();
-  server.listen(PORT, HOST, () => console.log(`CDG Parking: http://${HOST}:${PORT}`));
+  const basePath = process.env.BASE_PATH || '/';
+  const server = createServer({ basePath });
+  server.listen(PORT, HOST, () => console.log(`CDG Parking: http://${HOST}:${PORT}${basePath}`));
   for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(() => process.exit(0)));
 }
 module.exports = { createServer };
