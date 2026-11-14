@@ -1,0 +1,482 @@
+{
+  "lot": "pilote-2b",
+  "role": "Gabarit de saisie des confirmations terrain. Ce fichier n’est pas lu par l’application.",
+  "grille": "grille-terrain.md",
+  "conventions": {
+    "statut": [
+      "à confirmer",
+      "confirmé",
+      "variable selon conditions",
+      "inconnu"
+    ],
+    "statut_par_defaut": "à confirmer",
+    "difference_inconnu_a_confirmer": "« inconnu » : la question a été posée sans réponse. « à confirmer » : la question n’a pas encore été posée, ou la réponse n’est pas vérifiée.",
+    "nature": [
+      "observation ponctuelle",
+      "correspondance habituelle"
+    ],
+    "nature_note": "Pour une observation ponctuelle, indiquer dans valeur ou dans conditions la date, l’heure et si possible le vol. Une observation ponctuelle seule n’établit pas une correspondance habituelle.",
+    "conditions_format": "Liste d’objets {condition, valeur}, par exemple {\"condition\":\"vol Schengen\",\"valeur\":\"B21\"}. Obligatoire quand le statut est « variable selon conditions ».",
+    "origine": [
+      "vu directement",
+      "document interne (nom, date, citable oui/non)",
+      "transmis par un collègue (fonction)",
+      "signalétique sur place"
+    ],
+    "date_confirmation": "AAAA-MM-JJ, à renseigner pour chaque champ.",
+    "fonction_agent": "Fonction seulement, sans nom."
+  },
+  "regle_integration": "Une relation passe dans relations-candidates.json > relations_etayees seulement si le champ 3.1 est « confirmé », que sa nature est « correspondance habituelle », et que son origine et sa date sont renseignées. L’ajout à public/js/mappings.js est une étape séparée, sur demande explicite.",
+  "fiches": [
+    {
+      "poste": "B20",
+      "observation_source": "P-B20",
+      "champs": {
+        "1.1_libelle_poste": {
+          "question": "Libellé exact du poste au sol ou sur le panneau",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "1.2_terminal": {
+          "question": "Terminal et bâtiment (2B ?)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "2.1_passerelle": {
+          "question": "Le poste a-t-il une passerelle ? Combien ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "2.2_bus_ou_pied": {
+          "question": "Sinon, passage en bus ou à pied ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.1_porte_embarquement": {
+          "question": "Porte utilisée pour l’embarquement",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.2_porte_debarquement": {
+          "question": "Porte utilisée pour le débarquement, si différente",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.3_conditions_de_variation": {
+          "question": "Si la porte varie : de quoi cela dépend-il, et quelle porte dans chaque cas ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.4_porte_affichee_vs_physique": {
+          "question": "La porte affichée aux passagers est-elle la porte physique utilisée ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "4.1_postes_chevauchants": {
+          "question": "Le poste est-il une variante d’un autre poste, qu’on ne peut pas occuper en même temps ? Lequel ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.1_section": {
+          "question": "Section ou lettre de zone",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.2_offsite": {
+          "question": "Hors terminal ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.3_ramp": {
+          "question": "Rampe nécessaire ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.4_elevator": {
+          "question": "Ascenseur nécessaire ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "6.1_nom_futur_terminal4": {
+          "question": "Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "7.1_remarques": {
+          "question": "Remarques libres de l’agent",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        }
+      }
+    },
+    {
+      "poste": "B24",
+      "observation_source": "P-B24",
+      "champs": {
+        "1.1_libelle_poste": {
+          "question": "Libellé exact du poste au sol ou sur le panneau",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "1.2_terminal": {
+          "question": "Terminal et bâtiment (2B ?)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "2.1_passerelle": {
+          "question": "Le poste a-t-il une passerelle ? Combien ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "2.2_bus_ou_pied": {
+          "question": "Sinon, passage en bus ou à pied ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.1_porte_embarquement": {
+          "question": "Porte utilisée pour l’embarquement",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.2_porte_debarquement": {
+          "question": "Porte utilisée pour le débarquement, si différente",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.3_conditions_de_variation": {
+          "question": "Si la porte varie : de quoi cela dépend-il, et quelle porte dans chaque cas ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.4_porte_affichee_vs_physique": {
+          "question": "La porte affichée aux passagers est-elle la porte physique utilisée ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "4.1_postes_chevauchants": {
+          "question": "B24 et B26 peuvent-ils être occupés en même temps ? Ont-ils la même porte ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.1_section": {
+          "question": "Section ou lettre de zone",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.2_offsite": {
+          "question": "Hors terminal ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.3_ramp": {
+          "question": "Rampe nécessaire ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.4_elevator": {
+          "question": "Ascenseur nécessaire ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "6.1_nom_futur_terminal4": {
+          "question": "Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "7.1_remarques": {
+          "question": "Remarques libres de l’agent",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        }
+      }
+    },
+    {
+      "poste": "B26",
+      "observation_source": "P-B26",
+      "champs": {
+        "1.1_libelle_poste": {
+          "question": "Libellé exact du poste au sol ou sur le panneau",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "1.2_terminal": {
+          "question": "Terminal et bâtiment (2B ?)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "2.1_passerelle": {
+          "question": "Le poste a-t-il une passerelle ? Combien ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "2.2_bus_ou_pied": {
+          "question": "Sinon, passage en bus ou à pied ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.1_porte_embarquement": {
+          "question": "Porte utilisée pour l’embarquement",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.2_porte_debarquement": {
+          "question": "Porte utilisée pour le débarquement, si différente",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.3_conditions_de_variation": {
+          "question": "Si la porte varie : de quoi cela dépend-il, et quelle porte dans chaque cas ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "3.4_porte_affichee_vs_physique": {
+          "question": "La porte affichée aux passagers est-elle la porte physique utilisée ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "nature": null,
+          "conditions": [],
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "4.1_postes_chevauchants": {
+          "question": "B26 et B24 peuvent-ils être occupés en même temps ? Ont-ils la même porte ?",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.1_section": {
+          "question": "Section ou lettre de zone",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.2_offsite": {
+          "question": "Hors terminal ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.3_ramp": {
+          "question": "Rampe nécessaire ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "5.4_elevator": {
+          "question": "Ascenseur nécessaire ? (oui/non)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "6.1_nom_futur_terminal4": {
+          "question": "Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027)",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        },
+        "7.1_remarques": {
+          "question": "Remarques libres de l’agent",
+          "valeur": null,
+          "statut": "à confirmer",
+          "date_confirmation": null,
+          "origine": null,
+          "fonction_agent": null
+        }
+      }
+    }
+  ],
+  "questions_communes": {
+    "C.1_postes_D40_D41": {
+      "question": "Quels postes desservent les portes D40 et D41, que le plan d’ADP place en 2B ?",
+      "valeur": null,
+      "statut": "à confirmer",
+      "conditions": [],
+      "date_confirmation": null,
+      "origine": null,
+      "fonction_agent": null
+    },
+    "C.2_portes_B10_B12": {
+      "question": "Les portes B10 à B12 (niveau 0) sont-elles des portes vers bus ? Vers quels postes ?",
+      "valeur": null,
+      "statut": "à confirmer",
+      "conditions": [],
+      "date_confirmation": null,
+      "origine": null,
+      "fonction_agent": null
+    },
+    "C.3_pre_passerelles": {
+      "question": "Les « pré-passerelles » ont-elles un numéro sur place ?",
+      "valeur": null,
+      "statut": "à confirmer",
+      "date_confirmation": null,
+      "origine": null,
+      "fonction_agent": null
+    },
+    "C.4_document_interne": {
+      "question": "Existe-t-il un document interne qui associe postes et portes ? Nom, date, citable oui/non ?",
+      "valeur": null,
+      "statut": "à confirmer",
+      "date_confirmation": null,
+      "origine": null,
+      "fonction_agent": null
+    }
+  }
+}
