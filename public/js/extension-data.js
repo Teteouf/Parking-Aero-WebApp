@@ -8,7 +8,8 @@
     "terminalsIncluded": [
       "2A",
       "2B",
-      "2C"
+      "2C",
+      "2D"
     ],
     "sources": {
       "S1": {
@@ -40,6 +41,10 @@
       "2C": {
         "building": "C",
         "basis": "APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20)."
+      },
+      "2D": {
+        "building": "D",
+        "basis": "APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D »."
       }
     },
     "stands": [
@@ -815,6 +820,295 @@
           "S3"
         ],
         "relations": []
+      },
+      {
+        "code": "D02",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'19.22\"N 002°34'09.69\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D03",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'26.32\"N 002°34'06.33\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D05",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'26.18\"N 002°34'04.30\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D06",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'19.44\"N 002°34'08.11\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D07",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'26.21\"N 002°34'02.52\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D08",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'20.13\"N 002°34'06.32\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D09",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'26.07\"N 002°34'02.26\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D10",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'19.74\"N 002°34'04.99\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D11",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'25.96\"N 002°34'00.23\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D12",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'19.88\"N 002°34'04.92\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D13",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'26.06\"N 002°33'59.83\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D14",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'20.03\"N 002°34'02.62\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D15",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'25.99\"N 002°33'58.18\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D16",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'19.64\"N 002°33'59.67\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D17",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'25.92\"N 002°33'57.14\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D18",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'19.91\"N 002°33'57.18\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D19",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'25.88\"N 002°33'56.15\"E",
+        "basis": "Îlot au nord de la voie G3, en face des bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D20",
+        "terminal": "2D",
+        "sector": "2D",
+        "position": "face-batiment",
+        "ins": "49°00'19.50\"N 002°33'55.02\"E",
+        "basis": "Fait face au bâtiment « D » sur APDC 01. APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D ».",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S2b"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D22",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'18.76\"N 002°33'54.23\"E",
+        "basis": "Flèche dirigée vers la jonction entre les bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D24",
+        "terminal": null,
+        "sector": "2D",
+        "position": "secteur",
+        "ins": "49°00'18.65\"N 002°33'54.13\"E",
+        "basis": "Position à la jonction entre les bâtiments B et D. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
       }
     ],
     "gates": [
@@ -1243,6 +1537,176 @@
         "terminal": "2C",
         "level": "1",
         "poiId": 1666,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D50",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1679,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D51",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1678,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D52",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1676,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D53",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1675,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D54",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1674,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D55",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1673,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D56",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1672,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D57",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 1671,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D58",
+        "terminal": "2D",
+        "level": "0",
+        "poiId": 3267,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D59",
+        "terminal": "2D",
+        "level": "0",
+        "poiId": 3266,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D60",
+        "terminal": "2D",
+        "level": "0",
+        "poiId": 3264,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D62",
+        "terminal": "2D",
+        "level": "0",
+        "poiId": 4285,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D63",
+        "terminal": "2D",
+        "level": "0",
+        "poiId": 4286,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D66",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 3960,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D67",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 3961,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D68",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 3962,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "D69",
+        "terminal": "2D",
+        "level": "1",
+        "poiId": 3963,
         "sources": [
           "S3"
         ],

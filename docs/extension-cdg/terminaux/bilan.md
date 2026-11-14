@@ -61,3 +61,38 @@ Les 169 correspondances d'origine sont inchangées. Les sources, leurs dates et 
 - L'eAIP (AD 2.20, page du 19 FEB 2026) associe CFW et CFE à « l'aire CHARLIE », sans nommer de terminal.
 - Les portes C80 à C91 du plan ne correspondent à aucun code de poste. Aucune porte C02 à C14 n'a été trouvée.
 - **La couverture n'est pas déclarée complète.**
+
+## 2D
+
+| Indicateur | Valeur |
+|---|---|
+| Postes documentés | **20** (S1) : 9 face au bâtiment D (D02, puis D06 à D20 numéros pairs), 11 de rattachement incertain |
+| Portes documentées | **17** (S3) : D50 à D57, D66 à D69 (niveau 1) ; D58 à D60, D62, D63 (niveau 0) |
+| Relations étayées | **0** |
+| Postes dont la porte reste inconnue | **20** |
+
+**Postes de rattachement incertain :**
+- D22 et D24 : à la jonction des bâtiments B et D ;
+- D03 à D19 (numéros impairs) : îlot au nord de la voie G3.
+
+**Limites :**
+- Le nom « TERMINAL 2D » est écrit sur GMC 03 (11 JUN 2026). Le rattachement des postes reste une déduction faite à partir des cartes.
+- Les portes D61, D64 et D65 n'ont pas été trouvées dans le plan.
+- Les portes D40 et D41 ont une lettre D, mais leur fiche les rattache à 2B : elles ne sont pas comptées en 2D.
+- Aucun poste D n'existe dans l'eAIP entre D02 et D24 sous un code identique à une porte (D50 et au-delà).
+- Le même renommage en « Terminal 4 », annoncé pour le 16/03/2027, est à surveiller.
+- **La couverture n'est pas déclarée complète.**
+
+## Synthèse
+
+| Terminal | Postes | dont rattachement incertain | Portes | Relations étayées | Postes sans porte connue |
+|---|---|---|---|---|---|
+| 2A | 18 | 10 | 14 | 0 | 18 |
+| 2B | 21 | 8 | 17 | 0 | 21 |
+| 2C | 14 | 4 | 12 | 0 | 14 |
+| 2D | 20 | 11 | 17 | 0 | 20 |
+| **Total** | **73** | **33** | **60** | **0** | **73** |
+
+**Preuve manquante, commune à tous les terminaux :** un document qui associe chaque poste à une porte. Deux pistes :
+- les consignes particulières d'utilisation des postes, signalées par l'eAIP sur l'espace professionnel du Groupe ADP (non consulté) ;
+- une confirmation terrain, avec la grille de [`../pilote-2b/grille-terrain.md`](../pilote-2b/grille-terrain.md) ou le bouton de contribution de l'application.

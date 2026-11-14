@@ -128,3 +128,10 @@ test('2C: alphanumeric stand codes (CFW, CFE, C4A, CF9) are searchable and keep 
   assert.match(extension.find(catalog, 'stand', 'CFE').note, /aire CHARLIE/);
   assert.equal(extension.find(catalog, 'stand', 'CF9').certain, false);
 });
+
+test('2D: gates D40 and D41 are not counted in 2D, and stands D22/D24 stay uncertain', () => {
+  if (!data.terminalsIncluded.includes('2D')) return;
+  const gates2D = extension.search(catalog, '', '2D').gates.map(item => item.code);
+  assert(!gates2D.includes('D40') && !gates2D.includes('D41'));
+  for (const code of ['D22', 'D24']) assert.equal(extension.find(catalog, 'stand', code).certain, false);
+});
