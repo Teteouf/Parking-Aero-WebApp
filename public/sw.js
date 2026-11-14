@@ -1,5 +1,5 @@
 /* Generated into public/sw.js by npm run build. */
-const CACHE_VERSION = '777c00c9698ffb78';
+const CACHE_VERSION = 'a92e19b82a808023';
 const ASSETS = [
   "assets/app-icon-maskable-v2-192.png",
   "assets/app-icon-maskable-v2-512.png",

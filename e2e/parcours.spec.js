@@ -26,6 +26,43 @@ test.describe('Recherche parking ↔ porte', () => {
     expect(await visibleMappings(page)).toEqual([{ parking: 'E22', gates: 'K43', meta: 'Terminal 2E - Porte K' }]);
   });
 
+  test('F32 ambigu : poste avion d’abord, rôle visible et annoncé sur chaque carte', async ({ page }) => {
+    await openApp(page);
+    await search(page, 'F32');
+    await expect(page.locator('#resultsCount')).toHaveText('2 correspondances');
+    expect(await visibleMappings(page)).toEqual([
+      { parking: 'F32', gates: 'F35', meta: 'Terminal 2F - Porte F1' },
+      { parking: 'F22', gates: 'F32', meta: 'Terminal 2F - Porte F1' },
+    ]);
+    const cards = page.locator('#results .mapping-card');
+    await expect(cards.nth(0).locator('.match-role')).toHaveText('F32 est ici le parking');
+    await expect(cards.nth(1).locator('.match-role')).toHaveText('F32 est ici la porte');
+    await expect(cards.nth(0).locator('.is-match .code-hit')).toHaveText('F32');
+    await expect(cards.nth(1).locator('.is-match .code-hit')).toHaveText('F32');
+    await expect(cards.nth(0).locator('.mapping-open')).toHaveAccessibleName('F32 est ici le parking (poste avion). Parking F32, porte F35, détails');
+    await expect(cards.nth(1).locator('.mapping-open')).toHaveAccessibleName('F32 est ici la porte. Parking F22, porte F32, détails');
+  });
+
+  test('F21 → F21 : le même code est annoncé comme parking et porte', async ({ page }) => {
+    await openApp(page);
+    await search(page, 'F21');
+    await expect(page.locator('#resultsCount')).toHaveText('1 correspondance');
+    expect(await visibleMappings(page)).toEqual([{ parking: 'F21', gates: 'F21', meta: 'Terminal 2F - Porte F1' }]);
+    const card = page.locator('#results .mapping-card');
+    await expect(card.locator('.match-role')).toHaveText('F21 est ici parking et porte');
+    await expect(card.locator('.is-match')).toHaveCount(2);
+    await expect(card.locator('.code-hit')).toHaveText(['F21', 'F21']);
+    await expect(card.locator('.point-code:not(.gate-code) .code-hit')).toHaveCSS('text-decoration-line', 'underline');
+    await expect(card.locator('.gate-code .code-hit')).toHaveCSS('text-decoration-line', 'underline');
+    await expect(card.locator('.mapping-open')).toHaveAccessibleName('F21 est ici à la fois le parking (poste avion) et la porte. Parking F21, porte F21, détails');
+  });
+
+  test('F3 indique le rôle du code normalisé F03', async ({ page }) => {
+    await openApp(page);
+    await search(page, 'F3');
+    await expect(page.locator('#results .match-role')).toHaveText('F03 est ici le parking');
+  });
+
   test('F3 retrouve F03', async ({ page }) => {
     const expected = mappings.find(m => m.parkingCode === 'F03');
     await openApp(page);

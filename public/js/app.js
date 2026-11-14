@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const { searchParking, prepareLocations, searchLocations, pointCode, normalize } = window.ParkingCore;
+  const { searchParking, codeRole, orderByCodeRole, prepareLocations, searchLocations, pointCode, normalize } = window.ParkingCore;
   const mappings = window.PARKING_MAPPINGS;
   const appBase = new URL('./', document.baseURI);
   const shareUrl = 'https://teteouf.github.io/Parking-Aero-WebApp/';
@@ -23,10 +23,23 @@
       (mapping.elevator ? '<span class="badge access">Ascenseur</span>' : '');
   }
 
-  function mappingHtml(mapping) {
-    return `<article class="mapping-card"><button type="button" class="mapping-open" data-parking="${escapeHtml(mapping.parkingCode)}" aria-label="Parking ${escapeHtml(mapping.parkingCode)}, porte${mapping.gates.length > 1 ? 's' : ''} ${escapeHtml(mapping.gates.join(', '))}, détails">
-      <span class="mapping-line"><span><span class="code-label">Parking</span><span class="point-code">${escapeHtml(mapping.parkingCode)}</span></span>
-      <span class="direction" aria-hidden="true">↔</span><span><span class="code-label">Porte${mapping.gates.length > 1 ? 's' : ''}</span><span class="point-code gate-code">${escapeHtml(mapping.gates.join(', '))}</span></span></span>
+  const roleText = {
+    parking: { visible: 'est ici le parking', spoken: 'est ici le parking (poste avion)' },
+    gate: { visible: 'est ici la porte', spoken: 'est ici la porte' },
+    both: { visible: 'est ici parking et porte', spoken: 'est ici à la fois le parking (poste avion) et la porte' },
+  };
+
+  function mappingHtml(mapping, query = '') {
+    const role = codeRole(mapping, query);
+    const code = pointCode(query);
+    const hit = value => pointCode(value) === code ? `<span class="code-hit">${escapeHtml(value)}</span>` : escapeHtml(value);
+    const gatesHtml = mapping.gates.map(hit).join(', ');
+    const searched = role ? escapeHtml(role === 'gate' ? mapping.gates.find(g => pointCode(g) === code) : mapping.parkingCode) : '';
+    const gatesLabel = `porte${mapping.gates.length > 1 ? 's' : ''} ${escapeHtml(mapping.gates.join(', '))}`;
+    return `<article class="mapping-card"${role ? ` data-role="${role}"` : ''}><button type="button" class="mapping-open" data-parking="${escapeHtml(mapping.parkingCode)}" aria-label="${role ? `${searched} ${roleText[role].spoken}. ` : ''}Parking ${escapeHtml(mapping.parkingCode)}, ${gatesLabel}, détails">
+      ${role ? `<span class="match-role"><span class="match-code">${searched}</span> ${roleText[role].visible}</span>` : ''}
+      <span class="mapping-line"><span class="mapping-side${role === 'parking' || role === 'both' ? ' is-match' : ''}"><span class="code-label">Parking</span><span class="point-code">${role === 'parking' || role === 'both' ? hit(mapping.parkingCode) : escapeHtml(mapping.parkingCode)}</span></span>
+      <span class="direction" aria-hidden="true">↔</span><span class="mapping-side${role === 'gate' || role === 'both' ? ' is-match' : ''}"><span class="code-label">Porte${mapping.gates.length > 1 ? 's' : ''}</span><span class="point-code gate-code">${gatesHtml}</span></span></span>
       <span class="mapping-meta">Terminal ${escapeHtml(mapping.terminal)} - Porte ${escapeHtml(mapping.section)}</span>
       ${mapping.offsite || mapping.ramp || mapping.elevator ? `<span class="badges">${badgeHtml(mapping)}</span>` : ''}</button>${favoriteButton({ mode: 'parking', query: mapping.parkingCode }, 'la correspondance ' + mapping.parkingCode)}</article>`;
   }
@@ -84,7 +97,7 @@
     let exact;
     if (state.mode === 'parking') {
       matches = searchParking(mappings, query, state.filter);
-      exact = matches.some(m => pointCode(m.parkingCode) === pointCode(query) || m.gates.some(gate => pointCode(gate) === pointCode(query)));
+      exact = matches.some(m => codeRole(m, query));
     } else {
       if (!state.locations) return;
       matches = searchLocations(state.locations, query);
@@ -126,9 +139,9 @@
     const filterLabels = { '2E': 'Terminal 2E', '2F': 'Terminal 2F', '2G': 'Terminal 2G', '1': 'Terminal 1', access: 'Rampe / ascenseur' };
     $('searchHint').textContent = state.mode === 'iata' ? 'Aéroports & villes' : filterLabels[state.filter] || 'Parking ↔ porte';
     if (state.mode === 'parking') {
-      const matches = searchParking(mappings, query, state.filter);
+      const matches = orderByCodeRole(searchParking(mappings, query, state.filter), query);
       $('resultsCount').textContent = query || state.filter !== 'all' ? `${matches.length} correspondance${matches.length === 1 ? '' : 's'}` : `${mappings.length} points de parking`;
-      $('results').innerHTML = matches.length ? matches.map(mappingHtml).join('') : emptyHtml('Aucune correspondance', 'Essayez un autre code ou changez le filtre de terminal.');
+      $('results').innerHTML = matches.length ? matches.map(mapping => mappingHtml(mapping, query)).join('') : emptyHtml('Aucune correspondance', 'Essayez un autre code ou changez le filtre de terminal.');
       return;
     }
     if (!state.locations) {

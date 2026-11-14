@@ -34,6 +34,30 @@
       m.ramp ? 'rampe' : '', m.elevator ? 'ascenseur' : '', m.offsite ? 'au large' : ''].join(' ')).includes(compact(text)));
   }
 
+  /**
+   * Rôle du code recherché dans une correspondance : 'parking' (poste avion), 'gate' (porte),
+   * 'both' (le même code désigne le poste et la porte) ou null (pas de correspondance exacte).
+   * Utilise la même normalisation que searchParking (F3 ≡ F03).
+   */
+  function codeRole(mapping, query) {
+    const code = pointCode(query);
+    if (!code) return null;
+    const parking = pointCode(mapping.parkingCode) === code;
+    const gate = mapping.gates.some(g => pointCode(g) === code);
+    return parking && gate ? 'both' : parking ? 'parking' : gate ? 'gate' : null;
+  }
+
+  /**
+   * Ordonne les résultats de searchParking sans en changer le contenu : les correspondances où
+   * le code recherché est un poste avion d'abord, puis celles où il est une porte. Tri stable.
+   */
+  function orderByCodeRole(matches, query) {
+    const rank = mapping => ({ parking: 0, both: 0, gate: 1 })[codeRole(mapping, query)] ?? 2;
+    return matches.map((mapping, index) => ({ mapping, index, rank: rank(mapping) }))
+      .sort((a, b) => a.rank - b.rank || a.index - b.index)
+      .map(item => item.mapping);
+  }
+
   function countryName(code) {
     try { return new Intl.DisplayNames(['fr'], { type: 'region' }).of(code) || code; }
     catch (_) { return code; }
@@ -64,5 +88,5 @@
       });
   }
 
-  return { normalize, pointCode, searchParking, prepareLocations, searchLocations };
+  return { normalize, pointCode, searchParking, codeRole, orderByCodeRole, prepareLocations, searchLocations };
 });
