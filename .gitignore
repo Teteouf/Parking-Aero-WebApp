@@ -6,3 +6,6 @@ Thumbs.db
 public/data/*.tmp
 test-results/
 cdg-parking-public.zip
+playwright-report/
+blob-report/
+e2e-captures/

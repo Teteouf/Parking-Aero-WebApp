@@ -8,12 +8,22 @@ Playwright, les scripts externes et les animations de l’ancienne version ont
 
 ## Démarrer et vérifier
 
-Node.js 20 ou plus suffit. Aucune dépendance npm et aucune installation de
-navigateur ne sont nécessaires.
+Node.js 20 ou plus suffit pour l'application et `npm test` : aucune dépendance
+d'exécution. Seuls les tests navigateur utilisent Playwright (dépendance de
+développement) et Chromium.
 
 ```sh
 npm start
 npm test
+```
+
+Tests navigateur (`e2e/`), sur écran ordinateur et en émulation mobile Pixel 7
+(émulation Chromium, pas un téléphone réel) :
+
+```sh
+npm install
+npx playwright install chromium
+npm run test:e2e
 ```
 
 Ouvrir http://localhost:3000. `npm run dev` surveille le serveur Node.
