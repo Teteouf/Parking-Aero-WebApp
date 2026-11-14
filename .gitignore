@@ -9,3 +9,6 @@ cdg-parking-public.zip
 playwright-report/
 blob-report/
 e2e-captures/
+
+# Dossier local de travail Impeccable (captures, critiques, cache)
+/.impeccable/
