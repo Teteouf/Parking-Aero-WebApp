@@ -124,29 +124,34 @@
           "origine": null,
           "fonction_agent": null
         },
-        "5.2_offsite": {
-          "question": "Hors terminal ? (oui/non)",
+        "5.2_contact_ou_large": {
+          "question": "Le poste est-il au contact (relié au bâtiment) ou au large (à distance) ? Comment rejoint-on le terminal : passerelle, bus, à pied, autre ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "liaison_terminal": null
         },
-        "5.3_ramp": {
-          "question": "Rampe nécessaire ? (oui/non)",
+        "5.3_rampe": {
+          "question": "Une rampe est-elle nécessaire ? Sur quel parcours et pour quel utilisateur ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "parcours": null,
+          "utilisateur": null
         },
-        "5.4_elevator": {
-          "question": "Ascenseur nécessaire ? (oui/non)",
+        "5.4_ascenseur": {
+          "question": "Un ascenseur est-il nécessaire ? Sur quel parcours et pour quel utilisateur ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "parcours": null,
+          "utilisateur": null
         },
         "6.1_nom_futur_terminal4": {
           "question": "Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027)",
@@ -262,29 +267,34 @@
           "origine": null,
           "fonction_agent": null
         },
-        "5.2_offsite": {
-          "question": "Hors terminal ? (oui/non)",
+        "5.2_contact_ou_large": {
+          "question": "Le poste est-il au contact (relié au bâtiment) ou au large (à distance) ? Comment rejoint-on le terminal : passerelle, bus, à pied, autre ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "liaison_terminal": null
         },
-        "5.3_ramp": {
-          "question": "Rampe nécessaire ? (oui/non)",
+        "5.3_rampe": {
+          "question": "Une rampe est-elle nécessaire ? Sur quel parcours et pour quel utilisateur ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "parcours": null,
+          "utilisateur": null
         },
-        "5.4_elevator": {
-          "question": "Ascenseur nécessaire ? (oui/non)",
+        "5.4_ascenseur": {
+          "question": "Un ascenseur est-il nécessaire ? Sur quel parcours et pour quel utilisateur ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "parcours": null,
+          "utilisateur": null
         },
         "6.1_nom_futur_terminal4": {
           "question": "Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027)",
@@ -400,29 +410,34 @@
           "origine": null,
           "fonction_agent": null
         },
-        "5.2_offsite": {
-          "question": "Hors terminal ? (oui/non)",
+        "5.2_contact_ou_large": {
+          "question": "Le poste est-il au contact (relié au bâtiment) ou au large (à distance) ? Comment rejoint-on le terminal : passerelle, bus, à pied, autre ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "liaison_terminal": null
         },
-        "5.3_ramp": {
-          "question": "Rampe nécessaire ? (oui/non)",
+        "5.3_rampe": {
+          "question": "Une rampe est-elle nécessaire ? Sur quel parcours et pour quel utilisateur ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "parcours": null,
+          "utilisateur": null
         },
-        "5.4_elevator": {
-          "question": "Ascenseur nécessaire ? (oui/non)",
+        "5.4_ascenseur": {
+          "question": "Un ascenseur est-il nécessaire ? Sur quel parcours et pour quel utilisateur ?",
           "valeur": null,
           "statut": "à confirmer",
           "date_confirmation": null,
           "origine": null,
-          "fonction_agent": null
+          "fonction_agent": null,
+          "parcours": null,
+          "utilisateur": null
         },
         "6.1_nom_futur_terminal4": {
           "question": "Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027)",

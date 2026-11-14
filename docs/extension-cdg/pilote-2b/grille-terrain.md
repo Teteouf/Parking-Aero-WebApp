@@ -57,9 +57,9 @@ Date de l'entretien : ____ /____ /______  Fonction de l'agent : ________________
 | 3.4 | La porte affichée aux passagers est-elle la porte physique utilisée ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | ☐ Ponct. ☐ Hab. | | |
 | 4.1 | Le poste est-il une variante d'un autre poste, qu'on ne peut pas occuper en même temps ? Lequel ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 5.1 | Section ou lettre de zone | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.2 | Hors terminal ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.3 | Rampe nécessaire ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.4 | Ascenseur nécessaire ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.2 | Le poste est-il **au contact** (relié au bâtiment) ou **au large** (à distance) ? Comment rejoint-on le terminal : passerelle, bus, à pied, autre ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.3 | Une **rampe** est-elle nécessaire ? Sur quel parcours (de la porte à l’avion, de la salle au bus, du bus à l’avion…) et pour quel utilisateur (passager en fauteuil, passager à mobilité réduite, agent avec matériel…) ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.4 | Un **ascenseur** est-il nécessaire ? Sur quel parcours (changement de niveau entre salle, porte, bus et avion) et pour quel utilisateur ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 6.1 | Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 7.1 | Remarques libres de l'agent | | — | — | | |
 
@@ -88,9 +88,9 @@ Date de l'entretien : ____ /____ /______  Fonction de l'agent : ________________
 | 3.4 | La porte affichée aux passagers est-elle la porte physique utilisée ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | ☐ Ponct. ☐ Hab. | | |
 | 4.1 | **B24 et B26 peuvent-ils être occupés en même temps ? Ont-ils la même porte ?** | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 5.1 | Section ou lettre de zone | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.2 | Hors terminal ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.3 | Rampe nécessaire ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.4 | Ascenseur nécessaire ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.2 | Le poste est-il **au contact** (relié au bâtiment) ou **au large** (à distance) ? Comment rejoint-on le terminal : passerelle, bus, à pied, autre ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.3 | Une **rampe** est-elle nécessaire ? Sur quel parcours (de la porte à l’avion, de la salle au bus, du bus à l’avion…) et pour quel utilisateur (passager en fauteuil, passager à mobilité réduite, agent avec matériel…) ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.4 | Un **ascenseur** est-il nécessaire ? Sur quel parcours (changement de niveau entre salle, porte, bus et avion) et pour quel utilisateur ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 6.1 | Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 7.1 | Remarques libres de l'agent | | — | — | | |
 
@@ -119,9 +119,9 @@ Date de l'entretien : ____ /____ /______  Fonction de l'agent : ________________
 | 3.4 | La porte affichée aux passagers est-elle la porte physique utilisée ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | ☐ Ponct. ☐ Hab. | | |
 | 4.1 | **B26 et B24 peuvent-ils être occupés en même temps ? Ont-ils la même porte ?** | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 5.1 | Section ou lettre de zone | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.2 | Hors terminal ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.3 | Rampe nécessaire ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
-| 5.4 | Ascenseur nécessaire ? (oui/non) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.2 | Le poste est-il **au contact** (relié au bâtiment) ou **au large** (à distance) ? Comment rejoint-on le terminal : passerelle, bus, à pied, autre ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.3 | Une **rampe** est-elle nécessaire ? Sur quel parcours (de la porte à l’avion, de la salle au bus, du bus à l’avion…) et pour quel utilisateur (passager en fauteuil, passager à mobilité réduite, agent avec matériel…) ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
+| 5.4 | Un **ascenseur** est-il nécessaire ? Sur quel parcours (changement de niveau entre salle, porte, bus et avion) et pour quel utilisateur ? | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 6.1 | Futur nom de la porte au passage au Terminal 4 (annoncé pour le 16/03/2027) | | ☐ À conf. ☐ Conf. ☐ Var. ☐ Inc. | — | | |
 | 7.1 | Remarques libres de l'agent | | — | — | | |
 
