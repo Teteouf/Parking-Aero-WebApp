@@ -71,7 +71,7 @@
   }
 
   function terminalText(item) {
-    return item.certain ? `Terminal ${item.terminal}` : `Terminal non établi · secteur ${item.sector}`;
+    return item.certain ? `Terminal ${item.terminal}` : `Terminal à confirmer (secteur ${item.sector})`;
   }
 
   return { TERMINALS, createCatalog, search, find, terminalText };

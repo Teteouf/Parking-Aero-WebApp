@@ -6,7 +6,7 @@ const { openApp, search, visibleMappings } = require('./helpers');
 async function openStand(page, code) {
   await search(page, code);
   await page.locator('#results [data-documented="stand"]').click();
-  await expect(page.getByRole('dialog', { name: 'Poste documenté' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Parking documenté' })).toBeVisible();
 }
 
 async function fillGateDraft(page, gate = 'B22') {
@@ -34,19 +34,19 @@ test.describe('Vérification et pilote 2B', () => {
     test(`${code} est un poste documenté, porte à confirmer, distinct des correspondances`, async ({ page }) => {
       await openApp(page);
       await search(page, code);
-      await expect(page.locator('#resultsCount')).toHaveText('0 correspondances · 1 poste documenté · 1 porte documentée');
+      await expect(page.locator('#resultsCount')).toHaveText('0 correspondances · 1 parking documenté · 1 porte documentée');
       await expect(page.locator('#results .mapping-card')).toHaveCount(0);
-      await expect(page.getByRole('heading', { name: 'Postes et portes documentés · terminaux 2A à 2D' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Parkings et portes documentés · terminaux 2A à 2D' })).toBeVisible();
       const card = page.locator('#results .stand-card').filter({ has: page.locator('[data-documented="stand"]') });
       await expect(card).toHaveCount(1);
       // La porte du même code est affichée à part, sans lien avec le poste.
-      await expect(page.locator('#results [data-documented="gate"]')).toHaveAccessibleName(`Porte documentée ${code}, Terminal 2B, poste à confirmer, détails`);
+      await expect(page.locator('#results [data-documented="gate"]')).toHaveAccessibleName(`Porte ${code}, parking à confirmer, Terminal 2B, détails`);
       await expect(card.locator('.point-code').first()).toHaveText(code);
       await expect(card.locator('.gate-pending')).toHaveText('À confirmer');
       await expect(card.locator('.gate-code')).toHaveCount(0);
-      await expect(card.locator('.mapping-open')).toHaveAccessibleName(`Poste documenté ${code}, Terminal 2B, porte à confirmer, détails`);
+      await expect(card.locator('.mapping-open')).toHaveAccessibleName(`Parking ${code}, porte à confirmer, Terminal 2B, détails`);
       await card.locator('.mapping-open').click();
-      const detail = page.getByRole('dialog', { name: 'Poste documenté' });
+      const detail = page.getByRole('dialog', { name: 'Parking documenté' });
       await expect(detail).toContainText('Porte à confirmer');
       await expect(detail).toContainText('AD 2 LFPG APDC 01');
       await expect(detail).toContainText('ne fait pas partie des 169 correspondances');
@@ -90,7 +90,7 @@ test.describe('Vérification et pilote 2B', () => {
     await page.locator('#results .mapping-open').click();
     await page.getByRole('button', { name: 'Confirmer cette information' }).click();
     const form = page.getByRole('dialog', { name: 'Confirmer cette information' });
-    await expect(form.locator('#confirmStatement')).toHaveText('Vous confirmez : poste F21 → porte F21.');
+    await expect(form.locator('#confirmStatement')).toHaveText('Vous confirmez : parking F21 → porte F21.');
     await expect(form.getByLabel('Porte utilisée')).toHaveCount(0);
     await expect(form.getByLabel('Date de l’observation')).toBeFocused();
     await expect(form.locator('#contributionContext')).toContainText('Validée par le responsable');

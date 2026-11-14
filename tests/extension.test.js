@@ -85,7 +85,7 @@ test('the terminal of a gate comes from its source, not from its first letter', 
 test('an uncertain attachment stays uncertain', () => {
   for (const stand of catalog.stands.filter(item => !item.certain)) {
     assert.equal(stand.terminal, null);
-    assert.match(extension.terminalText(stand), /Terminal non établi · secteur 2[A-D]/);
+    assert.match(extension.terminalText(stand), /^Terminal à confirmer \(secteur 2[A-D]\)$/);
     assert.match(stand.basis, /non établi/);
   }
 });

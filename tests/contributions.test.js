@@ -51,7 +51,7 @@ test('the message carries the prefilled values and the answers, without claiming
   const context = { code: 'B20', gates: '', terminal: '2B', status: 'Porte à confirmer' };
   const message = buildMessage('gate', context, values);
   assert.equal(message.subject, '[CDG Parking] Porte proposée — B20');
-  for (const part of ['Poste (parking) : B20', 'Porte(s) affichée(s) : à confirmer', 'Porte proposée : B22', 'Date de l’observation : 2026-11-14',
+  for (const part of ['Parking : B20', 'Porte(s) affichée(s) : à confirmer', 'Porte proposée : B22', 'Date de l’observation : 2026-11-14',
     'Origine : Vu directement', 'Nature : Fonctionnement habituel', 'Conditions éventuelles : Vols Schengen', 'ne modifie pas les données']) {
     assert(message.body.includes(part), part);
   }
@@ -61,7 +61,7 @@ test('the message carries the prefilled values and the answers, without claiming
 test('a confirmation restates the displayed mapping', () => {
   const message = buildMessage('confirm', { code: 'F21', gates: 'F21', terminal: '2F - Porte F1', status: 'Validée par le responsable' },
     { ...values, answer: '', nature: 'once' });
-  assert.match(message.body, /Je confirme : poste F21 → porte\(s\) F21/);
+  assert.match(message.body, /Je confirme : parking F21 → porte\(s\) F21/);
   assert.match(message.body, /Nature : Observation ponctuelle/);
 });
 
