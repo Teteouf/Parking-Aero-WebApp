@@ -44,3 +44,20 @@ Les 169 correspondances d'origine sont inchangées. Les sources, leurs dates et 
 - Un renommage est annoncé pour le 16/03/2027 (2B et 2D deviendraient le Terminal 4), d'après Air France et Connexion France. Je n'ai trouvé aucune source ADP qui le confirme.
 - Les trois postes du pilote (B20, B24, B26) sont désormais fournis par l'extension, sans doublon. Leurs notes sont conservées.
 - **La couverture n'est pas déclarée complète.**
+
+## 2C
+
+| Indicateur | Valeur |
+|---|---|
+| Postes documentés | **14** (S1) : 10 face au bâtiment C (C02 à C14 numéros pairs, C4A, CFW, CFE), 4 de rattachement incertain |
+| Portes documentées | **12** (S3) : C80 à C91 |
+| Relations étayées | **0** |
+| Postes dont la porte reste inconnue | **14** |
+
+**Postes de rattachement incertain :** C03, C05, C07 et CF9, sur la rangée sud, de l'autre côté de la voie P1.
+
+**Limites :**
+- Aucune carte eAIP n'écrit « 2C ». Le rattachement repose sur l'étiquette « C » d'APDC 01, et sur le fait que le plan Paris Aéroport place les portes « Terminal 2C » sur ce bâtiment.
+- L'eAIP (AD 2.20, page du 19 FEB 2026) associe CFW et CFE à « l'aire CHARLIE », sans nommer de terminal.
+- Les portes C80 à C91 du plan ne correspondent à aucun code de poste. Aucune porte C02 à C14 n'a été trouvée.
+- **La couverture n'est pas déclarée complète.**

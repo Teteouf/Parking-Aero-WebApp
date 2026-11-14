@@ -120,3 +120,11 @@ test('a sourced relation would be shown with its provenance', () => {
   assert.deepEqual(stand.relations[0].gates, ['A44']);
   assert.equal(stand.relations[0].proof, 'Source test, page 1');
 });
+
+test('2C: alphanumeric stand codes (CFW, CFE, C4A, CF9) are searchable and keep their source note', () => {
+  if (!data.terminalsIncluded.includes('2C')) return;
+  assert.deepEqual(extension.search(catalog, 'cfw').stands.map(item => item.code), ['CFW']);
+  assert.deepEqual(extension.search(catalog, 'C 4A').stands.map(item => item.code), ['C4A']);
+  assert.match(extension.find(catalog, 'stand', 'CFE').note, /aire CHARLIE/);
+  assert.equal(extension.find(catalog, 'stand', 'CF9').certain, false);
+});

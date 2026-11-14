@@ -7,7 +7,8 @@
     "consulted": "2026-11-14 et 2026-11-15",
     "terminalsIncluded": [
       "2A",
-      "2B"
+      "2B",
+      "2C"
     ],
     "sources": {
       "S1": {
@@ -35,6 +36,10 @@
       "2B": {
         "building": "B",
         "basis": "APDC 01 écrit « B » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2B »."
+      },
+      "2C": {
+        "building": "C",
+        "basis": "APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20)."
       }
     },
     "stands": [
@@ -604,6 +609,212 @@
           "S2b"
         ],
         "relations": []
+      },
+      {
+        "code": "C02",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'07.65\"N 002°33'56.88\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C03",
+        "terminal": null,
+        "sector": "2C",
+        "position": "secteur",
+        "ins": "49°00'01.08\"N 002°34'00.99\"E",
+        "basis": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C04",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'07.56\"N 002°34'00.06\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C05",
+        "terminal": null,
+        "sector": "2C",
+        "position": "secteur",
+        "ins": "49°00'00.75\"N 002°34'04.31\"E",
+        "basis": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C06",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'07.33\"N 002°34'02.54\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C07",
+        "terminal": null,
+        "sector": "2C",
+        "position": "secteur",
+        "ins": "49°00'00.91\"N 002°34'07.23\"E",
+        "basis": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C08",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'08.10\"N 002°34'05.53\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C10",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'07.43\"N 002°34'08.24\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C12",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'08.20\"N 002°34'08.33\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C14",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'09.17\"N 002°34'10.82\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C4A",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'07.29\"N 002°34'00.05\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "CF9",
+        "terminal": null,
+        "sector": "2C",
+        "position": "secteur",
+        "ins": "49°00'00.94\"N 002°34'04.91\"E",
+        "basis": "Rangée sud, de l’autre côté de la voie P1 ; position oblique. Rattachement au terminal non établi.",
+        "note": "",
+        "sources": [
+          "S1",
+          "S2"
+        ],
+        "relations": []
+      },
+      {
+        "code": "CFE",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'09.09\"N 002°34'10.89\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "L’eAIP associe ce poste à « l’aire CHARLIE » (AD 2.20, risques de souffle).",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "CFW",
+        "terminal": "2C",
+        "sector": "2C",
+        "position": "face-batiment",
+        "ins": "49°00'07.65\"N 002°33'57.26\"E",
+        "basis": "Fait face au bâtiment « C » sur APDC 01. APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20).",
+        "note": "L’eAIP associe ce poste à « l’aire CHARLIE » (AD 2.20, risques de souffle).",
+        "sources": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "relations": []
       }
     ],
     "gates": [
@@ -912,6 +1123,126 @@
         "terminal": "2B",
         "level": "1",
         "poiId": 10256,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C80",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1655,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C81",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1656,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C82",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1657,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C83",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1658,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C84",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1659,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C85",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1660,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C86",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1661,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C87",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1662,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C88",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1663,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C89",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1664,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C90",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1665,
+        "sources": [
+          "S3"
+        ],
+        "relations": []
+      },
+      {
+        "code": "C91",
+        "terminal": "2C",
+        "level": "1",
+        "poiId": 1666,
         "sources": [
           "S3"
         ],
