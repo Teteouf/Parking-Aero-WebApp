@@ -9,10 +9,10 @@
  *   variable peut très bien être vérifiée.
  */
 (function (root, factory) {
-  const api = factory(root.ParkingCore || (typeof require === 'function' ? require('./core') : null));
+  const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ParkingVerification = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function (core) {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
   const STATUS = {
@@ -77,23 +77,7 @@
     usage: USAGE.undocumented,
   }));
 
-  /** Recherche dans les postes documentés, avec la même normalisation que searchParking. */
-  function searchDocumented(query, filter = 'all') {
-    if (!core || filter !== 'all') return [];
-    const text = core.normalize(query);
-    if (!text) return [];
-    const code = core.pointCode(query);
-    const exact = DOCUMENTED_STANDS.filter(stand => core.pointCode(stand.code) === code);
-    if (exact.length) return exact;
-    const needle = text.replace(/[\s.-]/g, '');
-    if (needle.length < 2) return [];
-    return DOCUMENTED_STANDS.filter(stand => [stand.code, stand.terminal, 'PILOTE', 'POSTE DOCUMENTE']
-      .some(value => core.normalize(value).replace(/[\s.-]/g, '').includes(needle)));
-  }
-
-  function findDocumented(code) {
-    return DOCUMENTED_STANDS.find(stand => stand.code === code) || null;
-  }
-
-  return { STATUS, USAGE, MANAGER_VALIDATED, DOCUMENTED_STANDS, verificationFor, searchDocumented, findDocumented };
+  // Postes du pilote 2B : repris par ParkingExtension tant que le terminal 2B n’est pas intégré.
+  const PILOT_STANDS = DOCUMENTED_STANDS;
+  return { STATUS, USAGE, MANAGER_VALIDATED, DOCUMENTED_STANDS, PILOT_STANDS, verificationFor };
 });

@@ -1,0 +1,84 @@
+{
+  "consulte": "2026-11-15",
+  "methode": "Lecture visuelle de la carte AD 2 LFPG APDC 01 (01 OCT 2026), rendue à 300 dpi : direction des flèches « Position INS » de chaque poste par rapport aux bâtiments étiquetés A, B, C et D. La première lettre du code n’est jamais utilisée seule.",
+  "niveaux": {
+    "face-batiment": "La flèche du poste pointe vers la façade du bâtiment étiqueté sur APDC 01. Déduction cartographique, pas un énoncé de source.",
+    "secteur": "Poste situé dans le secteur du bâtiment, mais séparé de sa façade (autre côté d’une voie, aire isolée). Rattachement au terminal incertain."
+  },
+  "batiments": {
+    "2A": { "etiquette": "A", "nomme_par": "APDC 01 écrit seulement « A » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2A ». Le plan Paris Aéroport (S3) place les portes « Terminal 2A » sur ce même bâtiment : concordance de position entre deux sources." },
+    "2B": { "etiquette": "B", "nomme_par": "APDC 01 écrit « B » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2B »." },
+    "2C": { "etiquette": "C", "nomme_par": "APDC 01 écrit seulement « C » dans « TERMINAL 2 ». Aucune carte eAIP n’écrit « 2C ». Le plan Paris Aéroport (S3) place les portes « Terminal 2C » sur ce même bâtiment. L’eAIP associe CFW et CFE à « l’aire CHARLIE » (AD 2.20)." },
+    "2D": { "etiquette": "D", "nomme_par": "APDC 01 écrit « D » ; GMC 03 (11 JUN 2026) nomme ce bâtiment « TERMINAL 2D »." }
+  },
+  "postes": {
+    "2A": {
+      "face-batiment": ["A04", "A06", "A08", "A10", "A12", "A14", "A16", "A18"],
+      "secteur": {
+        "A01": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "A03": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "A05": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "A07": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "A09": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "A30": "Aire isolée à l’ouest du bâtiment A.",
+        "A32": "Aire isolée à l’ouest du bâtiment A.",
+        "A34": "Aire isolée à l’ouest du bâtiment A.",
+        "A38": "Aire isolée à l’ouest du bâtiment A.",
+        "A39": "Aire au sud-ouest, de l’autre côté de la voie P1."
+      }
+    },
+    "2B": {
+      "face-batiment": ["B02", "B04", "B06", "B08", "B10", "B12", "B14", "B16", "B18", "B20", "B22", "B24", "B26"],
+      "secteur": {
+        "B01": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "B03": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "B05": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "B07": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "B09": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "B11": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "B13": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "B15": "Îlot au nord de la voie G3, en face des bâtiments B et D."
+      }
+    },
+    "2C": {
+      "face-batiment": ["C02", "C04", "C06", "C08", "C10", "C12", "C14", "C4A", "CFE", "CFW"],
+      "secteur": {
+        "C03": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "C05": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "C07": "Rangée sud, de l’autre côté de la voie P1 ; flèche orientée vers le sud.",
+        "CF9": "Rangée sud, de l’autre côté de la voie P1 ; position oblique."
+      }
+    },
+    "2D": {
+      "face-batiment": ["D02", "D06", "D08", "D10", "D12", "D14", "D16", "D18", "D20"],
+      "secteur": {
+        "D22": "Flèche dirigée vers la jonction entre les bâtiments B et D.",
+        "D24": "Position à la jonction entre les bâtiments B et D.",
+        "D03": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D05": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D07": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D09": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D11": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D13": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D15": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D17": "Îlot au nord de la voie G3, en face des bâtiments B et D.",
+        "D19": "Îlot au nord de la voie G3, en face des bâtiments B et D."
+      }
+    }
+  },
+  "notes": {
+    "B20": "Une porte B20 existe aussi en 2B. Aucune source ne relie le poste B20 à cette porte.",
+    "B24": "Point INS à environ 12 m de celui du poste B26 : postes peut-être superposés (hypothèse). Une porte B24 existe aussi en 2B, sans lien établi.",
+    "B26": "Poste B le plus à l’ouest de sa rangée. Une porte B26 existe aussi en 2B, sans lien établi.",
+    "B16": "Point INS à environ 21 m de celui du poste B18 : postes peut-être superposés (hypothèse).",
+    "B18": "Point INS à environ 21 m de celui du poste B16 : postes peut-être superposés (hypothèse).",
+    "B10": "Une porte B10 existe aussi en 2B (niveau 0). Aucune source ne relie le poste B10 à cette porte.",
+    "B12": "Une porte B12 existe aussi en 2B (niveau 0). Aucune source ne relie le poste B12 à cette porte.",
+    "B22": "Une porte B22 existe aussi en 2B. Aucune source ne relie le poste B22 à cette porte.",
+    "A38": "Une porte A38 existe aussi en 2A. Aucune source ne relie le poste A38 à cette porte.",
+    "A39": "Une porte A39 existe aussi en 2A. Aucune source ne relie le poste A39 à cette porte.",
+    "CFW": "L’eAIP associe ce poste à « l’aire CHARLIE » (AD 2.20, risques de souffle).",
+    "CFE": "L’eAIP associe ce poste à « l’aire CHARLIE » (AD 2.20, risques de souffle)."
+  },
+  "relations": []
+}

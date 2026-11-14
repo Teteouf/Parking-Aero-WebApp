@@ -2,7 +2,10 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const { searchParking, codeRole, orderByCodeRole, prepareLocations, searchLocations, pointCode, normalize } = window.ParkingCore;
-  const { verificationFor, searchDocumented, findDocumented } = window.ParkingVerification;
+  const { verificationFor, PILOT_STANDS } = window.ParkingVerification;
+  const extension = window.ParkingExtension;
+  // Données d'extension isolées (extension-data.js), fusionnées sans doublon avec le pilote 2B.
+  const catalog = extension.createCatalog(window.PARKING_EXTENSION, PILOT_STANDS);
   const contributions = window.ParkingContributions;
   const mappings = window.PARKING_MAPPINGS;
   const appBase = new URL('./', document.baseURI);
@@ -52,13 +55,35 @@
       ${badgeHtml(mapping) ? `<span class="badges">${badgeHtml(mapping)}</span>` : ''}</button>${favoriteButton({ mode: 'parking', query: mapping.parkingCode }, 'la correspondance ' + mapping.parkingCode)}</article>`;
   }
 
-  /** Poste documenté par le pilote 2B : jamais présenté comme une correspondance. */
-  function documentedHtml(stand) {
-    return `<article class="stand-card"><button type="button" class="mapping-open" data-documented="${escapeHtml(stand.code)}" aria-label="Poste documenté ${escapeHtml(stand.code)}, terminal ${escapeHtml(stand.terminal)}, porte à confirmer, détails">
-      <span class="mapping-line"><span class="mapping-side"><span class="code-label">Poste</span><span class="point-code">${escapeHtml(stand.code)}</span></span>
-      <span class="direction" aria-hidden="true">↔</span><span class="mapping-side"><span class="code-label">Porte</span><span class="point-code gate-pending">À confirmer</span></span></span>
-      <span class="mapping-meta">Terminal ${escapeHtml(stand.terminal)} · poste documenté par des sources publiques, sans porte établie</span></button></article>`;
+  function relationGates(item) {
+    return [...new Set(item.relations.flatMap(relation => relation.gates || []))];
   }
+
+  /** Poste avion documenté : la porte n'est affichée que si une relation est étayée. */
+  function standHtml(stand) {
+    const gates = relationGates(stand);
+    const gateText = gates.length ? gates.join(', ') : 'À confirmer';
+    return `<article class="stand-card"><button type="button" class="mapping-open" data-documented="stand" data-code="${escapeHtml(stand.code)}" aria-label="Poste documenté ${escapeHtml(stand.code)}, ${escapeHtml(extension.terminalText(stand))}, ${gates.length ? 'porte ' + escapeHtml(gateText) + ' selon une source citée' : 'porte à confirmer'}, détails">
+      <span class="mapping-line"><span class="mapping-side"><span class="code-label">Poste</span><span class="point-code">${escapeHtml(stand.code)}</span></span>
+      <span class="direction" aria-hidden="true">↔</span><span class="mapping-side"><span class="code-label">Porte</span><span class="point-code ${gates.length ? 'gate-code' : 'gate-pending'}">${escapeHtml(gateText)}</span></span></span>
+      <span class="mapping-meta">${escapeHtml(extension.terminalText(stand))} · poste avion documenté${gates.length ? ', correspondance sourcée' : ', sans porte établie'}</span>
+      ${stand.certain ? '' : '<span class="badges"><span class="badge pending">Rattachement incertain</span></span>'}</button></article>`;
+  }
+
+  /** Porte passagers documentée : le poste reste à confirmer sans relation étayée. */
+  function gateDocHtml(gate) {
+    const stands = gate.relations.map(relation => relation.stand);
+    const standText = stands.length ? stands.join(', ') : 'À confirmer';
+    return `<article class="stand-card"><button type="button" class="mapping-open" data-documented="gate" data-code="${escapeHtml(gate.code)}" aria-label="Porte documentée ${escapeHtml(gate.code)}, ${escapeHtml(extension.terminalText(gate))}, ${stands.length ? 'poste ' + escapeHtml(standText) : 'poste à confirmer'}, détails">
+      <span class="mapping-line"><span class="mapping-side"><span class="code-label">Poste</span><span class="point-code ${stands.length ? '' : 'gate-pending'}">${escapeHtml(standText)}</span></span>
+      <span class="direction" aria-hidden="true">↔</span><span class="mapping-side"><span class="code-label">Porte</span><span class="point-code gate-code">${escapeHtml(gate.code)}</span></span></span>
+      <span class="mapping-meta">${escapeHtml(extension.terminalText(gate))} · porte passagers documentée, niveau ${escapeHtml(gate.level)}</span></button></article>`;
+  }
+
+  function plural(count, singular, pluralForm) {
+    return `${count} ${count === 1 ? singular : pluralForm}`;
+  }
+
 
   function favoriteButton(item, label, action = false) {
     const selected = preferences.hasFavorite(item);
@@ -112,9 +137,9 @@
     let matches;
     let exact;
     if (state.mode === 'parking') {
-      const documented = searchDocumented(query, state.filter);
-      matches = [...searchParking(mappings, query, state.filter), ...documented];
-      exact = matches.some(m => m.kind === 'documented' ? pointCode(m.code) === pointCode(query) : codeRole(m, query));
+      const documented = extension.search(catalog, query, state.filter);
+      matches = [...searchParking(mappings, query, state.filter), ...documented.stands, ...documented.gates];
+      exact = matches.some(m => m.type ? pointCode(m.code) === pointCode(query) : codeRole(m, query));
     } else {
       if (!state.locations) return;
       matches = searchLocations(state.locations, query);
@@ -147,24 +172,28 @@
     $('clearButton').hidden = !query;
     $('showMoreButton').hidden = true;
     renderShortcuts();
-    const secondaryFilter = ['1', 'access'].includes(state.filter);
+    const secondaryFilter = ['1', 'access', ...extension.TERMINALS].includes(state.filter);
     $('additionalFilters').hidden = !state.additionalFilters;
     $('filterMoreButton').textContent = (state.additionalFilters ? 'Moins' : 'Plus') + (secondaryFilter ? ' · 1' : '');
     $('filterMoreButton').classList.toggle('active', secondaryFilter);
     $('filterMoreButton').setAttribute('aria-expanded', String(state.additionalFilters));
     $('filterMoreButton').setAttribute('aria-label', (state.additionalFilters ? 'Masquer' : 'Afficher') + ' les autres filtres' + (secondaryFilter ? ', un filtre actif' : ''));
-    const filterLabels = { '2E': 'Terminal 2E', '2F': 'Terminal 2F', '2G': 'Terminal 2G', '1': 'Terminal 1', access: 'Rampe / ascenseur' };
+    const filterLabels = { '2E': 'Terminal 2E', '2F': 'Terminal 2F', '2G': 'Terminal 2G', '1': 'Terminal 1', access: 'Rampe / ascenseur',
+      ...Object.fromEntries(extension.TERMINALS.map(terminal => [terminal, `Terminal ${terminal}`])) };
     $('searchHint').textContent = state.mode === 'iata' ? 'Aéroports & villes' : filterLabels[state.filter] || 'Parking ↔ porte';
     if (state.mode === 'parking') {
       const matches = orderByCodeRole(searchParking(mappings, query, state.filter), query);
-      const documented = searchDocumented(query, state.filter);
-      const counted = `${matches.length} correspondance${matches.length === 1 ? '' : 's'}`;
-      $('resultsCount').textContent = query || state.filter !== 'all' ?
-        counted + (documented.length ? ` · ${documented.length} poste${documented.length === 1 ? '' : 's'} documenté${documented.length === 1 ? '' : 's'}` : '') :
-        `${mappings.length} points de parking`;
-      const documentedBlock = documented.length ? `<section class="results-group" aria-labelledby="documentedTitle"><h3 id="documentedTitle">Postes documentés · pilote 2B</h3>
-        <p>Postes relevés dans des sources publiques. Ils ne font pas partie des ${mappings.length} correspondances et aucune porte ne leur est attribuée.</p></section>${documented.map(documentedHtml).join('')}` : '';
-      $('results').innerHTML = matches.length || documented.length ? matches.map(mapping => mappingHtml(mapping, query)).join('') + documentedBlock :
+      const documented = extension.search(catalog, query, state.filter);
+      const documentedCount = documented.stands.length + documented.gates.length;
+      const pending = extension.TERMINALS.includes(state.filter) && !catalog.terminalsIncluded.includes(state.filter);
+      const parts = [plural(matches.length, 'correspondance', 'correspondances')];
+      if (documented.stands.length) parts.push(plural(documented.stands.length, 'poste documenté', 'postes documentés'));
+      if (documented.gates.length) parts.push(plural(documented.gates.length, 'porte documentée', 'portes documentées'));
+      $('resultsCount').textContent = query || state.filter !== 'all' ? parts.join(' · ') : `${mappings.length} points de parking`;
+      const documentedBlock = documentedCount ? `<section class="results-group" aria-labelledby="documentedTitle"><h3 id="documentedTitle">Postes et portes documentés · terminaux 2A à 2D</h3>
+        <p>Relevés dans des sources publiques (eAIP, plan Paris Aéroport). Ils ne font pas partie des ${mappings.length} correspondances : sans relation sourcée, la porte ou le poste reste à confirmer.</p></section>${documented.stands.map(standHtml).join('')}${documented.gates.map(gateDocHtml).join('')}` : '';
+      $('results').innerHTML = matches.length || documentedCount ? matches.map(mapping => mappingHtml(mapping, query)).join('') + documentedBlock :
+        pending ? emptyHtml(`Terminal ${state.filter} pas encore intégré`, 'Les postes et portes de ce terminal seront ajoutés dans une prochaine étape.') :
         emptyHtml('Aucune correspondance', 'Essayez un autre code ou changez le filtre de terminal.');
       return;
     }
@@ -257,7 +286,7 @@
     const mapping = mappings.find(item => item.parkingCode === code);
     if (!mapping) return;
     const verification = verificationFor(mapping);
-    state.detail = { kinds: ['confirm', 'correct'], code: mapping.parkingCode, gates: mapping.gates.join(', '),
+    state.detail = { type: 'mapping', kinds: ['confirm', 'correct'], code: mapping.parkingCode, gates: mapping.gates.join(', '),
       terminal: `${mapping.terminal} - Porte ${mapping.section}`, status: verification.status.label };
     $('detailTitle').textContent = 'Détails de la correspondance';
     $('detailBody').innerHTML = `<div class="detail-codes"><div><span class="code-label">Parking</span><span class="point-code">${escapeHtml(mapping.parkingCode)}</span></div><span class="direction" aria-hidden="true">↔</span><div><span class="code-label">Porte${mapping.gates.length > 1 ? 's' : ''}</span><span class="point-code gate-code">${escapeHtml(mapping.gates.join(', '))}</span></div></div>
@@ -268,18 +297,35 @@
     $('detailDialog').showModal();
   }
 
-  function openDocumented(code) {
-    const stand = findDocumented(code);
-    if (!stand) return;
-    state.detail = { kinds: ['gate', 'correct'], code: stand.code, gates: '', terminal: stand.terminal, status: stand.verification.label };
-    $('detailTitle').textContent = 'Poste documenté';
-    $('detailBody').innerHTML = `<div class="detail-codes is-pending"><div><span class="code-label">Poste</span><span class="point-code">${escapeHtml(stand.code)}</span></div><span class="direction" aria-hidden="true">↔</span><div><span class="code-label">Porte</span><span class="point-code gate-pending">À confirmer</span></div></div>
-      <dl class="detail-list"><div><dt>Terminal</dt><dd>${escapeHtml(stand.terminal)}</dd></div><div><dt>Point INS (eAIP)</dt><dd>${escapeHtml(stand.ins)}</dd></div></dl>
-      <p class="verification-note">${escapeHtml(stand.terminalBasis)} ${escapeHtml(stand.note)}</p>
-      ${verificationHtml(stand.verification, stand.usage)}
-      <section class="sources" aria-labelledby="sourcesTitle"><h3 id="sourcesTitle">Sources</h3><ul>${stand.sources.map(source => `<li><strong>${escapeHtml(source.id)}</strong> · ${escapeHtml(source.label)}</li>`).join('')}</ul>
-      <p class="verification-note">Consultées les ${escapeHtml(stand.consulted)}. Ce poste ne fait pas partie des ${mappings.length} correspondances.</p></section>
-      <div class="detail-actions"><button type="button" class="secondary-button" data-copy="${escapeHtml(stand.code)}">Copier le poste</button></div>
+  function sourcesHtml(item) {
+    return `<section class="sources" aria-labelledby="sourcesTitle"><h3 id="sourcesTitle">Sources</h3><ul>${item.sources.map(source => `<li><strong>${escapeHtml(source.id)}</strong> · ${escapeHtml(source.label)}${source.date ? ` (${escapeHtml(source.date)})` : ''}</li>`).join('')}</ul>
+      <p class="verification-note">Consultées les ${escapeHtml(catalog.consulted || '2026-11-14 et 2026-11-15')}. Cet élément ne fait pas partie des ${mappings.length} correspondances.</p></section>`;
+  }
+
+  function relationsHtml(item) {
+    if (!item.relations.length) return '';
+    return `<section class="verification" aria-labelledby="relationsTitle"><h3 id="relationsTitle">Correspondance documentée</h3><ul class="relation-list">${item.relations.map(relation =>
+      `<li>Poste ${escapeHtml(relation.stand)} → porte ${escapeHtml((relation.gates || []).join(', '))}${relation.conditions ? ` · ${escapeHtml(relation.conditions)}` : ''}<br><span class="verification-note">Provenance : ${escapeHtml(relation.proof)}</span></li>`).join('')}</ul></section>`;
+  }
+
+  function openDocumented(type, code) {
+    const item = extension.find(catalog, type, code);
+    if (!item) return;
+    const isGate = type === 'gate';
+    const linked = isGate ? item.relations.map(relation => relation.stand).join(', ') : relationGates(item).join(', ');
+    const status = linked ? { label: 'Correspondance sourcée', detail: 'La relation affichée provient d’une source citée ci-dessous.' } :
+      isGate ? { label: 'Poste à confirmer', detail: 'La porte est documentée par une source publique. Aucun poste ne lui est attribué tant qu’il n’est pas confirmé.' } :
+      { label: 'Porte à confirmer', detail: 'Le poste est documenté par des sources publiques. Aucune porte ne lui est attribuée tant qu’elle n’est pas confirmée.' };
+    state.detail = { type, kinds: [isGate ? 'stand' : 'gate', 'correct'], code: item.code, gates: isGate ? '' : linked,
+      terminal: extension.terminalText(item).replace(/^Terminal /, ''), status: status.label, draftCode: isGate ? `PORTE-${item.code}` : item.code };
+    $('detailTitle').textContent = isGate ? 'Porte documentée' : 'Poste documenté';
+    const pendingSide = text => `<span class="point-code ${linked ? 'gate-code' : 'gate-pending'}">${escapeHtml(linked || text)}</span>`;
+    $('detailBody').innerHTML = `<div class="detail-codes${linked ? '' : ' is-pending'}"><div><span class="code-label">Poste</span>${isGate ? pendingSide('À confirmer') : `<span class="point-code">${escapeHtml(item.code)}</span>`}</div><span class="direction" aria-hidden="true">↔</span><div><span class="code-label">Porte</span>${isGate ? `<span class="point-code gate-code">${escapeHtml(item.code)}</span>` : pendingSide('À confirmer')}</div></div>
+      <dl class="detail-list"><div><dt>Terminal</dt><dd>${escapeHtml(item.certain ? item.terminal : `Non établi (secteur ${item.sector})`)}</dd></div>
+      ${isGate ? `<div><dt>Niveau (plan)</dt><dd>${escapeHtml(item.level)}</dd></div>` : `<div><dt>Point INS (eAIP)</dt><dd>${escapeHtml(item.ins)}</dd></div>`}</dl>
+      ${isGate ? '<p class="verification-note">Fiche « Porte d’embarquement » du plan Paris Aéroport. Le plan n’indique pas les postes desservis.</p>' : `<p class="verification-note">${escapeHtml(item.basis)}${item.note ? ' ' + escapeHtml(item.note) : ''}</p>`}
+      ${relationsHtml(item)}${verificationHtml(status, { label: 'Non documentées' })}${sourcesHtml(item)}
+      <div class="detail-actions"><button type="button" class="secondary-button" data-copy="${escapeHtml(item.code)}">Copier ${isGate ? 'la porte' : 'le poste'}</button></div>
       ${contributeHtml(state.detail.kinds)}`;
     $('detailDialog').showModal();
   }
@@ -317,17 +363,19 @@
     contributionForm.reset();
     resetFieldStates();
     $('contributionTitle').textContent = contributions.KINDS[kind].title;
-    $('contributionContext').innerHTML = `<div><dt>Poste (parking)</dt><dd>${escapeHtml(detail.code)}</dd></div><div><dt>Porte${detail.gates.includes(',') ? 's' : ''} affichée${detail.gates.includes(',') ? 's' : ''}</dt><dd>${escapeHtml(detail.gates || 'À confirmer')}</dd></div>
+    $('contributionContext').innerHTML = (detail.type === 'gate' ? `<div><dt>Porte</dt><dd>${escapeHtml(detail.code)}</dd></div><div><dt>Poste affiché</dt><dd>À confirmer</dd></div>` :
+      `<div><dt>Poste (parking)</dt><dd>${escapeHtml(detail.code)}</dd></div><div><dt>Porte${detail.gates.includes(',') ? 's' : ''} affichée${detail.gates.includes(',') ? 's' : ''}</dt><dd>${escapeHtml(detail.gates || 'À confirmer')}</dd></div>`) + `
       <div><dt>Terminal</dt><dd>${escapeHtml(detail.terminal)}</dd></div><div><dt>État affiché</dt><dd>${escapeHtml(detail.status)}</dd></div>`;
     const confirming = kind === 'confirm';
     $('confirmStatement').hidden = !confirming;
     $('confirmStatement').textContent = confirming ? `Vous confirmez : poste ${detail.code} → porte${detail.gates.includes(',') ? 's' : ''} ${detail.gates}.` : '';
     $('answerField').hidden = confirming;
     $('contribAnswer').disabled = confirming;
-    $('answerLabel').textContent = kind === 'gate' ? 'Porte utilisée' : 'Correction proposée';
-    $('answerHint').textContent = kind === 'gate' ? 'La porte réellement utilisée pour ce poste, par exemple B22.' : 'La valeur correcte, par exemple une autre porte ou un autre terminal.';
+    $('answerLabel').textContent = kind === 'gate' ? 'Porte utilisée' : kind === 'stand' ? 'Poste avion desservi' : 'Correction proposée';
+    $('answerHint').textContent = kind === 'gate' ? 'La porte réellement utilisée pour ce poste, par exemple B22.' :
+      kind === 'stand' ? 'Le poste avion réellement desservi par cette porte, par exemple A10.' : 'La valeur correcte, par exemple une autre porte ou un autre terminal.';
     $('contribDate').max = today();
-    const draft = drafts.get(kind, detail.code);
+    const draft = drafts.get(kind, detail.draftCode || detail.code);
     if (draft) {
       for (const field of contributions.FIELDS) {
         const control = contributionForm.elements[field];
@@ -353,7 +401,7 @@
   function saveDraft() {
     const current = state.contribution;
     if (!current) return;
-    const result = drafts.save(current.kind, current.code, formValues());
+    const result = drafts.save(current.kind, current.draftCode || current.code, formValues());
     showDraftStatus(result.draft, result.saved);
   }
 
@@ -449,7 +497,7 @@
   $('discardDraftButton').addEventListener('click', () => {
     const current = state.contribution;
     if (!current) return;
-    const saved = drafts.remove(current.kind, current.code);
+    const saved = drafts.remove(current.kind, current.draftCode || current.code);
     contributionForm.reset();
     resetFieldStates();
     if (current.kind === 'correct') $('contribAnswer').value = current.gates;
@@ -482,7 +530,7 @@
 
   async function openDataInfo() {
     $('infoTitle').textContent = 'À propos des données';
-    $('infoBody').innerHTML = `<div class="info-content"><h3>Parkings & portes</h3><p>Les ${mappings.length} correspondances de l’antisèche d’origine ont été conservées. Les accès rampe, ascenseur et les emplacements au large sont affichés lorsqu’ils sont renseignés.</p><p>Chaque fiche indique son état de vérification. « Validée par le responsable » reprend une déclaration du responsable de l’application ; « Vérification à documenter » signifie seulement qu’aucune source n’est encore enregistrée.</p><p>Les postes B20, B24 et B26 (pilote 2B) viennent de sources publiques (eAIP). Ils ne font pas partie des correspondances et leur porte reste à confirmer. Depuis une fiche, vous pouvez préparer une confirmation ou une correction : elle ne modifie pas les données.</p>
+    $('infoBody').innerHTML = `<div class="info-content"><h3>Parkings & portes</h3><p>Les ${mappings.length} correspondances de l’antisèche d’origine ont été conservées. Les accès rampe, ascenseur et les emplacements au large sont affichés lorsqu’ils sont renseignés.</p><p>Chaque fiche indique son état de vérification. « Validée par le responsable » reprend une déclaration du responsable de l’application ; « Vérification à documenter » signifie seulement qu’aucune source n’est encore enregistrée.</p><p>Terminaux 2A à 2D : les postes avion viennent de l’eAIP (AD 2 LFPG, carte APDC 01) et les portes du plan Paris Aéroport. Ils ne font pas partie des correspondances. Sans relation sourcée, la porte ou le poste reste à confirmer, et le rattachement au terminal est signalé lorsqu’il est incertain. Depuis une fiche, vous pouvez préparer une confirmation ou une correction : elle ne modifie pas les données.</p>
       <h3>Répertoire IATA</h3><p id="iataSourceInfo">Aéroports : OurAirports. Villes et regroupements : Travelpayouts. Ce répertoire public est une aide à la recherche ; il ne constitue pas le registre officiel exhaustif IATA.</p>
       <p><a href="https://ourairports.com/data/" target="_blank" rel="noopener noreferrer">OurAirports</a> · <a href="https://api.travelpayouts.com/data/fr/cities.json" target="_blank" rel="noopener noreferrer">Données de villes</a></p></div>`;
     $('infoDialog').showModal();
@@ -572,7 +620,7 @@
     const iata = event.target.closest('[data-iata]');
     if (parking) { rememberCurrentSearch(true); openDetail(parking.dataset.parking); }
     const documented = event.target.closest('[data-documented]');
-    if (documented) { rememberCurrentSearch(true); openDocumented(documented.dataset.documented); }
+    if (documented) { rememberCurrentSearch(true); openDocumented(documented.dataset.documented, documented.dataset.code); }
     if (iata) { clearTimeout(historyTimer); rememberCurrentSearch(true); $('searchInput').value = iata.dataset.iata; state.limit = 40; render(); rememberCurrentSearch(); }
   });
   $('quickAccess').addEventListener('click', event => {

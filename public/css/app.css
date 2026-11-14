@@ -184,3 +184,4 @@ dialog:modal { overscroll-behavior:contain; }
 dialog::backdrop { overflow:hidden; overscroll-behavior:contain; }
 ::selection { background:var(--soft); color:var(--ink); }
 .results-group:first-child { margin-top:0; padding-top:0; border-top:0; }
+.relation-list { margin:8px 0 0; padding-left:18px; font-size:14px; line-height:1.55; }

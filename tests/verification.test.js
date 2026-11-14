@@ -71,11 +71,7 @@ test('B20, B24 and B26 are documented stands without any gate', () => {
   }
 });
 
-test('documented stands are found by code (F03-style normalization) and hidden by terminal filters', () => {
-  assert.deepEqual(verification.searchDocumented('b 20').map(s => s.code), ['B20']);
-  assert.deepEqual(verification.searchDocumented('B024').map(s => s.code), ['B24']);
-  assert.deepEqual(verification.searchDocumented('2B').map(s => s.code), ['B20', 'B24', 'B26']);
-  assert.deepEqual(verification.searchDocumented('B20', '2E'), []);
-  assert.deepEqual(verification.searchDocumented(''), []);
-  assert.deepEqual(verification.searchDocumented('E22'), []);
+test('pilot stands stay available, without gates, until the extension covers their terminal', () => {
+  assert.deepEqual(verification.PILOT_STANDS.map(s => s.code), ['B20', 'B24', 'B26']);
+  for (const stand of verification.PILOT_STANDS) assert.equal(stand.gate, null);
 });

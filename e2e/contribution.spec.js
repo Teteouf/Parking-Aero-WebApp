@@ -36,13 +36,13 @@ test.describe('Vérification et pilote 2B', () => {
       await search(page, code);
       await expect(page.locator('#resultsCount')).toHaveText('0 correspondances · 1 poste documenté');
       await expect(page.locator('#results .mapping-card')).toHaveCount(0);
-      await expect(page.getByRole('heading', { name: 'Postes documentés · pilote 2B' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Postes et portes documentés · terminaux 2A à 2D' })).toBeVisible();
       const card = page.locator('#results .stand-card');
       await expect(card).toHaveCount(1);
       await expect(card.locator('.point-code').first()).toHaveText(code);
       await expect(card.locator('.gate-pending')).toHaveText('À confirmer');
       await expect(card.locator('.gate-code')).toHaveCount(0);
-      await expect(card.locator('.mapping-open')).toHaveAccessibleName(`Poste documenté ${code}, terminal 2B, porte à confirmer, détails`);
+      await expect(card.locator('.mapping-open')).toHaveAccessibleName(`Poste documenté ${code}, Terminal 2B, porte à confirmer, détails`);
       await card.locator('.mapping-open').click();
       const detail = page.getByRole('dialog', { name: 'Poste documenté' });
       await expect(detail).toContainText('Porte à confirmer');

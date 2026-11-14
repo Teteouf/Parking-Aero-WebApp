@@ -16,6 +16,7 @@
     confirm: { title: 'Confirmer cette information', subject: 'Confirmation' },
     correct: { title: 'Proposer une correction', subject: 'Correction proposée' },
     gate: { title: 'Je connais la porte', subject: 'Porte proposée' },
+    stand: { title: 'Je connais le poste', subject: 'Poste proposé' },
   };
 
   const ORIGINS = {
@@ -95,15 +96,15 @@
       `Contribution CDG Parking — ${kindInfo.title}`,
       '',
       'Fiche affichée :',
-      `- Poste (parking) : ${context.code}`,
-      `- Porte(s) affichée(s) : ${context.gates || 'à confirmer'}`,
+      ...(context.type === 'gate' ? [`- Porte : ${context.code}`, '- Poste(s) affiché(s) : à confirmer'] :
+        [`- Poste (parking) : ${context.code}`, `- Porte(s) affichée(s) : ${context.gates || 'à confirmer'}`]),
       `- Terminal : ${context.terminal}`,
       `- État de vérification affiché : ${context.status}`,
       '',
       'Contribution :',
     ];
     if (kind === 'confirm') lines.push(`- Je confirme : poste ${context.code} → porte(s) ${context.gates}`);
-    else lines.push(`- ${kind === 'gate' ? 'Porte proposée' : 'Correction proposée'} : ${values.answer || '[non renseignée]'}`);
+    else lines.push(`- ${{ gate: 'Porte proposée', stand: 'Poste proposé' }[kind] || 'Correction proposée'} : ${values.answer || '[non renseignée]'}`);
     lines.push(`- Date de l’observation : ${values.date || '[non renseignée]'}`);
     lines.push(`- Origine : ${ORIGINS[values.origin] || '[non renseignée]'}${values.originDetail ? ` (${values.originDetail})` : ''}`);
     lines.push(`- Nature : ${NATURES[values.nature] || '[non renseignée]'}`);
