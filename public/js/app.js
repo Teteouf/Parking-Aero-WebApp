@@ -2,10 +2,10 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const { searchParking, codeRole, orderByCodeRole, prepareLocations, searchLocations, pointCode, normalize } = window.ParkingCore;
-  const { verificationFor, PILOT_STANDS } = window.ParkingVerification;
+  const { verificationFor } = window.ParkingVerification;
   const extension = window.ParkingExtension;
-  // Données d'extension isolées (extension-data.js), fusionnées sans doublon avec le pilote 2B.
-  const catalog = extension.createCatalog(window.PARKING_EXTENSION, PILOT_STANDS);
+  // Données d'extension isolées (extension-data.js), générées depuis docs/extension-cdg/terminaux.
+  const catalog = extension.createCatalog(window.PARKING_EXTENSION);
   const contributions = window.ParkingContributions;
   const mappings = window.PARKING_MAPPINGS;
   const appBase = new URL('./', document.baseURI);

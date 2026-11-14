@@ -5,7 +5,7 @@ const { openApp, search, visibleMappings } = require('./helpers');
 
 async function openStand(page, code) {
   await search(page, code);
-  await page.locator('#results .stand-card .mapping-open').click();
+  await page.locator('#results [data-documented="stand"]').click();
   await expect(page.getByRole('dialog', { name: 'Poste documenté' })).toBeVisible();
 }
 
@@ -34,11 +34,13 @@ test.describe('Vérification et pilote 2B', () => {
     test(`${code} est un poste documenté, porte à confirmer, distinct des correspondances`, async ({ page }) => {
       await openApp(page);
       await search(page, code);
-      await expect(page.locator('#resultsCount')).toHaveText('0 correspondances · 1 poste documenté');
+      await expect(page.locator('#resultsCount')).toHaveText('0 correspondances · 1 poste documenté · 1 porte documentée');
       await expect(page.locator('#results .mapping-card')).toHaveCount(0);
       await expect(page.getByRole('heading', { name: 'Postes et portes documentés · terminaux 2A à 2D' })).toBeVisible();
-      const card = page.locator('#results .stand-card');
+      const card = page.locator('#results .stand-card').filter({ has: page.locator('[data-documented="stand"]') });
       await expect(card).toHaveCount(1);
+      // La porte du même code est affichée à part, sans lien avec le poste.
+      await expect(page.locator('#results [data-documented="gate"]')).toHaveAccessibleName(`Porte documentée ${code}, Terminal 2B, poste à confirmer, détails`);
       await expect(card.locator('.point-code').first()).toHaveText(code);
       await expect(card.locator('.gate-pending')).toHaveText('À confirmer');
       await expect(card.locator('.gate-code')).toHaveCount(0);
@@ -168,7 +170,7 @@ test.describe('Vérification et pilote 2B', () => {
     for (const theme of ['light', 'dark']) {
       await page.evaluate(value => { document.documentElement.dataset.theme = value; }, theme);
       await search(page, 'B20');
-      const ratio = await page.locator('#results .stand-card .gate-pending').evaluate(element => {
+      const ratio = await page.locator('#results [data-documented="stand"] .gate-pending').evaluate(element => {
         const rgb = value => value.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
         const lum = ([r, g, b]) => [r, g, b].map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; })
           .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);

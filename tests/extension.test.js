@@ -5,14 +5,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 const data = require('../public/js/extension-data');
 const extension = require('../public/js/extension');
-const { PILOT_STANDS } = require('../public/js/verification');
 const { searchParking } = require('../public/js/core');
 
 const docs = path.join(__dirname, '../docs/extension-cdg/terminaux/donnees');
 const read = name => JSON.parse(fs.readFileSync(path.join(docs, name), 'utf8'));
 const eaipStands = read('postes-eaip-ad2-8.json').postes;
 const planGates = read('portes-plan-paris-aeroport.json').portes;
-const catalog = extension.createCatalog(data, PILOT_STANDS);
+const catalog = extension.createCatalog(data);
 
 // Décompte attendu par terminal intégré : postes face au bâtiment, postes de rattachement
 // incertain, portes du plan, relations étayées.
@@ -56,13 +55,11 @@ test('nothing is invented: every stand comes from the eAIP table and every gate 
   for (const gate of data.gates) assert(planGates.some(item => item.code === gate.code && item.terminal === gate.terminal), gate.code);
 });
 
-test('no duplicates, even with the 2B pilot stands', () => {
+test('no duplicates in stands or gates', () => {
   for (const list of [catalog.stands, catalog.gates]) {
     const codes = list.map(item => item.code);
     assert.equal(new Set(codes).size, codes.length);
   }
-  const pilotCodes = PILOT_STANDS.map(stand => stand.code);
-  assert.equal(catalog.stands.filter(stand => pilotCodes.includes(stand.code)).length, pilotCodes.length);
 });
 
 test('stands and gates stay distinct when their codes are identical', () => {
@@ -77,6 +74,12 @@ test('stands and gates stay distinct when their codes are identical', () => {
 test('without a sourced relation, no gate is attached to a stand and no stand to a gate', () => {
   for (const stand of catalog.stands) if (!stand.relations.length) assert.equal(stand.type, 'stand');
   assert(catalog.stands.every(stand => stand.relations.every(relation => relation.proof)));
+});
+
+test('the terminal of a gate comes from its source, not from its first letter', () => {
+  if (!data.terminalsIncluded.includes('2B')) return;
+  for (const code of ['D40', 'D41']) assert.equal(extension.find(catalog, 'gate', code).terminal, '2B');
+  assert.deepEqual(extension.search(catalog, 'D40', '2D').gates, []);
 });
 
 test('an uncertain attachment stays uncertain', () => {

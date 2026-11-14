@@ -59,19 +59,15 @@ test('verification state and usage conditions are separate axes', () => {
   assert.equal(result.usage.id, 'non-documentees');
 });
 
-test('B20, B24 and B26 are documented stands without any gate', () => {
-  assert.deepEqual(verification.DOCUMENTED_STANDS.map(s => s.code), ['B20', 'B24', 'B26']);
-  for (const stand of verification.DOCUMENTED_STANDS) {
-    assert.equal(stand.gate, null);
-    assert.equal(stand.gateLabel, 'Porte à confirmer');
-    assert.equal(stand.kind, 'documented');
-    assert(stand.sources.length >= 2);
-    assert(!mappings.some(m => m.parkingCode === stand.code || m.gates.includes(stand.code)), stand.code + ' must not collide');
-    assert.deepEqual(searchParking(mappings, stand.code), []);
+test('the 2B pilot stands B20, B24 and B26 are now provided once by the extension, still without gates', () => {
+  const extension = require('../public/js/extension');
+  const catalog = extension.createCatalog(require('../public/js/extension-data'));
+  for (const code of ['B20', 'B24', 'B26']) {
+    const found = catalog.stands.filter(stand => stand.code === code);
+    assert.equal(found.length, 1, code);
+    assert.equal(found[0].terminal, '2B');
+    assert.deepEqual(found[0].relations, []);
+    assert.match(found[0].note, /sans lien établi|Aucune source ne relie/);
   }
-});
-
-test('pilot stands stay available, without gates, until the extension covers their terminal', () => {
-  assert.deepEqual(verification.PILOT_STANDS.map(s => s.code), ['B20', 'B24', 'B26']);
-  for (const stand of verification.PILOT_STANDS) assert.equal(stand.gate, null);
+  assert(!('PILOT_STANDS' in verification));
 });

@@ -1,5 +1,6 @@
 /*
- * État de vérification et postes documentés du pilote 2B.
+ * État de vérification des correspondances existantes.
+ * Les postes du pilote 2B sont désormais repris par l’extension (extension-data.js).
  * Ces métadonnées sont volontairement séparées de mappings.js : elles ne modifient
  * aucune des 169 correspondances, elles les décrivent.
  *
@@ -47,37 +48,5 @@
     return { status: declared ? STATUS.managerValidated : STATUS.toDocument, usage: USAGE.undocumented };
   }
 
-  const SOURCES = {
-    S1: 'eAIP France, AD 2 LFPG, AD 2.8 item 5 « Points de vérification INS », page du 01 OCT 2026 (cycle AIRAC 11/26, valable jusqu’au 25/11/2026)',
-    S2: 'eAIP, carte AD 2 LFPG APDC 01 « Aires de stationnement », 01 OCT 2026',
-    S2b: 'eAIP, carte AD 2 LFPG GMC 03 « Mouvements à la surface », 11 JUN 2026',
-    S3: 'Plan interactif Paris Aéroport (Groupe ADP), données non datées',
-  };
-
-  // Postes documentés par le pilote 2B (docs/extension-cdg/pilote-2b/observations.json).
-  // Aucune porte n'est attribuée : la porte reste à confirmer.
-  const DOCUMENTED_STANDS = [
-    { code: 'B20', observation: 'P-B20', ins: '49°00\'18.29"N 002°33\'37.48"E', homonymGate: 'B20',
-      note: 'Une porte B20 existe aussi en 2B. Aucune source ne relie le poste B20 à cette porte.' },
-    { code: 'B24', observation: 'P-B24', ins: '49°00\'16.61"N 002°33\'34.55"E', homonymGate: 'B24',
-      note: 'Point situé à environ 12 m de celui du poste B26 : postes peut-être superposés (hypothèse). Une porte B24 existe aussi en 2B, sans lien établi.' },
-    { code: 'B26', observation: 'P-B26', ins: '49°00\'16.99"N 002°33\'34.43"E', homonymGate: 'B26',
-      note: 'Poste B le plus à l’ouest de sa rangée. Une porte B26 existe aussi en 2B, sans lien établi.' },
-  ].map(stand => Object.freeze({
-    ...stand,
-    kind: 'documented',
-    terminal: '2B',
-    terminalBasis: 'Déduction cartographique : le poste fait face au bâtiment « B » (APDC 01), nommé « TERMINAL 2B » sur GMC 03.',
-    gate: null,
-    gateLabel: 'Porte à confirmer',
-    sources: ['S1', 'S2', 'S2b'].map(id => ({ id, label: SOURCES[id] })),
-    consulted: '2026-11-14 et 2026-11-15',
-    verification: { id: 'porte-a-confirmer', label: 'Porte à confirmer',
-      detail: 'Le poste est documenté par des sources publiques. Aucune porte ne lui est attribuée tant qu’elle n’est pas confirmée.' },
-    usage: USAGE.undocumented,
-  }));
-
-  // Postes du pilote 2B : repris par ParkingExtension tant que le terminal 2B n’est pas intégré.
-  const PILOT_STANDS = DOCUMENTED_STANDS;
-  return { STATUS, USAGE, MANAGER_VALIDATED, DOCUMENTED_STANDS, PILOT_STANDS, verificationFor };
+  return { STATUS, USAGE, MANAGER_VALIDATED, verificationFor };
 });
