@@ -8,9 +8,13 @@
     "dev": "node --watch src/server.js",
     "build": "node scripts/build-cache.js",
     "test": "node --test",
-    "update:iata": "python scripts/update-iata.py && npm run build"
+    "update:iata": "python scripts/update-iata.py && npm run build",
+    "test:e2e": "playwright test"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1"
   }
 }

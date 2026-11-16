@@ -19,7 +19,7 @@ jobs:
   build:
     name: Construire et vérifier
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Récupérer les sources
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -34,6 +34,14 @@ jobs:
         run: npm run build
       - name: Tester l'application
         run: npm test
+      - name: Installer Chromium et ses dépendances Linux
+        run: npx playwright install --with-deps chromium
+      - name: Tests navigateur (ordinateur et émulation mobile Pixel 7)
+        run: npm run test:e2e
+      - name: Tests navigateur sous le chemin publié /Parking-Aero-WebApp/
+        env:
+          E2E_BASE_PATH: /Parking-Aero-WebApp/
+        run: npm run test:e2e
       - name: Configurer GitHub Pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

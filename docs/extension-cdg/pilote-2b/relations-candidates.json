@@ -1,0 +1,86 @@
+{
+  "lot": "pilote-2b",
+  "date_consultation": "2026-11-14 (recherche) et 2026-11-15 (vérification)",
+  "regle": "Une relation poste → porte n'est « étayée » que si une source l'énonce explicitement. La proximité sur un plan, ou l'égalité des libellés, ne suffit pas.",
+  "statuts": {
+    "etayee": "Énoncée explicitement par une source citée.",
+    "hypothese": "Plausible, mais aucune source ne l'énonce.",
+    "contredite_ou_infondee": "Une observation va contre, ou rien ne la soutient."
+  },
+  "relations_etayees": [],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "enonce": "Les postes pairs B02 à B26, situés devant le bâtiment 2B, sont desservis par les portes B20 à B31 et D40/D41 du niveau 1 (au contact ou non : inconnu).",
+      "statut": "hypothese",
+      "observations": [
+        "P-B02",
+        "P-B10",
+        "P-B18",
+        "P-B20",
+        "P-B24",
+        "P-B26",
+        "G-B20",
+        "G-B31",
+        "G-D40",
+        "G-D41"
+      ],
+      "elements_favorables": [
+        "S2 (APDC 01) + S2b (GMC 03) : les flèches INS des postes pairs pointent vers le bâtiment étiqueté « B », que GMC 03 nomme « TERMINAL 2B ». Repères communs : la voie G3 longe le bâtiment, la voie TB2 sépare les bâtiments B et D. C’est une déduction cartographique, pas un énoncé de source, et elle ne dit rien de l’affectation aux portes.",
+        "Les points INS des postes B pairs (S1) et les icônes des portes B20 à B31 (S3) occupent la même bande de longitude, d'environ 2,5596 à 2,5638.",
+        "S3 rattache à 2B au moins 11 POI « Pré-passerelle » (vérifiés). Cela suggère des passerelles, sans dire lesquelles ni vers quels postes.",
+        "Les icônes des portes B20 à B31 (lat. 49,0043 à 49,0048) sont juste au sud des points INS des postes pairs (49,0046 à 49,0053), donc du côté du bâtiment."
+      ],
+      "preuve_manquante": "Une source ADP, une compagnie ou un assistant au sol qui associe chaque poste à une porte (tableau d'affectation, plan d'assistance, consigne d'exploitation).",
+      "remarque": "Les icônes de S3 sont des positions sur un plan, pas des levés. La proximité ne vaut pas correspondance."
+    },
+    {
+      "id": "H2",
+      "enonce": "Les postes impairs B01 à B15 de la rangée nord (vers 49°00'25\"N) sont des postes éloignés, desservis par bus depuis les portes B10 à B12 du niveau 0.",
+      "statut": "hypothese",
+      "observations": [
+        "P-B01",
+        "P-B15",
+        "G-B10"
+      ],
+      "elements_favorables": [
+        "La rangée nord est à environ 200 m de la rangée sud (calcul entre B01 et B02).",
+        "Les portes B10 à B12 sont au niveau 0, ce qui est fréquent pour des portes vers bus. Ce n'est pas une preuve."
+      ],
+      "preuve_manquante": "Une source qui dit si ces postes sont au contact ou éloignés, et par quelle porte ils sont desservis.",
+      "remarque": "On ne peut même pas affirmer que ces postes relèvent de 2B. Sur S2, ils occupent un îlot au nord de la voie G3, en face des bâtiments B et D : la carte ne les rattache à aucun des deux."
+    }
+  ],
+  "relations_rejetees": [
+    {
+      "id": "R1",
+      "enonce": "Poste Bnn = porte Bnn (exemples : poste B20 → porte B20, poste B24 → porte B24, poste B26 → porte B26).",
+      "statut": "contredite_ou_infondee",
+      "observations": [
+        "P-B20",
+        "G-B20",
+        "P-B24",
+        "G-B24",
+        "P-B26",
+        "G-B26",
+        "P-B10",
+        "G-B10"
+      ],
+      "motif": [
+        "Aucune source n'énonce cette égalité.",
+        "Les numéros semblent croître en sens inverse. Côté postes, B26 est le plus à l'ouest (lon 2,55956) et B02 le plus à l'est (lon 2,56384). Côté portes, B20 est à l'ouest (lon 2,5605) et B31 à l'est (lon 2,56334).",
+        "Le poste B10 est sur l’aire de trafic, et la porte B10 est une porte du niveau 0 du bâtiment. Aucune source ne les relie."
+      ],
+      "note_metier": "Dans l'application, des fiches comme F21 → F21 utilisent la même valeur pour le parking et la porte. Theo a confirmé personnellement F21, F23, F24, F25, F41, F43, F44, F45 et F46 (terminal 2F). Cette convention ne se transpose pas à 2B sans preuve."
+    }
+  ],
+  "inconnues_conservees": [
+    "Le terminal des postes impairs B01 à B15. Pour les postes pairs B02 à B26, le rattachement à 2B n’est qu’une déduction cartographique.",
+    "La porte qui dessert chaque poste B.",
+    "Les postes desservis par les portes D40 et D41, que S3 rattache à 2B.",
+    "Le numéro et la porte associée de chaque « Pré-passerelle ».",
+    "La nature exacte des libellés B1 et B2, qui se trouvent dans l’encart de l’aire Hotel (hors 2B).",
+    "La numérotation des portes de 2B après le 16/03/2027 (passage au Terminal 4).",
+    "Le caractère contact ou éloigné de chaque poste B."
+  ]
+}

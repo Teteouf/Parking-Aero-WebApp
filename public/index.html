@@ -21,6 +21,10 @@
   <script defer src="js/mappings.js"></script>
   <script defer src="js/core.js"></script>
   <script defer src="js/preferences.js"></script>
+  <script defer src="js/verification.js"></script>
+  <script defer src="js/extension-data.js"></script>
+  <script defer src="js/extension.js"></script>
+  <script defer src="js/contributions.js"></script>
   <script defer src="js/app.js"></script>
   <title>CDG Parking · Parking & portes</title>
 </head>
@@ -88,6 +92,10 @@
       <button id="filterMoreButton" class="filter filter-more" type="button" aria-controls="additionalFilters" aria-expanded="false" aria-label="Afficher les autres filtres">Plus</button>
       </div>
       <div id="additionalFilters" class="additional-filters" hidden>
+      <button class="filter" type="button" data-filter="2A" aria-pressed="false">2A</button>
+      <button class="filter" type="button" data-filter="2B" aria-pressed="false">2B</button>
+      <button class="filter" type="button" data-filter="2C" aria-pressed="false">2C</button>
+      <button class="filter" type="button" data-filter="2D" aria-pressed="false">2D</button>
       <button class="filter" type="button" data-filter="1" aria-pressed="false">Terminal 1</button>
       <button class="filter" type="button" data-filter="access" aria-pressed="false">Rampe / ascenseur</button>
       </div>
@@ -109,6 +117,78 @@
   <dialog id="infoDialog" class="sheet" aria-labelledby="infoTitle">
     <div class="sheet-header"><h2 id="infoTitle">L’application sur votre écran d’accueil</h2><button class="close-button" type="button" data-close aria-label="Fermer les informations">×</button></div>
     <div id="infoBody"></div>
+  </dialog>
+  <dialog id="contributionDialog" class="sheet" aria-labelledby="contributionTitle">
+    <div class="sheet-header"><h2 id="contributionTitle">Contribuer</h2><button class="close-button" type="button" data-close aria-label="Fermer la contribution">×</button></div>
+    <form id="contributionForm" class="contribution-form">
+      <p id="contributionIntro" class="contribution-intro">Votre contribution sera relue avant toute mise à jour. Elle ne modifie pas les données de l’application.</p>
+      <dl id="contributionContext" class="detail-list context-list"></dl>
+      <p id="confirmStatement" class="confirm-statement" hidden></p>
+      <div id="proposalFields" hidden>
+        <div class="field">
+          <label for="contribProposedCode">Code proposé</label>
+          <p id="proposedCodeHint" class="field-hint">Corrigez le code si besoin : lettres, chiffres ou tiret, 12 caractères au plus.</p>
+          <input id="contribProposedCode" name="proposedCode" type="text" required maxlength="12" pattern="[A-Za-z0-9\-]{1,12}" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="proposedCodeHint" data-error="contribProposedCodeError">
+          <p id="contribProposedCodeError" class="error-msg">Erreur : indiquez un code de 1 à 12 lettres, chiffres ou tirets.</p>
+        </div>
+        <fieldset class="field choice-field">
+          <legend>Ce code est…</legend>
+          <label class="choice"><input type="radio" name="codeType" value="stand" required data-error="contribCodeTypeError"> <span>Parking <small>poste avion</small></span></label>
+          <label class="choice"><input type="radio" name="codeType" value="gate" required data-error="contribCodeTypeError"> <span>Porte <small>porte d’embarquement</small></span></label>
+          <label class="choice"><input type="radio" name="codeType" value="unknown" required data-error="contribCodeTypeError"> <span>Je ne sais pas</span></label>
+          <p id="contribCodeTypeError" class="error-msg">Erreur : précisez s’il s’agit d’un parking, d’une porte, ou choisissez « Je ne sais pas ».</p>
+        </fieldset>
+      </div>
+      <div id="answerField" class="field">
+        <label for="contribAnswer"><span id="answerLabel">Correction proposée</span> <span id="answerOptional" class="optional" hidden>facultatif</span></label>
+        <p id="answerHint" class="field-hint">Indiquez la valeur correcte, par exemple une autre porte.</p>
+        <input id="contribAnswer" name="answer" type="text" required maxlength="120" autocomplete="off" spellcheck="false" aria-describedby="answerHint" data-error="contribAnswerError">
+        <p id="contribAnswerError" class="error-msg">Erreur : indiquez la valeur proposée.</p>
+      </div>
+      <div class="field">
+        <label for="contribDate">Date de l’observation</label>
+        <input id="contribDate" name="date" type="date" required data-error="contribDateError">
+        <p id="contribDateError" class="error-msg">Erreur : indiquez une date, au plus tard aujourd’hui.</p>
+      </div>
+      <div class="field">
+        <label for="contribOrigin">Origine de l’information</label>
+        <select id="contribOrigin" name="origin" required data-error="contribOriginError">
+          <option value="">Choisir…</option>
+          <option value="seen">Vu directement</option>
+          <option value="document">Document interne</option>
+          <option value="colleague">Transmis par un collègue</option>
+          <option value="signage">Signalétique sur place</option>
+        </select>
+        <p id="contribOriginError" class="error-msg">Erreur : choisissez l’origine de l’information.</p>
+      </div>
+      <div id="originDetailField" class="field" hidden>
+        <label id="originDetailLabel" for="contribOriginDetail">Nom et date du document</label>
+        <input id="contribOriginDetail" name="originDetail" type="text" maxlength="160" autocomplete="off">
+      </div>
+      <fieldset class="field choice-field">
+        <legend>Nature de l’information</legend>
+        <label class="choice"><input type="radio" name="nature" value="once" required data-error="contribNatureError"> <span>Observation ponctuelle <small>vue une fois, sur un vol précis</small></span></label>
+        <label class="choice"><input type="radio" name="nature" value="usual" required data-error="contribNatureError"> <span>Fonctionnement habituel <small>ce qui se passe normalement</small></span></label>
+        <p id="contribNatureError" class="error-msg">Erreur : précisez s’il s’agit d’une observation ponctuelle ou du fonctionnement habituel.</p>
+      </fieldset>
+      <div class="field">
+        <label for="contribConditions">Conditions éventuelles <span class="optional">facultatif</span></label>
+        <p id="conditionsHint" class="field-hint">Si la réponse varie : de quoi cela dépend (compagnie, vol Schengen ou non…) et la valeur dans chaque cas.</p>
+        <textarea id="contribConditions" name="conditions" rows="3" maxlength="600" aria-describedby="conditionsHint"></textarea>
+      </div>
+      <div class="field">
+        <label for="contribComment">Précisions <span class="optional">facultatif</span></label>
+        <textarea id="contribComment" name="comment" rows="2" maxlength="600"></textarea>
+      </div>
+      <p id="draftStatus" class="draft-status" role="status"></p>
+      <div class="detail-actions">
+        <button type="submit" class="primary-button" value="copy">Copier le message</button>
+        <button type="submit" class="secondary-button" value="mail">Préparer un courriel</button>
+        <button id="discardDraftButton" type="button" class="text-button">Effacer le brouillon</button>
+      </div>
+      <p id="contributionOutcome" class="contribution-outcome" role="status"></p>
+      <details id="messagePreviewBox" class="message-preview" hidden><summary>Voir le message</summary><pre id="messagePreview"></pre></details>
+    </form>
   </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <noscript><p class="no-script">Activez JavaScript pour rechercher les parkings, portes et codes IATA.</p></noscript>

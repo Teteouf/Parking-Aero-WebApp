@@ -74,3 +74,45 @@ test('the complete bundled IATA snapshot has valid codes, provenance and essenti
   assert(data.locations.some(row => row[0] === 'CDG' && row[5] === 'PAR'));
   assert(data.locations.some(row => row[0] === 'LHR' && row[5] === 'LON'));
 });
+
+test('ambiguous F32 keeps both mappings and lists the aircraft stand first', () => {
+  const raw = core.searchParking(mappings, 'F32');
+  const ordered = core.orderByCodeRole(raw, 'F32');
+  assert.equal(ordered.length, raw.length);
+  assert.deepEqual(ordered.map(m => [m.parkingCode, m.gates.join(',')]), [['F32', 'F35'], ['F22', 'F32']]);
+  assert.deepEqual(ordered.map(m => core.codeRole(m, 'F32')), ['parking', 'gate']);
+  assert.deepEqual(core.orderByCodeRole(core.searchParking(mappings, ' f-32 '), ' f-32 ').map(m => m.parkingCode), ['F32', 'F22']);
+});
+
+test('code roles follow the search normalisation and leave the searchParking contract intact', () => {
+  const [f03] = core.searchParking(mappings, 'F3');
+  assert.equal(core.codeRole(f03, 'F3'), 'parking');
+  assert.equal(core.codeRole(f03, 'F03'), 'parking');
+  const [e22] = core.searchParking(mappings, 'K43');
+  assert.equal(core.codeRole(e22, 'K43'), 'gate');
+  assert.equal(core.codeRole(e22, 'rampe'), null);
+  assert.equal(core.codeRole(e22, ''), null);
+  // L'ordre brut de searchParking reste celui des données.
+  assert.deepEqual(core.searchParking(mappings, 'F32').map(m => m.parkingCode), ['F22', 'F32']);
+  const unfiltered = core.searchParking(mappings, '');
+  assert.deepEqual(core.orderByCodeRole(unfiltered, ''), unfiltered);
+});
+
+test('real data: F21 → F21 is one mapping where the code is both stand and gate', () => {
+  const matches = core.orderByCodeRole(core.searchParking(mappings, 'F21'), 'F21');
+  assert.deepEqual(matches.map(m => [m.parkingCode, m.gates.join(',')]), [['F21', 'F21']]);
+  assert.equal(core.codeRole(matches[0], 'F21'), 'both');
+  assert.equal(core.codeRole(matches[0], ' f-21 '), 'both');
+});
+
+test('a "both" mapping is ranked with stand matches, before gate-only matches', () => {
+  // Cas synthétique : les données réelles (F21 → F21, F23 → F23, etc.) n'ont pas de code
+  // à la fois « poste et porte » dans une correspondance et « porte seule » dans une autre.
+  const sample = [
+    { parkingCode: 'X02', gates: ['X01'], terminal: '2X', section: 'X', ramp: false, elevator: false, offsite: false },
+    { parkingCode: 'X01', gates: ['X01', 'X03'], terminal: '2X', section: 'X', ramp: false, elevator: false, offsite: false },
+  ];
+  const ordered = core.orderByCodeRole(core.searchParking(sample, 'x1'), 'x1');
+  assert.deepEqual(ordered.map(m => m.parkingCode), ['X01', 'X02']);
+  assert.deepEqual(ordered.map(m => core.codeRole(m, 'x1')), ['both', 'gate']);
+});

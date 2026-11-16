@@ -1,0 +1,485 @@
+{
+  "lot": "pilote-2b",
+  "date_consultation": "2026-11-14",
+  "avertissement": "Échantillon de 20 lieux. Les coordonnées décimales des postes sont converties depuis les valeurs DMS de S1 (6 décimales) : ce sont des valeurs dérivées. Le terminal « 2B » n'est attribué aux postes par aucune source. Aucune donnée de ce fichier n'est utilisée par l'application. Corrections apportées après la vérification indépendante du 2026-11-15 : HS, B1/B2, terminal des postes pairs, coordonnées des portes, nombre de pré-passerelles.",
+  "types": {
+    "poste_avion": "Poste de stationnement avion identifié comme tel par la source.",
+    "porte_embarquement": "Porte d'embarquement passagers identifiée comme telle par la source.",
+    "repere_type_inconnu": "Libellé dont la source ne dit pas s'il désigne un poste, une porte ou autre chose.",
+    "autre_repere_identifie": "Repère dont la source donne la nature, mais qui n’est ni un poste ni une porte."
+  },
+  "observations": [
+    {
+      "id_obs": "P-B02",
+      "type": "poste_avion",
+      "libelle": "B02",
+      "sources": [
+        "S1",
+        "S2",
+        "S2b"
+      ],
+      "preuve": "S1, AD 2.8 item 5 « Points de vérification INS », page PDF 4 (01 OCT 2026) : « B02 49°00'19.05\"N 002°33'49.82\"E ». S2 : libellé B02 sous « POSTES DE STATIONNEMENT / Parking stands ».",
+      "coordonnees_source": {
+        "lat": "49°00'19.05\"N",
+        "lon": "002°33'49.82\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.005292,
+        "lon": 2.563839
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Sur S2, la flèche INS du poste pointe vers le bâtiment étiqueté « B ». S2b (GMC 03) nomme ce bâtiment « TERMINAL 2B ». Il s’agit d’une déduction par superposition des deux cartes, qu’aucune source n’énonce.",
+      "inconnu": [
+        "terminal d’exploitation énoncé par une source",
+        "contact ou éloigné",
+        "porte desservie"
+      ]
+    },
+    {
+      "id_obs": "P-B10",
+      "type": "poste_avion",
+      "libelle": "B10",
+      "sources": [
+        "S1",
+        "S2",
+        "S2b"
+      ],
+      "preuve": "S1, AD 2.8 item 5, page PDF 4 : « B10 49°00'18.64\"N 002°33'44.74\"E ». S2 : libellé B10.",
+      "coordonnees_source": {
+        "lat": "49°00'18.64\"N",
+        "lon": "002°33'44.74\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.005178,
+        "lon": 2.562428
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Sur S2, la flèche INS du poste pointe vers le bâtiment étiqueté « B ». S2b (GMC 03) nomme ce bâtiment « TERMINAL 2B ». Il s’agit d’une déduction par superposition des deux cartes, qu’aucune source n’énonce.",
+      "inconnu": [
+        "terminal d’exploitation énoncé par une source",
+        "contact ou éloigné",
+        "porte desservie"
+      ],
+      "remarque": "Homonyme de la porte B10 (G-B10). L’identité de libellé ne prouve aucun lien."
+    },
+    {
+      "id_obs": "P-B18",
+      "type": "poste_avion",
+      "libelle": "B18",
+      "sources": [
+        "S1",
+        "S2",
+        "S2b"
+      ],
+      "preuve": "S1, AD 2.8 item 5, page PDF 4 : « B18 49°00'17.96\"N 002°33'39.37\"E ». S2 : libellé B18.",
+      "coordonnees_source": {
+        "lat": "49°00'17.96\"N",
+        "lon": "002°33'39.37\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.004989,
+        "lon": 2.560936
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Sur S2, la flèche INS du poste pointe vers le bâtiment étiqueté « B ». S2b (GMC 03) nomme ce bâtiment « TERMINAL 2B ». Il s’agit d’une déduction par superposition des deux cartes, qu’aucune source n’énonce.",
+      "inconnu": [
+        "terminal d’exploitation énoncé par une source",
+        "contact ou éloigné",
+        "porte desservie",
+        "relation avec B16, très proche"
+      ],
+      "remarque": "Point situé à environ 21 m de celui de B16 (calcul sur les coordonnées dérivées). Hypothèse non vérifiée : postes qui se chevauchent ou alternatifs."
+    },
+    {
+      "id_obs": "P-B20",
+      "type": "poste_avion",
+      "libelle": "B20",
+      "sources": [
+        "S1",
+        "S2",
+        "S2b"
+      ],
+      "preuve": "S1, AD 2.8 item 5, page PDF 4 : « B20 49°00'18.29\"N 002°33'37.48\"E ». S2 : libellé B20.",
+      "coordonnees_source": {
+        "lat": "49°00'18.29\"N",
+        "lon": "002°33'37.48\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.005081,
+        "lon": 2.560411
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Sur S2, la flèche INS du poste pointe vers le bâtiment étiqueté « B ». S2b (GMC 03) nomme ce bâtiment « TERMINAL 2B ». Il s’agit d’une déduction par superposition des deux cartes, qu’aucune source n’énonce.",
+      "inconnu": [
+        "terminal d’exploitation énoncé par une source",
+        "contact ou éloigné",
+        "porte desservie"
+      ],
+      "remarque": "Homonyme de la porte B20 (G-B20). L'identité de libellé ne prouve aucun lien."
+    },
+    {
+      "id_obs": "P-B24",
+      "type": "poste_avion",
+      "libelle": "B24",
+      "sources": [
+        "S1",
+        "S2",
+        "S2b"
+      ],
+      "preuve": "S1, AD 2.8 item 5, page PDF 4 : « B24 49°00'16.61\"N 002°33'34.55\"E ». S2 : libellé B24.",
+      "coordonnees_source": {
+        "lat": "49°00'16.61\"N",
+        "lon": "002°33'34.55\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.004614,
+        "lon": 2.559597
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Sur S2, la flèche INS du poste pointe vers le bâtiment étiqueté « B ». S2b (GMC 03) nomme ce bâtiment « TERMINAL 2B ». Il s’agit d’une déduction par superposition des deux cartes, qu’aucune source n’énonce.",
+      "inconnu": [
+        "terminal d’exploitation énoncé par une source",
+        "contact ou éloigné",
+        "porte desservie",
+        "relation avec B26, très proche"
+      ],
+      "remarque": "Homonyme de la porte B24. Point situé à environ 12 m de celui de B26 (calcul sur les coordonnées dérivées)."
+    },
+    {
+      "id_obs": "P-B26",
+      "type": "poste_avion",
+      "libelle": "B26",
+      "sources": [
+        "S1",
+        "S2",
+        "S2b"
+      ],
+      "preuve": "S1, AD 2.8 item 5, page PDF 4 : « B26 49°00'16.99\"N 002°33'34.43\"E ». S2 : libellé B26.",
+      "coordonnees_source": {
+        "lat": "49°00'16.99\"N",
+        "lon": "002°33'34.43\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.004719,
+        "lon": 2.559564
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Sur S2, la flèche INS du poste pointe vers le bâtiment étiqueté « B ». S2b (GMC 03) nomme ce bâtiment « TERMINAL 2B ». Il s’agit d’une déduction par superposition des deux cartes, qu’aucune source n’énonce.",
+      "inconnu": [
+        "terminal d’exploitation énoncé par une source",
+        "contact ou éloigné",
+        "porte desservie"
+      ],
+      "remarque": "Poste B le plus à l'ouest de la rangée sud. Homonyme de la porte B26 (G-B26)."
+    },
+    {
+      "id_obs": "P-B01",
+      "type": "poste_avion",
+      "libelle": "B01",
+      "sources": [
+        "S1",
+        "S2"
+      ],
+      "preuve": "S1, AD 2.8 item 5, page PDF 4 : « B01 49°00'25.44\"N 002°33'48.00\"E ». S2 : libellé B01 dans la ligne « B15 B11 B09 B07 B05 B03 B01 ».",
+      "coordonnees_source": {
+        "lat": "49°00'25.44\"N",
+        "lon": "002°33'48.00\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.007067,
+        "lon": 2.563333
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Le poste est sur l’îlot situé au nord de la voie G3, en face des bâtiments B et D : la carte ne permet pas d’attribuer un terminal.",
+      "inconnu": [
+        "terminal exact",
+        "contact ou éloigné",
+        "porte desservie"
+      ],
+      "remarque": "Rangée nord (impairs), environ 200 m au nord de la rangée sud (pairs)."
+    },
+    {
+      "id_obs": "P-B15",
+      "type": "poste_avion",
+      "libelle": "B15",
+      "sources": [
+        "S1",
+        "S2"
+      ],
+      "preuve": "S1, AD 2.8 item 5, page PDF 4 : « B15 49°00'24.81\"N 002°33'35.82\"E ». S2 : libellé B15.",
+      "coordonnees_source": {
+        "lat": "49°00'24.81\"N",
+        "lon": "002°33'35.82\"E",
+        "nature": "point de vérification INS"
+      },
+      "coordonnees_derivees": {
+        "lat": 49.006892,
+        "lon": 2.55995
+      },
+      "terminal_selon_source": "« TERMINAL 2 » (S2). Le poste est sur l’îlot situé au nord de la voie G3, en face des bâtiments B et D : la carte ne permet pas d’attribuer un terminal.",
+      "inconnu": [
+        "terminal exact",
+        "contact ou éloigné",
+        "porte desservie"
+      ]
+    },
+    {
+      "id_obs": "G-B10",
+      "type": "porte_embarquement",
+      "libelle": "PORTE B10",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10262?lang=fr, niveau 0 : « PORTE B10 – Portes d'embarquement – Paris-Charles De Gaulle Terminal 2B – Zone réservée – Porte d'embarquement ».",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "0",
+      "inconnu": [
+        "postes desservis",
+        "accès passerelle ou bus",
+        "date des données"
+      ],
+      "remarque": "Hypothèse : porte vers des bus, car elle est au niveau 0. Aucune source ne l'affirme.",
+      "coordonnees_plan_derivees": {
+        "lat": 49.004672,
+        "lon": 2.561246,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      }
+    },
+    {
+      "id_obs": "G-B20",
+      "type": "porte_embarquement",
+      "libelle": "PORTE B20",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10243?lang=fr, niveau 1 : « PORTE B20 – … Terminal 2B – Zone réservée – Porte d'embarquement ».",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "1",
+      "coordonnees_plan_derivees": {
+        "lat": 49.004292,
+        "lon": 2.560505,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      },
+      "inconnu": [
+        "postes desservis",
+        "accès passerelle ou bus",
+        "date des données"
+      ]
+    },
+    {
+      "id_obs": "G-B21",
+      "type": "porte_embarquement",
+      "libelle": "PORTE B21",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10244?lang=fr, niveau 1 : « PORTE B21 – … Terminal 2B ».",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "1",
+      "inconnu": [
+        "postes desservis",
+        "accès passerelle ou bus",
+        "date des données"
+      ],
+      "coordonnees_plan_derivees": {
+        "lat": 49.004439,
+        "lon": 2.560406,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      }
+    },
+    {
+      "id_obs": "G-B24",
+      "type": "porte_embarquement",
+      "libelle": "PORTE B24",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10247?lang=fr, niveau 1 : « PORTE B24 – … Terminal 2B ».",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "1",
+      "inconnu": [
+        "postes desservis",
+        "accès passerelle ou bus",
+        "date des données"
+      ],
+      "coordonnees_plan_derivees": {
+        "lat": 49.004716,
+        "lon": 2.561377,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      }
+    },
+    {
+      "id_obs": "G-B26",
+      "type": "porte_embarquement",
+      "libelle": "PORTE B26",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10249?lang=fr, niveau 1 : « PORTE B26 – … Terminal 2B ».",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "1",
+      "inconnu": [
+        "postes desservis",
+        "accès passerelle ou bus",
+        "date des données"
+      ],
+      "coordonnees_plan_derivees": {
+        "lat": 49.004796,
+        "lon": 2.562034,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      }
+    },
+    {
+      "id_obs": "G-B31",
+      "type": "porte_embarquement",
+      "libelle": "PORTE B31",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10254?lang=fr, niveau 1 : « PORTE B31 – … Terminal 2B ».",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "1",
+      "coordonnees_plan_derivees": {
+        "lat": 49.004739,
+        "lon": 2.563346,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      },
+      "inconnu": [
+        "postes desservis",
+        "accès passerelle ou bus",
+        "date des données"
+      ],
+      "remarque": "Plus haut numéro de porte B dans S3. Des sources tierces non lues citent B33 ou B34."
+    },
+    {
+      "id_obs": "G-D40",
+      "type": "porte_embarquement",
+      "libelle": "PORTE D40",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10255?lang=fr, niveau 1 : la fiche indique « Terminal 2B » pour une porte de lettre D.",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "1",
+      "inconnu": [
+        "postes desservis",
+        "raison de la lettre D en 2B",
+        "date des données"
+      ],
+      "remarque": "La lettre ne suffit donc pas à déduire le terminal.",
+      "coordonnees_plan_derivees": {
+        "lat": 49.004667,
+        "lon": 2.563482,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      }
+    },
+    {
+      "id_obs": "G-D41",
+      "type": "porte_embarquement",
+      "libelle": "PORTE D41",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/10256?lang=fr, niveau 1 : la fiche indique « Terminal 2B ».",
+      "terminal_selon_source": "2B",
+      "niveau_plan": "1",
+      "inconnu": [
+        "postes desservis",
+        "raison de la lettre D en 2B",
+        "date des données"
+      ],
+      "coordonnees_plan_derivees": {
+        "lat": 49.004658,
+        "lon": 2.563564,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      }
+    },
+    {
+      "id_obs": "U-PREPASS-11112",
+      "type": "repere_type_inconnu",
+      "libelle": "Pré-passerelle (sans numéro)",
+      "sources": [
+        "S3"
+      ],
+      "preuve": "S3, API /api/POI/11112?lang=fr, niveau 1 : POI « Pré-passerelle » rattaché à « Terminal 2B ». Onze POI de ce type rattachés à 2B ont été vérifiés (ids 11112, 11114, 11116, 11117, 11118, 11121, 11215, 11216, 11217, 11336 au niveau 0, 11339). Le total de 13 annoncé lors de la recherche n’a pas été confirmé : le balayage n’a porté que sur 95 des 470 fiches.",
+      "terminal_selon_source": "2B",
+      "inconnu": [
+        "numéro",
+        "porte associée",
+        "poste associé",
+        "nature exacte (salle, couloir, accès passerelle)"
+      ],
+      "coordonnees_plan_derivees": {
+        "lat": 49.005079,
+        "lon": 2.562117,
+        "nature": "icône du plan S3 (POIs.json, Web Mercator EPSG:3857, conversion sphérique), non datée"
+      }
+    },
+    {
+      "id_obs": "U-B1",
+      "type": "repere_type_inconnu",
+      "libelle": "B1",
+      "sources": [
+        "S2"
+      ],
+      "preuve": "S2, rendu visuel : « B1 » apparaît deux fois dans l’encart « AIRE HOTEL / HOTEL AREA », sur des voies en tirets entre H09/H10 et H11/H12. Le rapprochement avec « Traversée véhicules » venait d’un artefact de l’extraction de texte.",
+      "inconnu": [
+        "nature (hypothèse compatible avec le dessin : voie de circulation de l’aire Hotel)",
+        "aucun lien avec le terminal 2B"
+      ]
+    },
+    {
+      "id_obs": "U-B2",
+      "type": "repere_type_inconnu",
+      "libelle": "B2",
+      "sources": [
+        "S2"
+      ],
+      "preuve": "S2, rendu visuel : « B2 » apparaît dans l’encart « AIRE HOTEL / HOTEL AREA », sur une voie en tirets près de H22/H30.",
+      "inconnu": [
+        "nature (hypothèse compatible avec le dessin : voie de circulation de l’aire Hotel)",
+        "aucun lien avec le terminal 2B"
+      ]
+    },
+    {
+      "id_obs": "U-HS",
+      "type": "autre_repere_identifie",
+      "libelle": "HS A / HS B",
+      "sources": [
+        "S2"
+      ],
+      "preuve": "S2, légende : cadre « HS » et cercle magenta, « Points chauds / Hot spots – Traversée véhicules / Vehicles crossing – Voir AD 2 LFPG.20.3.3.2.4.4 ». S1, § 20.3.3.2.4.4 : « HS_A à HS_E : croisement d’une route de service avec présence de nombreux véhicules ». Sur la carte, HS A est à l’extrémité ouest de G3 et HS B au carrefour G3/TB2.",
+      "inconnu": [],
+      "remarque": "Classé d’abord « type inconnu », à tort : la séquence « HS A B13 HS B » était un artefact de l’extraction de texte. Ce sont des points chauds, ni postes ni portes."
+    }
+  ],
+  "inventaire_hors_echantillon": {
+    "postes_avion_S1": [
+      "B03",
+      "B04",
+      "B05",
+      "B06",
+      "B07",
+      "B08",
+      "B09",
+      "B11",
+      "B12",
+      "B13",
+      "B14",
+      "B16",
+      "B22"
+    ],
+    "portes_S3": [
+      "B11",
+      "B12",
+      "B22",
+      "B23",
+      "B25",
+      "B27",
+      "B28",
+      "B29",
+      "B30"
+    ],
+    "note": "Relevés dans les mêmes sources par le sous-agent de recherche ; la liste des portes hors échantillon n’a pas été revérifiée. S1 ne contient pas de postes B17, B19, B21, B23 ni B25 (vérifié). Les portes B13 à B19 et B32 et au-delà n’ont pas été trouvées dans S3 (non revérifié)."
+  }
+}

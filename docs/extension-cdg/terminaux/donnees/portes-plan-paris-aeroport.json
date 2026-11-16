@@ -1,0 +1,488 @@
+{
+ "source": "S3",
+ "consulte": "2026-11-15",
+ "methode": "POI 2ABCD du plan public portant l’icône 241.png, libellés lus via /api/POI/{id}?lang=fr ; coordonnées converties depuis EPSG:3857",
+ "limites": "Plan non daté ; portes A46, D61, D64, D65 non trouvées ; d’autres portes pourraient porter une autre icône",
+ "portes": [
+  {
+   "code": "A37",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1814,
+   "lat": 49.002457,
+   "lon": 2.558726
+  },
+  {
+   "code": "A38",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1815,
+   "lat": 49.002259,
+   "lon": 2.558745
+  },
+  {
+   "code": "A39",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1816,
+   "lat": 49.002169,
+   "lon": 2.558954
+  },
+  {
+   "code": "A40",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1643,
+   "lat": 49.002567,
+   "lon": 2.560695
+  },
+  {
+   "code": "A41",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1644,
+   "lat": 49.002521,
+   "lon": 2.560742
+  },
+  {
+   "code": "A42",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1645,
+   "lat": 49.002453,
+   "lon": 2.561121
+  },
+  {
+   "code": "A43",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1646,
+   "lat": 49.002426,
+   "lon": 2.561188
+  },
+  {
+   "code": "A44",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1647,
+   "lat": 49.002369,
+   "lon": 2.561755
+  },
+  {
+   "code": "A45",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1648,
+   "lat": 49.002353,
+   "lon": 2.561835
+  },
+  {
+   "code": "A47",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1650,
+   "lat": 49.002357,
+   "lon": 2.562475
+  },
+  {
+   "code": "A48",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1651,
+   "lat": 49.002419,
+   "lon": 2.563039
+  },
+  {
+   "code": "A49",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1652,
+   "lat": 49.002436,
+   "lon": 2.563109
+  },
+  {
+   "code": "A50",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1653,
+   "lat": 49.002563,
+   "lon": 2.563643
+  },
+  {
+   "code": "A51",
+   "terminal": "2A",
+   "level": "1",
+   "poiId": 1654,
+   "lat": 49.002585,
+   "lon": 2.563706
+  },
+  {
+   "code": "B10",
+   "terminal": "2B",
+   "level": "0",
+   "poiId": 10262,
+   "lat": 49.004672,
+   "lon": 2.561246
+  },
+  {
+   "code": "B11",
+   "terminal": "2B",
+   "level": "0",
+   "poiId": 10263,
+   "lat": 49.004694,
+   "lon": 2.561364
+  },
+  {
+   "code": "B12",
+   "terminal": "2B",
+   "level": "0",
+   "poiId": 10264,
+   "lat": 49.004747,
+   "lon": 2.561681
+  },
+  {
+   "code": "B20",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10243,
+   "lat": 49.004292,
+   "lon": 2.560505
+  },
+  {
+   "code": "B21",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10244,
+   "lat": 49.004439,
+   "lon": 2.560406
+  },
+  {
+   "code": "B22",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10245,
+   "lat": 49.004555,
+   "lon": 2.560748
+  },
+  {
+   "code": "B23",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10246,
+   "lat": 49.004609,
+   "lon": 2.560926
+  },
+  {
+   "code": "B24",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10247,
+   "lat": 49.004716,
+   "lon": 2.561377
+  },
+  {
+   "code": "B25",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10248,
+   "lat": 49.004743,
+   "lon": 2.561541
+  },
+  {
+   "code": "B26",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10249,
+   "lat": 49.004796,
+   "lon": 2.562034
+  },
+  {
+   "code": "B27",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10250,
+   "lat": 49.004804,
+   "lon": 2.562211
+  },
+  {
+   "code": "B28",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10251,
+   "lat": 49.004812,
+   "lon": 2.56269
+  },
+  {
+   "code": "B29",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10252,
+   "lat": 49.004794,
+   "lon": 2.562881
+  },
+  {
+   "code": "B30",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10253,
+   "lat": 49.004748,
+   "lon": 2.563264
+  },
+  {
+   "code": "B31",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10254,
+   "lat": 49.004739,
+   "lon": 2.563346
+  },
+  {
+   "code": "D40",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10255,
+   "lat": 49.004667,
+   "lon": 2.563482
+  },
+  {
+   "code": "D41",
+   "terminal": "2B",
+   "level": "1",
+   "poiId": 10256,
+   "lat": 49.004658,
+   "lon": 2.563564
+  },
+  {
+   "code": "C80",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1655,
+   "lat": 49.002668,
+   "lon": 2.565645
+  },
+  {
+   "code": "C81",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1656,
+   "lat": 49.002644,
+   "lon": 2.565751
+  },
+  {
+   "code": "C82",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1657,
+   "lat": 49.002563,
+   "lon": 2.566286
+  },
+  {
+   "code": "C83",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1658,
+   "lat": 49.002552,
+   "lon": 2.566397
+  },
+  {
+   "code": "C84",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1659,
+   "lat": 49.002529,
+   "lon": 2.566942
+  },
+  {
+   "code": "C85",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1660,
+   "lat": 49.002531,
+   "lon": 2.567054
+  },
+  {
+   "code": "C86",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1661,
+   "lat": 49.002568,
+   "lon": 2.567597
+  },
+  {
+   "code": "C87",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1662,
+   "lat": 49.002581,
+   "lon": 2.567707
+  },
+  {
+   "code": "C88",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1663,
+   "lat": 49.002682,
+   "lon": 2.568234
+  },
+  {
+   "code": "C89",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1664,
+   "lat": 49.002707,
+   "lon": 2.568339
+  },
+  {
+   "code": "C90",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1665,
+   "lat": 49.002861,
+   "lon": 2.568838
+  },
+  {
+   "code": "C91",
+   "terminal": "2C",
+   "level": "1",
+   "poiId": 1666,
+   "lat": 49.002898,
+   "lon": 2.568935
+  },
+  {
+   "code": "D50",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1679,
+   "lat": 49.004896,
+   "lon": 2.565503
+  },
+  {
+   "code": "D51",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1678,
+   "lat": 49.00494,
+   "lon": 2.565661
+  },
+  {
+   "code": "D52",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1676,
+   "lat": 49.005052,
+   "lon": 2.566152
+  },
+  {
+   "code": "D53",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1675,
+   "lat": 49.005079,
+   "lon": 2.566308
+  },
+  {
+   "code": "D54",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1674,
+   "lat": 49.005138,
+   "lon": 2.566822
+  },
+  {
+   "code": "D55",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1673,
+   "lat": 49.005143,
+   "lon": 2.566987
+  },
+  {
+   "code": "D56",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1672,
+   "lat": 49.00514,
+   "lon": 2.567498
+  },
+  {
+   "code": "D57",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 1671,
+   "lat": 49.005125,
+   "lon": 2.567666
+  },
+  {
+   "code": "D58",
+   "terminal": "2D",
+   "level": "0",
+   "poiId": 3267,
+   "lat": 49.005035,
+   "lon": 2.56686
+  },
+  {
+   "code": "D59",
+   "terminal": "2D",
+   "level": "0",
+   "poiId": 3266,
+   "lat": 49.005033,
+   "lon": 2.567477
+  },
+  {
+   "code": "D60",
+   "terminal": "2D",
+   "level": "0",
+   "poiId": 3264,
+   "lat": 49.005025,
+   "lon": 2.567574
+  },
+  {
+   "code": "D62",
+   "terminal": "2D",
+   "level": "0",
+   "poiId": 4285,
+   "lat": 49.004921,
+   "lon": 2.568081
+  },
+  {
+   "code": "D63",
+   "terminal": "2D",
+   "level": "0",
+   "poiId": 4286,
+   "lat": 49.004903,
+   "lon": 2.568247
+  },
+  {
+   "code": "D66",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 3960,
+   "lat": 49.005068,
+   "lon": 2.56818
+  },
+  {
+   "code": "D67",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 3961,
+   "lat": 49.005033,
+   "lon": 2.568353
+  },
+  {
+   "code": "D68",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 3962,
+   "lat": 49.004947,
+   "lon": 2.568749
+  },
+  {
+   "code": "D69",
+   "terminal": "2D",
+   "level": "1",
+   "poiId": 3963,
+   "lat": 49.004921,
+   "lon": 2.568837
+  }
+ ]
+}
