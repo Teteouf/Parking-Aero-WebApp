@@ -1,7 +1,6 @@
 'use strict';
 const { test, expect } = require('@playwright/test');
-const { createServer } = require('../src/server');
-const { openApp, search, visibleMappings } = require('./helpers');
+const { openApp, search, startServer, visibleMappings } = require('./helpers');
 
 async function openStand(page, code) {
   await search(page, code);
@@ -185,18 +184,9 @@ test.describe('Vérification et pilote 2B', () => {
 
 // Serveur dédié, réellement arrêté : seul le service worker sert l'application.
 test('hors connexion : le pilote 2B et le brouillon restent disponibles', async ({ page, context }) => {
-  const server = createServer();
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const origin = `http://127.0.0.1:${server.address().port}`;
-  let stopped = false;
-  const stopServer = () => new Promise(resolve => {
-    if (stopped) return resolve();
-    stopped = true;
-    server.closeAllConnections();
-    server.close(() => resolve());
-  });
+  const { url: appUrl, stop: stopServer } = await startServer();
   try {
-    await openApp(page, origin + '/');
+    await openApp(page, appUrl);
     await expect(page.locator('#offlineStatus')).toHaveText('Disponible hors connexion', { timeout: 20_000 });
     await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 10_000 });
 

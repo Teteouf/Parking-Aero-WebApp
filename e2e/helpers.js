@@ -2,6 +2,28 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const { createServer } = require('../src/server');
+
+/** Chemin de publication rejoué par les tests (GitHub Pages : /Parking-Aero-WebApp/). */
+const BASE_PATH = process.env.E2E_BASE_PATH || '/';
+
+/**
+ * Serveur dédié que le test peut réellement arrêter (seul le service worker sert alors l'app).
+ * `url` inclut le chemin de publication.
+ */
+async function startServer(options = {}) {
+  const server = createServer({ basePath: BASE_PATH, ...options });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  let stopped = false;
+  const stop = () => new Promise(resolve => {
+    if (stopped) return resolve();
+    stopped = true;
+    server.closeAllConnections();
+    server.close(() => resolve());
+  });
+  return { origin, url: origin + BASE_PATH, stop };
+}
 
 /** Charge les 169 correspondances réelles depuis public/js/mappings.js. */
 function loadMappings() {
@@ -31,4 +53,4 @@ async function visibleMappings(page) {
   })));
 }
 
-module.exports = { loadMappings, openApp, search, visibleMappings };
+module.exports = { BASE_PATH, loadMappings, openApp, search, startServer, visibleMappings };

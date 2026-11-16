@@ -1,26 +1,16 @@
 'use strict';
 const { test, expect } = require('@playwright/test');
-const { createServer } = require('../src/server');
-const { openApp, search, visibleMappings } = require('./helpers');
+const { BASE_PATH, openApp, search, startServer, visibleMappings } = require('./helpers');
 
 // Ce scénario démarre son propre serveur pour pouvoir l'arrêter réellement :
 // après la préparation du cache, l'origine ne répond plus du tout ET le
 // navigateur est passé hors ligne. Seul le service worker peut alors servir l'app.
 test('après préparation du cache, l’app recharge et recherche sans réseau', async ({ page, context }) => {
-  const server = createServer();
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const origin = `http://127.0.0.1:${server.address().port}`;
-  let serverStopped = false;
-  const stopServer = () => new Promise(resolve => {
-    if (serverStopped) return resolve();
-    serverStopped = true;
-    server.closeAllConnections();
-    server.close(() => resolve());
-  });
+  const { url: appUrl, stop: stopServer } = await startServer();
 
   try {
     // 1. Première visite en ligne : le service worker doit tout enregistrer.
-    await openApp(page, origin + '/');
+    await openApp(page, appUrl);
     await expect(page.locator('#offlineStatus')).toHaveText('Disponible hors connexion', { timeout: 20_000 });
     await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 10_000 });
     const cached = await page.evaluate(async () => {
@@ -30,18 +20,18 @@ test('après préparation du cache, l’app recharge et recherche sans réseau',
       }
       return urls;
     });
-    for (const asset of ['/index.html', '/js/app.js', '/js/core.js', '/js/mappings.js', '/js/preferences.js', '/css/app.css', '/data/iata.json']) {
-      expect(cached, `ressource en cache : ${asset}`).toContain(asset);
+    for (const asset of ['index.html', 'js/app.js', 'js/core.js', 'js/mappings.js', 'js/preferences.js', 'css/app.css', 'data/iata.json']) {
+      expect(cached, `ressource en cache : ${asset}`).toContain(BASE_PATH + asset);
     }
 
     // 2. Coupure réelle : serveur arrêté, puis navigateur hors ligne.
     await stopServer();
-    await expect(fetch(origin + '/'), 'le serveur doit être injoignable').rejects.toThrow();
+    await expect(fetch(appUrl), 'le serveur doit être injoignable').rejects.toThrow();
     await context.setOffline(true);
     expect(await page.evaluate(() => navigator.onLine)).toBe(false);
     const bypass = await page.evaluate(async url => {
       try { await fetch(url, { cache: 'no-store' }); return 'reachable'; } catch (_) { return 'unreachable'; }
-    }, origin + '/__absent-du-cache__.json');
+    }, appUrl + '__absent-du-cache__.json');
     expect(bypass, 'une ressource absente du cache ne doit pas être joignable').toBe('unreachable');
 
     // 3. Rechargement sans réseau.

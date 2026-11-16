@@ -41,6 +41,16 @@ Ouvrir http://localhost:3000/Parking-Aero-WebApp/. Sans `BASE_PATH`, le serveur
 continue à servir l’application à la racine. `npm test` vérifie les deux
 emplacements, les ressources et le cache hors connexion sous le chemin Pages.
 
+Pour rejouer les tests navigateur sous ce chemin (PowerShell) :
+
+```powershell
+$env:E2E_BASE_PATH = '/Parking-Aero-WebApp/'
+npm run test:e2e
+```
+
+Le workflow GitHub exécute les tests navigateur à la racine puis sous
+`/Parking-Aero-WebApp/`, avant toute publication.
+
 ## Publier le site
 
 Le workflow `.github/workflows/pages.yml` construit et vérifie l’application
@@ -172,6 +182,32 @@ emplacement du site. Elles fonctionnent hors connexion et survivent aux mises
 à jour de l’application. Elles ne sont pas envoyées à un serveur ni synchronisées
 entre téléphones. Si le stockage est indisponible, la recherche reste utilisable
 et les favoris sont conservés pour la session, avec une indication explicite.
+
+## Contributions et propositions
+
+Depuis une fiche, on peut confirmer une information ou proposer une correction.
+Si une recherche « Parkings & portes » ne trouve rien, même sans filtre, l’état
+vide propose **Proposer un parking ou une correspondance** : le code recherché
+est prérempli et modifiable, et la porte ou le parking associé reste facultatif.
+Aucune correspondance n’est supposée.
+
+Le message est préparé sur l’appareil, puis copié ou ouvert dans la messagerie.
+Il n’est transmis que si la personne l’envoie elle-même, et il ne modifie
+aucune donnée publiée. Les brouillons sont enregistrés sous la clé
+`cdg-parking.contributions.v1:<chemin>`, distincte des favoris et de l’historique.
+Ils restent disponibles hors connexion et après une mise à jour. Trente brouillons
+au plus sont conservés : au-delà, les plus anciens sont retirés.
+
+**Limite connue : anciens brouillons de recherche longue.** Dans la version
+retenue de l’essai B (commit `6a0953f`), le brouillon d’une proposition était
+rattaché aux 12 premiers caractères de la recherche. Depuis le commit `29727ad`,
+il est rattaché à la recherche entière : deux recherches distinctes ne partagent
+plus de brouillon. Un brouillon enregistré avec l’ancienne règle pour une
+recherche de plus de 12 caractères n’est donc plus retrouvé. Il n’est pas effacé,
+mais n’est plus affiché, et disparaît lorsque la limite de 30 brouillons est
+atteinte. Les recherches de 12 caractères au plus ne sont pas concernées.
+Cette ancienne version n’a jamais été publiée sur GitHub Pages : seuls des essais
+locaux ont pu créer de tels brouillons.
 
 ## Données IATA
 

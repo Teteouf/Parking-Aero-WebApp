@@ -1,8 +1,7 @@
 'use strict';
 // Proposition depuis une recherche « Parkings & portes » sans résultat.
 const { test, expect } = require('@playwright/test');
-const { createServer } = require('../src/server');
-const { openApp, search } = require('./helpers');
+const { openApp, search, startServer } = require('./helpers');
 
 const TITLE = 'Proposer un parking ou une correspondance';
 
@@ -207,18 +206,9 @@ test.describe('Proposition depuis une recherche sans résultat', () => {
 
 // Serveur dédié, réellement arrêté : seul le service worker sert l'application.
 test('hors connexion : la proposition et son brouillon restent disponibles', async ({ page, context }) => {
-  const server = createServer();
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const origin = `http://127.0.0.1:${server.address().port}`;
-  let stopped = false;
-  const stopServer = () => new Promise(resolve => {
-    if (stopped) return resolve();
-    stopped = true;
-    server.closeAllConnections();
-    server.close(() => resolve());
-  });
+  const { url: appUrl, stop: stopServer } = await startServer();
   try {
-    await openApp(page, origin + '/');
+    await openApp(page, appUrl);
     await expect(page.locator('#offlineStatus')).toHaveText('Disponible hors connexion', { timeout: 20_000 });
     await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: 10_000 });
     await stopServer();

@@ -98,8 +98,9 @@ ne remplace pas les sources, les tests et le workflow du dépôt.
    remplacent les fichiers obsolètes. La description peut reprendre
    `docs/description-refonte.md`.
 3. Dans **Checks**, attendre la réussite de **Construire et vérifier**.
-   Cette vérification reconstruit le cache et lance les tests ; elle ne publie
-   pas le site depuis la pull request.
+   Cette vérification reconstruit le cache et lance les tests Node, puis les
+   tests Playwright (Chromium et ses dépendances Linux), à la racine puis sous
+   `/Parking-Aero-WebApp/`. Elle ne publie pas le site depuis la pull request.
 4. Ouvrir **Settings → Pages**. Sous **Build and deployment**, choisir
    **Source → GitHub Actions**. Le workflow est déjà fourni : aucun modèle
    supplémentaire n’est nécessaire.

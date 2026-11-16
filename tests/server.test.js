@@ -81,3 +81,16 @@ test('invalid preview base paths fail before starting the server', () => {
     assert.throws(() => createServer({ basePath }), /BASE_PATH/);
   }
 });
+
+test('the server can serve another published folder under the GitHub Pages path', async t => {
+  const dir = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'cdg-public-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(dir, 'index.html'), '<p>autre version</p>');
+  const server = createServer({ basePath: '/Parking-Aero-WebApp/', publicDir: dir });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = 'http://127.0.0.1:' + server.address().port;
+  assert.equal(await (await fetch(base + '/Parking-Aero-WebApp/')).text(), '<p>autre version</p>');
+  assert.equal((await fetch(base + '/Parking-Aero-WebApp/js/app.js')).status, 404);
+  assert.equal((await fetch(base + '/')).status, 404);
+});

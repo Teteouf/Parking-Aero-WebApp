@@ -10,7 +10,9 @@ const HOST = process.env.HOST || '127.0.0.1';
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json; charset=utf-8', '.png': 'image/png', '.ico': 'image/x-icon' };
 
-function createServer({ basePath = '/' } = {}) {
+// `publicDir` permet aux tests de servir une autre version publiée (mise à jour simulée).
+function createServer({ basePath = '/', publicDir = PUBLIC_DIR } = {}) {
+  const root = path.resolve(publicDir);
   if (!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(basePath)) throw new Error('BASE_PATH must be a path such as / or /Parking-Aero-WebApp/.');
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -34,8 +36,8 @@ function createServer({ basePath = '/' } = {}) {
       }
       if (!pathname.startsWith(basePath)) { res.writeHead(404); res.end('Not found'); return; }
       pathname = '/' + pathname.slice(basePath.length);
-      file = path.resolve(PUBLIC_DIR, '.' + pathname);
-      if (file !== PUBLIC_DIR && !file.startsWith(PUBLIC_DIR + path.sep)) throw new Error('Invalid path');
+      file = path.resolve(root, '.' + pathname);
+      if (file !== root && !file.startsWith(root + path.sep)) throw new Error('Invalid path');
       if (pathname.endsWith('/')) file = path.join(file, 'index.html');
     } catch (_) { res.writeHead(400); res.end('Bad request'); return; }
     if (!TYPES[path.extname(file)]) { res.writeHead(404); res.end('Not found'); return; }
