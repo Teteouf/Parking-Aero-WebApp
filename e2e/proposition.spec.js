@@ -118,6 +118,34 @@ test.describe('Proposition depuis une recherche sans résultat', () => {
     await expect(again.getByLabel('Porte ou parking associé')).toHaveValue('');
   });
 
+  test('deux recherches identiques sur 12 caractères gardent chacune leur brouillon', async ({ page }) => {
+    await openApp(page);
+    const first = await openProposal(page, 'ZZABCDEFGHIJ-UN');
+    await expect(first.getByLabel('Code proposé')).toHaveValue('ZZABCDEFGHIJ');
+    await fillProposal(first, { code: 'ZZ1', answer: 'K43' });
+    await first.getByRole('button', { name: 'Fermer la contribution' }).click();
+
+    const second = await openProposal(page, 'ZZABCDEFGHIJ-DEUX');
+    await expect(second.getByLabel('Porte ou parking associé')).toHaveValue('');
+    await expect(second.locator('#draftStatus')).toHaveText('Aucun brouillon pour cette fiche.');
+    await fillProposal(second, { code: 'ZZ2' });
+    await second.getByRole('button', { name: 'Fermer la contribution' }).click();
+
+    await page.reload();
+    const reopened = await openProposal(page, 'ZZABCDEFGHIJ-UN');
+    await expect(reopened.getByLabel('Code proposé')).toHaveValue('ZZ1');
+    await expect(reopened.getByLabel('Porte ou parking associé')).toHaveValue('K43');
+  });
+
+  test('le code proposé en minuscules est présenté en majuscules dans le message', async ({ page }) => {
+    await openApp(page);
+    const form = await openProposal(page, 'ZZ99');
+    await fillProposal(form, { code: 'zz-98' });
+    await form.getByRole('button', { name: 'Préparer un courriel' }).click();
+    await expect(form.locator('#messagePreview')).toContainText('[CDG Parking] Proposition — ZZ-98');
+    await expect(form.locator('#messagePreview')).toContainText('Code proposé : ZZ-98');
+  });
+
   test('préparer un courriel indique que rien n’est transmis', async ({ page }) => {
     await openApp(page);
     const form = await openProposal(page, 'ZZ99');

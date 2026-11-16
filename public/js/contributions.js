@@ -47,7 +47,16 @@
 
   /** Code proposé à partir du texte recherché : majuscules, sans espaces, 12 caractères au plus. */
   function proposalCode(query) {
-    return typeof query === 'string' ? query.replace(/\s+/g, '').toUpperCase().slice(0, 12) : '';
+    return proposalDraftCode(query).slice(0, 12);
+  }
+
+  /**
+   * Clé de brouillon d'une proposition : la recherche entière (majuscules, sans espaces),
+   * non tronquée, pour que deux recherches distinctes ne partagent jamais un brouillon.
+   * Pour une recherche de 12 caractères au plus, elle est identique à l'ancienne clé.
+   */
+  function proposalDraftCode(query) {
+    return typeof query === 'string' ? query.replace(/\s+/g, '').toUpperCase() : '';
   }
 
   function draftKey(kind, code) {
@@ -135,7 +144,7 @@
   }
 
   function buildProposal(context, values) {
-    const code = values.proposedCode || context.code;
+    const code = String(values.proposedCode || context.code || '').toUpperCase();
     const lines = [
       `Contribution CDG Parking — ${KINDS.propose.title}`,
       '',
@@ -156,5 +165,5 @@
     return `mailto:${recipient}?subject=${encodeURIComponent(message.subject)}&body=${encodeURIComponent(message.body)}`;
   }
 
-  return { KINDS, ORIGINS, NATURES, CODE_TYPES, FIELDS, DRAFT_LIMIT, createDraftStore, buildMessage, mailtoHref, proposalCode };
+  return { KINDS, ORIGINS, NATURES, CODE_TYPES, FIELDS, DRAFT_LIMIT, createDraftStore, buildMessage, mailtoHref, proposalCode, proposalDraftCode };
 });

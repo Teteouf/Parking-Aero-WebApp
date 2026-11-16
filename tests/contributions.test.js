@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { createDraftStore, buildMessage, mailtoHref, DRAFT_LIMIT, KINDS, CODE_TYPES, proposalCode } = require('../public/js/contributions');
+const { createDraftStore, buildMessage, mailtoHref, DRAFT_LIMIT, KINDS, CODE_TYPES, proposalCode, proposalDraftCode } = require('../public/js/contributions');
 const { createPreferences } = require('../public/js/preferences');
 
 function memoryStorage() {
@@ -114,4 +114,35 @@ test('a proposal draft keeps the corrected code and its type, apart from prefere
   const reopened = createDraftStore(storage, 'cdg-parking.contributions.v1:/').get('propose', 'ZZ99');
   assert.equal(reopened.proposedCode, 'ZZ98');
   assert.equal(reopened.codeType, 'gate');
+});
+
+/* ---------- Régressions (labo-claude) ---------- */
+test('searches sharing only their first 12 characters keep separate proposal drafts', () => {
+  const first = proposalDraftCode('ABCDEFGHIJKL-PARKING');
+  const second = proposalDraftCode('abcdefghijkl-porte');
+  assert.notEqual(first, second);
+  assert.equal(proposalCode('ABCDEFGHIJKL-PARKING'), proposalCode('abcdefghijkl-porte'));
+  const storage = memoryStorage();
+  const store = createDraftStore(storage, 'cdg-parking.contributions.v1:/');
+  store.save('gate', 'B20', values);
+  store.save('propose', first, { ...proposal, comment: 'premier' });
+  store.save('propose', second, { ...proposal, comment: 'second' });
+  const reopened = createDraftStore(storage, 'cdg-parking.contributions.v1:/');
+  assert.equal(reopened.get('propose', first).comment, 'premier');
+  assert.equal(reopened.get('propose', second).comment, 'second');
+  assert.equal(reopened.get('gate', 'B20').answer, 'B22');
+});
+
+test('the proposal draft key of a short search is unchanged, so existing drafts are still found', () => {
+  assert.equal(proposalDraftCode(' zz 99 '), 'ZZ99');
+  assert.equal(proposalDraftCode('ZZ99'), proposalCode('ZZ99'));
+});
+
+test('a proposed code typed in lower case is shown in upper case in the message', () => {
+  const message = buildMessage('propose', { code: 'ZZ99', searched: 'zz99' }, { ...proposal, proposedCode: 'zz-98' });
+  assert.equal(message.subject, '[CDG Parking] Proposition — ZZ-98');
+  assert.match(message.body, /Code proposé : ZZ-98/);
+  assert.doesNotMatch(message.body, /zz-98/);
+  const fallback = buildMessage('propose', { code: 'zz99', searched: 'zz99' }, { ...proposal, proposedCode: '' });
+  assert.match(fallback.body, /Code proposé : ZZ99/);
 });

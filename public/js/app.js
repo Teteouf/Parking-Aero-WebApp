@@ -439,8 +439,8 @@
 
   function openProposal(query) {
     const code = contributions.proposalCode(query);
-    // La clé du brouillon reste le code recherché, même si la personne corrige le code proposé.
-    state.detail = { type: 'proposal', kinds: ['propose'], code, searched: query.trim(), gates: '', draftCode: code };
+    // Clé du brouillon : la recherche entière (non tronquée), même si la personne corrige le code proposé.
+    state.detail = { type: 'proposal', kinds: ['propose'], code, searched: query.trim(), gates: '', draftCode: contributions.proposalDraftCode(query) };
     openContribution('propose');
   }
 
