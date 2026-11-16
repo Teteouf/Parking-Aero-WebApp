@@ -47,6 +47,16 @@ test.describe('Proposition depuis une recherche sans résultat', () => {
     await expect(proposeButton(page)).toHaveCount(0);
   });
 
+  test('pas de proposition pour un code publié masqué par le filtre actif', async ({ page }) => {
+    await openApp(page);
+    await page.getByRole('button', { name: '2F', exact: true }).click();
+    await search(page, 'E22');
+    await expect(page.locator('#resultsCount')).toHaveText('0 correspondances');
+    await expect(proposeButton(page)).toHaveCount(0);
+    await search(page, 'ZZ99');
+    await expect(proposeButton(page)).toBeVisible();
+  });
+
   test('le code recherché est prérempli, modifiable, et la correspondance reste facultative', async ({ page }) => {
     await openApp(page);
     const form = await openProposal(page, 'zz 99');

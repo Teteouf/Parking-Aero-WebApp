@@ -210,7 +210,12 @@
       $('resultsCount').textContent = query || state.filter !== 'all' ? parts.join(' · ') : `${mappings.length} points de parking`;
       const documentedBlock = documentedCount ? `<section class="results-group" aria-labelledby="documentedTitle"><h3 id="documentedTitle">Parkings et portes documentés · terminaux 2A à 2D</h3>
         <p>Relevés dans des sources publiques (eAIP, plan Paris Aéroport). Ils ne font pas partie des ${mappings.length} correspondances : sans relation sourcée, la porte ou le parking reste à confirmer.</p></section>${documented.stands.map(stand => standHtml(stand, query)).join('')}${documented.gates.map(gate => gateDocHtml(gate, query)).join('')}` : '';
-      const proposeAction = query.trim() ? proposeActionHtml() : '';
+      // Pas de proposition pour un code publié que seul le filtre actif masque.
+      const unknownEverywhere = () => !searchParking(mappings, query, 'all').length && (() => {
+        const all = extension.search(catalog, query, 'all');
+        return !all.stands.length && !all.gates.length;
+      })();
+      const proposeAction = query.trim() && unknownEverywhere() ? proposeActionHtml() : '';
       $('results').innerHTML = matches.length || documentedCount ? matches.map(mapping => mappingHtml(mapping, query)).join('') + documentedBlock :
         pending ? emptyHtml(`Terminal ${state.filter} pas encore intégré`, 'Les parkings et portes de ce terminal seront ajoutés dans une prochaine étape.', false, proposeAction) :
         emptyHtml('Aucune correspondance', 'Essayez un autre code ou changez le filtre de terminal.', false, proposeAction);
