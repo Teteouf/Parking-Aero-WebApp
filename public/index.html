@@ -121,11 +121,26 @@
   <dialog id="contributionDialog" class="sheet" aria-labelledby="contributionTitle">
     <div class="sheet-header"><h2 id="contributionTitle">Contribuer</h2><button class="close-button" type="button" data-close aria-label="Fermer la contribution">×</button></div>
     <form id="contributionForm" class="contribution-form">
-      <p class="contribution-intro">Votre contribution sera relue avant toute mise à jour. Elle ne modifie pas les données de l’application.</p>
+      <p id="contributionIntro" class="contribution-intro">Votre contribution sera relue avant toute mise à jour. Elle ne modifie pas les données de l’application.</p>
       <dl id="contributionContext" class="detail-list context-list"></dl>
       <p id="confirmStatement" class="confirm-statement" hidden></p>
+      <div id="proposalFields" hidden>
+        <div class="field">
+          <label for="contribProposedCode">Code proposé</label>
+          <p id="proposedCodeHint" class="field-hint">Corrigez le code si besoin : lettres, chiffres ou tiret, 12 caractères au plus.</p>
+          <input id="contribProposedCode" name="proposedCode" type="text" required maxlength="12" pattern="[A-Za-z0-9\-]{1,12}" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="proposedCodeHint" data-error="contribProposedCodeError">
+          <p id="contribProposedCodeError" class="error-msg">Erreur : indiquez un code de 1 à 12 lettres, chiffres ou tirets.</p>
+        </div>
+        <fieldset class="field choice-field">
+          <legend>Ce code est…</legend>
+          <label class="choice"><input type="radio" name="codeType" value="stand" required data-error="contribCodeTypeError"> <span>Parking <small>poste avion</small></span></label>
+          <label class="choice"><input type="radio" name="codeType" value="gate" required data-error="contribCodeTypeError"> <span>Porte <small>porte d’embarquement</small></span></label>
+          <label class="choice"><input type="radio" name="codeType" value="unknown" required data-error="contribCodeTypeError"> <span>Je ne sais pas</span></label>
+          <p id="contribCodeTypeError" class="error-msg">Erreur : précisez s’il s’agit d’un parking, d’une porte, ou choisissez « Je ne sais pas ».</p>
+        </fieldset>
+      </div>
       <div id="answerField" class="field">
-        <label id="answerLabel" for="contribAnswer">Correction proposée</label>
+        <label for="contribAnswer"><span id="answerLabel">Correction proposée</span> <span id="answerOptional" class="optional" hidden>facultatif</span></label>
         <p id="answerHint" class="field-hint">Indiquez la valeur correcte, par exemple une autre porte.</p>
         <input id="contribAnswer" name="answer" type="text" required maxlength="120" autocomplete="off" spellcheck="false" aria-describedby="answerHint" data-error="contribAnswerError">
         <p id="contribAnswerError" class="error-msg">Erreur : indiquez la valeur proposée.</p>

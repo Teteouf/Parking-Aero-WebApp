@@ -17,6 +17,14 @@
     correct: { title: 'Proposer une correction', subject: 'Correction proposée' },
     gate: { title: 'Je connais la porte', subject: 'Porte proposée' },
     stand: { title: 'Je connais le parking', subject: 'Parking proposé' },
+    // Code introuvable : aucune fiche affichée, aucune correspondance supposée.
+    propose: { title: 'Proposer un parking ou une correspondance', subject: 'Proposition' },
+  };
+
+  const CODE_TYPES = {
+    stand: 'Parking',
+    gate: 'Porte',
+    unknown: 'Je ne sais pas',
   };
 
   const ORIGINS = {
@@ -31,10 +39,15 @@
     usual: 'Fonctionnement habituel',
   };
 
-  const FIELDS = ['answer', 'date', 'origin', 'originDetail', 'nature', 'conditions', 'comment'];
+  const FIELDS = ['answer', 'date', 'origin', 'originDetail', 'nature', 'conditions', 'comment', 'proposedCode', 'codeType'];
 
   function clean(value, max = 600) {
     return typeof value === 'string' ? value.slice(0, max) : '';
+  }
+
+  /** Code proposé à partir du texte recherché : majuscules, sans espaces, 12 caractères au plus. */
+  function proposalCode(query) {
+    return typeof query === 'string' ? query.replace(/\s+/g, '').toUpperCase().slice(0, 12) : '';
   }
 
   function draftKey(kind, code) {
@@ -92,6 +105,7 @@
    */
   function buildMessage(kind, context, values) {
     const kindInfo = KINDS[kind];
+    if (kind === 'propose') return buildProposal(context, values);
     const lines = [
       `Contribution CDG Parking — ${kindInfo.title}`,
       '',
@@ -105,18 +119,42 @@
     ];
     if (kind === 'confirm') lines.push(`- Je confirme : parking ${context.code} → porte(s) ${context.gates}`);
     else lines.push(`- ${{ gate: 'Porte proposée', stand: 'Parking proposé' }[kind] || 'Correction proposée'} : ${values.answer || '[non renseignée]'}`);
-    lines.push(`- Date de l’observation : ${values.date || '[non renseignée]'}`);
-    lines.push(`- Origine : ${ORIGINS[values.origin] || '[non renseignée]'}${values.originDetail ? ` (${values.originDetail})` : ''}`);
-    lines.push(`- Nature : ${NATURES[values.nature] || '[non renseignée]'}`);
-    lines.push(`- Conditions éventuelles : ${values.conditions || 'aucune indiquée'}`);
-    if (values.comment) lines.push(`- Précisions : ${values.comment}`);
+    lines.push(...observationLines(values));
     lines.push('', 'Cette contribution ne modifie pas les données de l’application : elle doit être vérifiée avant toute mise à jour.');
     return { subject: `[CDG Parking] ${kindInfo.subject} — ${context.code}`, body: lines.join('\n') };
+  }
+
+  function observationLines(values) {
+    return [
+      `- Date de l’observation : ${values.date || '[non renseignée]'}`,
+      `- Origine : ${ORIGINS[values.origin] || '[non renseignée]'}${values.originDetail ? ` (${values.originDetail})` : ''}`,
+      `- Nature : ${NATURES[values.nature] || '[non renseignée]'}`,
+      `- Conditions éventuelles : ${values.conditions || 'aucune indiquée'}`,
+      ...(values.comment ? [`- Précisions : ${values.comment}`] : []),
+    ];
+  }
+
+  function buildProposal(context, values) {
+    const code = values.proposedCode || context.code;
+    const lines = [
+      `Contribution CDG Parking — ${KINDS.propose.title}`,
+      '',
+      `Recherche sans résultat : ${context.searched || context.code}`,
+      '',
+      'Proposition :',
+      `- Code proposé : ${code || '[non renseigné]'}`,
+      `- Nature du code : ${CODE_TYPES[values.codeType] || '[non renseignée]'}`,
+      values.answer ? `- Correspondance proposée : ${values.answer}` : '- Correspondance : non indiquée (aucune n’est supposée)',
+      ...observationLines(values),
+      '',
+      'Cette proposition ne modifie pas les données de l’application : elle doit être vérifiée avant toute mise à jour.',
+    ];
+    return { subject: `[CDG Parking] ${KINDS.propose.subject} — ${code}`, body: lines.join('\n') };
   }
 
   function mailtoHref(recipient, message) {
     return `mailto:${recipient}?subject=${encodeURIComponent(message.subject)}&body=${encodeURIComponent(message.body)}`;
   }
 
-  return { KINDS, ORIGINS, NATURES, FIELDS, DRAFT_LIMIT, createDraftStore, buildMessage, mailtoHref };
+  return { KINDS, ORIGINS, NATURES, CODE_TYPES, FIELDS, DRAFT_LIMIT, createDraftStore, buildMessage, mailtoHref, proposalCode };
 });

@@ -1,7 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { createDraftStore, buildMessage, mailtoHref, DRAFT_LIMIT } = require('../public/js/contributions');
+const { createDraftStore, buildMessage, mailtoHref, DRAFT_LIMIT, KINDS, CODE_TYPES, proposalCode } = require('../public/js/contributions');
 const { createPreferences } = require('../public/js/preferences');
 
 function memoryStorage() {
@@ -68,4 +68,50 @@ test('a confirmation restates the displayed mapping', () => {
 test('the mailto link is fully encoded', () => {
   const href = mailtoHref('agent@example.test', { subject: 'A & B', body: 'ligne 1\nligne 2 ?' });
   assert.equal(href, 'mailto:agent@example.test?subject=A%20%26%20B&body=ligne%201%0Aligne%202%20%3F');
+});
+
+/* ---------- Proposition depuis une recherche sans résultat ---------- */
+const proposal = { answer: '', date: '2026-11-15', origin: 'signage', originDetail: '', nature: 'once', conditions: '', comment: '',
+  proposedCode: 'ZZ98', codeType: 'gate' };
+
+test('the proposal kind and code types are declared', () => {
+  assert.equal(KINDS.propose.title, 'Proposer un parking ou une correspondance');
+  assert.deepEqual(CODE_TYPES, { stand: 'Parking', gate: 'Porte', unknown: 'Je ne sais pas' });
+});
+
+test('the searched text becomes an editable code: upper case, no spaces, at most 12 characters', () => {
+  assert.equal(proposalCode(' zz 99 '), 'ZZ99');
+  assert.equal(proposalCode('abcdefghijklmnop'), 'ABCDEFGHIJKL');
+  assert.equal(proposalCode(undefined), '');
+});
+
+test('a proposal without an answer does not assume any mapping and is not presented as sent', () => {
+  const message = buildMessage('propose', { code: 'ZZ99', searched: 'zz99' }, proposal);
+  assert.equal(message.subject, '[CDG Parking] Proposition — ZZ98');
+  for (const part of ['Recherche sans résultat : zz99', 'Code proposé : ZZ98', 'Nature du code : Porte',
+    'Correspondance : non indiquée (aucune n’est supposée)', 'Origine : Signalétique sur place', 'ne modifie pas les données']) {
+    assert(message.body.includes(part), part);
+  }
+  assert.doesNotMatch(message.body, /envoyé|reçu/i);
+  assert.doesNotMatch(message.body, /Fiche affichée/);
+});
+
+test('a proposal with an answer carries it as a proposal only', () => {
+  const message = buildMessage('propose', { code: 'ZZ99', searched: 'ZZ99' }, { ...proposal, answer: 'K43', codeType: 'unknown' });
+  assert.match(message.body, /Correspondance proposée : K43/);
+  assert.match(message.body, /Nature du code : Je ne sais pas/);
+});
+
+test('a proposal draft keeps the corrected code and its type, apart from preferences', () => {
+  const storage = memoryStorage();
+  const preferences = createPreferences(storage, 'cdg-parking.preferences.v1:/');
+  preferences.toggleFavorite({ mode: 'parking', query: 'E22' });
+  preferences.rememberSearch({ mode: 'parking', query: 'E22' });
+  const before = storage.getItem('cdg-parking.preferences.v1:/');
+  const store = createDraftStore(storage, 'cdg-parking.contributions.v1:/');
+  assert.equal(store.save('propose', 'ZZ99', proposal).saved, true);
+  assert.equal(storage.getItem('cdg-parking.preferences.v1:/'), before);
+  const reopened = createDraftStore(storage, 'cdg-parking.contributions.v1:/').get('propose', 'ZZ99');
+  assert.equal(reopened.proposedCode, 'ZZ98');
+  assert.equal(reopened.codeType, 'gate');
 });
