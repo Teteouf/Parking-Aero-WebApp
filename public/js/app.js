@@ -162,9 +162,15 @@
     if (preferences.rememberSearch({ mode: state.mode, query: exact ? query.toUpperCase() : query })) renderShortcuts();
   }
 
-  function emptyHtml(title, description, quickCodes = false) {
+  function emptyHtml(title, description, quickCodes = false, action = '') {
     return `<div class="empty-state"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(description)}</p>${quickCodes ?
-      '<div class="quick-codes">' + ['CDG', 'ORY', 'LON', 'JFK', 'DXB'].map(code => `<button class="filter" type="button" data-iata="${code}">${code}</button>`).join('') + '</div>' : ''}</div>`;
+      '<div class="quick-codes">' + ['CDG', 'ORY', 'LON', 'JFK', 'DXB'].map(code => `<button class="filter" type="button" data-iata="${code}">${code}</button>`).join('') + '</div>' : ''}${action}</div>`;
+  }
+
+  // Recherche Parkings & portes non vide et sans résultat : on propose de signaler le code.
+  function proposeActionHtml() {
+    return `<div class="empty-action"><p>Vous connaissez ce code ? Préparez une proposition, relue avant toute mise à jour.</p>
+      <button type="button" class="secondary-button" data-propose>${escapeHtml(contributions.KINDS.propose.title)}</button></div>`;
   }
 
   function locationHtml(location) {
@@ -204,9 +210,10 @@
       $('resultsCount').textContent = query || state.filter !== 'all' ? parts.join(' · ') : `${mappings.length} points de parking`;
       const documentedBlock = documentedCount ? `<section class="results-group" aria-labelledby="documentedTitle"><h3 id="documentedTitle">Parkings et portes documentés · terminaux 2A à 2D</h3>
         <p>Relevés dans des sources publiques (eAIP, plan Paris Aéroport). Ils ne font pas partie des ${mappings.length} correspondances : sans relation sourcée, la porte ou le parking reste à confirmer.</p></section>${documented.stands.map(stand => standHtml(stand, query)).join('')}${documented.gates.map(gate => gateDocHtml(gate, query)).join('')}` : '';
+      const proposeAction = query.trim() ? proposeActionHtml() : '';
       $('results').innerHTML = matches.length || documentedCount ? matches.map(mapping => mappingHtml(mapping, query)).join('') + documentedBlock :
-        pending ? emptyHtml(`Terminal ${state.filter} pas encore intégré`, 'Les parkings et portes de ce terminal seront ajoutés dans une prochaine étape.') :
-        emptyHtml('Aucune correspondance', 'Essayez un autre code ou changez le filtre de terminal.');
+        pending ? emptyHtml(`Terminal ${state.filter} pas encore intégré`, 'Les parkings et portes de ce terminal seront ajoutés dans une prochaine étape.', false, proposeAction) :
+        emptyHtml('Aucune correspondance', 'Essayez un autre code ou changez le filtre de terminal.', false, proposeAction);
       return;
     }
     if (!state.locations) {
@@ -375,7 +382,15 @@
     contributionForm.reset();
     resetFieldStates();
     $('contributionTitle').textContent = contributions.KINDS[kind].title;
-    $('contributionContext').innerHTML = (detail.type === 'gate' ? `<div><dt>Porte</dt><dd>${escapeHtml(detail.code)}</dd></div><div><dt>Parking affiché</dt><dd>À confirmer</dd></div>` :
+    const proposing = kind === 'propose';
+    $('proposalFields').hidden = !proposing;
+    for (const control of $('proposalFields').querySelectorAll('input')) control.disabled = !proposing;
+    $('contribAnswer').required = !proposing;
+    $('answerOptional').hidden = !proposing;
+    $('contributionIntro').textContent = proposing ?
+      'Votre proposition est préparée sur cet appareil et n’est pas encore transmise. Elle sera relue avant toute mise à jour et ne modifie pas les données de l’application.' :
+      'Votre contribution sera relue avant toute mise à jour. Elle ne modifie pas les données de l’application.';
+    $('contributionContext').innerHTML = proposing ? `<div><dt>Recherche sans résultat</dt><dd>${escapeHtml(detail.searched)}</dd></div><div><dt>Correspondance</dt><dd>Aucune correspondance supposée</dd></div>` : (detail.type === 'gate' ? `<div><dt>Porte</dt><dd>${escapeHtml(detail.code)}</dd></div><div><dt>Parking affiché</dt><dd>À confirmer</dd></div>` :
       `<div><dt>Parking</dt><dd>${escapeHtml(detail.code)}</dd></div><div><dt>Porte${detail.gates.includes(',') ? 's' : ''} affichée${detail.gates.includes(',') ? 's' : ''}</dt><dd>${escapeHtml(detail.gates || 'À confirmer')}</dd></div>`) + `
       <div><dt>Terminal</dt><dd>${escapeHtml(detail.terminal)}</dd></div><div><dt>État affiché</dt><dd>${escapeHtml(detail.status)}</dd></div>`;
     const confirming = kind === 'confirm';
@@ -383,8 +398,9 @@
     $('confirmStatement').textContent = confirming ? `Vous confirmez : parking ${detail.code} → porte${detail.gates.includes(',') ? 's' : ''} ${detail.gates}.` : '';
     $('answerField').hidden = confirming;
     $('contribAnswer').disabled = confirming;
-    $('answerLabel').textContent = kind === 'gate' ? 'Porte utilisée' : kind === 'stand' ? 'Parking desservi' : 'Correction proposée';
-    $('answerHint').textContent = kind === 'gate' ? 'La porte réellement utilisée pour ce parking, par exemple B22.' :
+    $('answerLabel').textContent = kind === 'gate' ? 'Porte utilisée' : kind === 'stand' ? 'Parking desservi' : proposing ? 'Porte ou parking associé' : 'Correction proposée';
+    $('answerHint').textContent = proposing ? 'Seulement si vous la connaissez : la porte de ce parking, ou le parking de cette porte. Laissez vide sinon.' :
+      kind === 'gate' ? 'La porte réellement utilisée pour ce parking, par exemple B22.' :
       kind === 'stand' ? 'Le parking réellement desservi par cette porte, par exemple A10.' : 'La valeur correcte, par exemple une autre porte ou un autre terminal.';
     $('contribDate').max = today();
     const draft = drafts.get(kind, detail.draftCode || detail.code);
@@ -395,8 +411,8 @@
         if (control instanceof RadioNodeList) { for (const radio of control) radio.checked = radio.value === draft[field]; }
         else control.value = draft[field];
       }
-    } else if (kind === 'correct') {
-      $('contribAnswer').value = detail.gates;
+    } else {
+      prefill(state.contribution);
     }
     syncOriginDetail();
     showDraftStatus(draft, drafts.isSaved());
@@ -407,7 +423,20 @@
     $('contributionDialog').showModal();
     $('contributionDialog').scrollTop = 0;
     // Le premier champ à remplir reçoit le focus, pas le bouton de fermeture.
-    (confirming ? $('contribDate') : $('contribAnswer')).focus({ preventScroll: true });
+    (confirming ? $('contribDate') : proposing ? $('contribProposedCode') : $('contribAnswer')).focus({ preventScroll: true });
+  }
+
+  /** Valeurs préremplies d'un formulaire vierge (sans brouillon ou après effacement). */
+  function prefill(current) {
+    if (current.kind === 'correct') $('contribAnswer').value = current.gates;
+    if (current.kind === 'propose') $('contribProposedCode').value = current.code;
+  }
+
+  function openProposal(query) {
+    const code = contributions.proposalCode(query);
+    // La clé du brouillon reste le code recherché, même si la personne corrige le code proposé.
+    state.detail = { type: 'proposal', kinds: ['propose'], code, searched: query.trim(), gates: '', draftCode: code };
+    openContribution('propose');
   }
 
   function saveDraft() {
@@ -512,7 +541,7 @@
     const saved = drafts.remove(current.kind, current.draftCode || current.code);
     contributionForm.reset();
     resetFieldStates();
-    if (current.kind === 'correct') $('contribAnswer').value = current.gates;
+    prefill(current);
     syncOriginDetail();
     $('messagePreviewBox').hidden = true;
     $('contributionOutcome').textContent = '';
@@ -523,8 +552,8 @@
   function saveDraftIfFilled() {
     const values = formValues();
     const current = state.contribution;
-    const prefilled = current.kind === 'correct' ? current.gates : '';
-    const filled = contributions.FIELDS.some(field => values[field] && !(field === 'answer' && values[field] === prefilled));
+    const prefilled = { answer: current.kind === 'correct' ? current.gates : '', proposedCode: current.kind === 'propose' ? current.code : '' };
+    const filled = contributions.FIELDS.some(field => values[field] && values[field] !== prefilled[field]);
     if (filled) saveDraft();
   }
 
@@ -633,6 +662,7 @@
     if (parking) { rememberCurrentSearch(true); openDetail(parking.dataset.parking); }
     const documented = event.target.closest('[data-documented]');
     if (documented) { rememberCurrentSearch(true); openDocumented(documented.dataset.documented, documented.dataset.code); }
+    if (event.target.closest('[data-propose]')) { openProposal($('searchInput').value); return; }
     if (iata) { clearTimeout(historyTimer); rememberCurrentSearch(true); $('searchInput').value = iata.dataset.iata; state.limit = 40; render(); rememberCurrentSearch(); }
   });
   $('quickAccess').addEventListener('click', event => {
